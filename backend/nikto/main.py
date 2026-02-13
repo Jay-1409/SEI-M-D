@@ -1,5 +1,6 @@
 """
 Nikto Service - Handles vulnerability scanning with Nikto
+Scan results are persisted in Redis.
 """
 
 from fastapi import FastAPI, HTTPException
@@ -7,9 +8,12 @@ from fastapi.middleware.cors import CORSMiddleware
 import subprocess
 import logging
 import uuid
+import json
+import os
 from datetime import datetime
 from pydantic import BaseModel
 from typing import Optional
+import redis
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("nikto-service")
@@ -24,6 +28,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Redis connection
+REDIS_HOST = os.getenv("REDIS_HOST", "redis-service.deployer-system.svc.cluster.local")
+REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
+
+try:
+    redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
+    redis_client.ping()
+    logger.info(f"Connected to Redis at {REDIS_HOST}:{REDIS_PORT}")
+except Exception as e:
+    logger.warning(f"Redis connection failed: {e}. Will retry on requests.")
+    redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
 
 
 class Vulnerability(BaseModel):
@@ -51,9 +67,49 @@ class ScanResult(BaseModel):
     error: Optional[str] = None
 
 
-# In-memory storage of scan results
-scan_results: dict[str, ScanResult] = {}
+# ── Redis helpers ──────────────────────────────────────────────
 
+def _save_scan(scan_result: ScanResult):
+    """Save scan result to Redis."""
+    key = f"scan:{scan_result.scan_id}"
+    service_key = f"service_scan:{scan_result.service_name}"
+    data = scan_result.model_dump_json()
+    redis_client.set(key, data)
+    # Also store latest scan_id per service for quick lookup
+    redis_client.set(service_key, scan_result.scan_id)
+    logger.info(f"Saved scan {scan_result.scan_id} to Redis")
+
+
+def _get_scan(scan_id: str) -> Optional[ScanResult]:
+    """Get scan result from Redis."""
+    key = f"scan:{scan_id}"
+    data = redis_client.get(key)
+    if data:
+        return ScanResult.model_validate_json(data)
+    return None
+
+
+def _get_scan_by_service(service_name: str) -> Optional[ScanResult]:
+    """Get the latest scan result for a service."""
+    service_key = f"service_scan:{service_name}"
+    scan_id = redis_client.get(service_key)
+    if scan_id:
+        return _get_scan(scan_id)
+    return None
+
+
+def _list_all_scans() -> list[ScanResult]:
+    """List all scan results from Redis."""
+    results = []
+    keys = redis_client.keys("scan:*")
+    for key in keys:
+        data = redis_client.get(key)
+        if data:
+            results.append(ScanResult.model_validate_json(data))
+    return results
+
+
+# ── Endpoints ──────────────────────────────────────────────────
 
 @app.post("/scan", response_model=ScanResult)
 async def trigger_scan(request: ScanRequest):
@@ -69,7 +125,7 @@ async def trigger_scan(request: ScanRequest):
         scan_status="running",
         started_at=datetime.utcnow().isoformat()
     )
-    scan_results[scan_id] = scan_result
+    _save_scan(scan_result)
     
     try:
         # Run Nikto scan
@@ -137,6 +193,9 @@ async def trigger_scan(request: ScanRequest):
         completed = datetime.fromisoformat(scan_result.completed_at)
         scan_result.scan_duration = (completed - started).total_seconds()
         
+        # Persist to Redis
+        _save_scan(scan_result)
+        
         logger.info(f"Scan {scan_id} completed: {len(vulnerabilities)} findings")
         
         return scan_result
@@ -144,12 +203,14 @@ async def trigger_scan(request: ScanRequest):
     except subprocess.TimeoutExpired:
         scan_result.scan_status = "failed"
         scan_result.error = "Scan timeout"
+        _save_scan(scan_result)
         logger.error(f"Scan {scan_id} timed out")
         raise HTTPException(status_code=500, detail="Scan timed out")
     
     except Exception as e:
         scan_result.scan_status = "failed"
         scan_result.error = str(e)
+        _save_scan(scan_result)
         logger.error(f"Scan {scan_id} failed: {e}")
         raise HTTPException(status_code=500, detail=f"Scan failed: {str(e)}")
 
@@ -157,18 +218,32 @@ async def trigger_scan(request: ScanRequest):
 @app.get("/scan/{scan_id}", response_model=ScanResult)
 async def get_scan_result(scan_id: str):
     """Get scan results by scan ID."""
-    if scan_id not in scan_results:
+    result = _get_scan(scan_id)
+    if not result:
         raise HTTPException(status_code=404, detail=f"Scan '{scan_id}' not found")
-    
-    return scan_results[scan_id]
+    return result
+
+
+@app.get("/scan/service/{service_name}", response_model=ScanResult)
+async def get_scan_by_service(service_name: str):
+    """Get the latest scan result for a service by name."""
+    result = _get_scan_by_service(service_name)
+    if not result:
+        raise HTTPException(status_code=404, detail=f"No scan found for service '{service_name}'")
+    return result
 
 
 @app.get("/scans")
 async def list_scans():
     """List all scans."""
-    return list(scan_results.values())
+    return _list_all_scans()
 
 
 @app.get("/health")
 def health():
-    return {"status": "healthy", "service": "nikto-service"}
+    try:
+        redis_client.ping()
+        redis_status = "connected"
+    except Exception:
+        redis_status = "disconnected"
+    return {"status": "healthy", "service": "nikto-service", "redis": redis_status}

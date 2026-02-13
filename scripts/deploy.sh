@@ -59,6 +59,7 @@ echo ""
 kubectl apply -f k8s/namespace.yaml
 kubectl apply -f k8s/user-namespace.yaml
 kubectl apply -f k8s/rbac.yaml
+kubectl apply -f k8s/redis.yaml
 kubectl apply -f k8s/backend.yaml
 kubectl apply -f k8s/image-service.yaml
 kubectl apply -f k8s/nikto-service.yaml
@@ -73,6 +74,7 @@ echo ""
 echo -e "${BLUE}Waiting for pods to be ready...${NC}"
 echo ""
 
+kubectl wait --for=condition=ready pod -l app=redis -n deployer-system --timeout=60s || true
 kubectl wait --for=condition=ready pod -l app=frontend -n deployer-system --timeout=60s || true
 kubectl wait --for=condition=ready pod -l app=backend -n deployer-system --timeout=60s || true
 kubectl wait --for=condition=ready pod -l app=image-service -n deployer-system --timeout=60s || true

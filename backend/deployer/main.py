@@ -40,8 +40,8 @@ app.add_middleware(
 # In-memory registry of deployed services
 deployed_services: dict[str, ServiceInfo] = {}
 
-# In-memory storage of scan results
-scan_results: dict[str, ScanResult] = {}
+# Nikto service URL for scan proxying
+NIKTO_SERVICE_URL = "http://nikto-service.deployer-system.svc.cluster.local:8002"
 
 GATEWAY_HOST = os.getenv("GATEWAY_HOST", "localhost")
 GATEWAY_PORT = os.getenv("GATEWAY_PORT", "30080")
@@ -67,8 +67,8 @@ async def upload_image(file: UploadFile = File(...)):
     try:
         files = {'file': (file.filename, await file.read(), file.content_type)}
         
-        async with httpx.AsyncClient(timeout=120.0) as client:
-            response = await client.post(
+        async with httpx.AsyncClient(timeout=120.0) as http_client:
+            response = await http_client.post(
                 "http://image-service.deployer-system.svc.cluster.local:8001/upload",
                 files=files
             )
@@ -127,10 +127,10 @@ async def deploy_service(req: DeployRequest):
 
     # 3. Register route in gateway
     try:
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient() as http_client:
             # Use FQDN for cross-namespace service communication
             service_fqdn = f"http://{req.service_name}-service.user-services.svc.cluster.local:{req.container_port}"
-            resp = await client.post(
+            resp = await http_client.post(
                 f"{GATEWAY_REGISTER_URL}/register",
                 json={
                     "service_name": req.service_name,
@@ -220,8 +220,8 @@ async def delete_service_endpoint(service_name: str):
 
     # 1. Deregister from gateway
     try:
-        async with httpx.AsyncClient() as client:
-            await client.delete(f"{GATEWAY_REGISTER_URL}/register/{service_name}")
+        async with httpx.AsyncClient() as http_client:
+            await http_client.delete(f"{GATEWAY_REGISTER_URL}/register/{service_name}")
             logger.info(f"Deregistered route from gateway for {service_name}")
     except Exception as e:
         logger.warning(f"Gateway deregistration failed: {e}")
@@ -242,10 +242,6 @@ async def delete_service_endpoint(service_name: str):
 
     # 4. Remove from in-memory registry
     del deployed_services[service_name]
-    
-    # 5. Remove scan results if any
-    if service_name in scan_results:
-        del scan_results[service_name]
     
     logger.info(f"Service '{service_name}' deleted successfully")
     return {"message": f"Service '{service_name}' deleted successfully"}
@@ -279,8 +275,8 @@ async def scan_service(service_name: str):
     
     # Forward to nikto-service
     try:
-        async with httpx.AsyncClient(timeout=180.0) as client:
-            response = await client.post(
+        async with httpx.AsyncClient(timeout=180.0) as http_client:
+            response = await http_client.post(
                 "http://nikto-service.deployer-system.svc.cluster.local:8002/scan",
                 json={
                     "target_url": target_url,
@@ -289,9 +285,6 @@ async def scan_service(service_name: str):
             )
             response.raise_for_status()
             result = response.json()
-        
-        # Store scan result with service_name as key for easy lookup
-        scan_results[service_name] = ScanResult(**result)
         
         # Update deployed_services if exists
         if service_name in deployed_services:
@@ -313,7 +306,7 @@ async def scan_service(service_name: str):
 
 @app.get("/services/{service_name}/scan", response_model=ScanResult)
 async def get_scan_results(service_name: str):
-    """Get scan results for a service."""
+    """Get scan results for a service — proxied from nikto-service (Redis-backed)."""
     # Check if service exists in Kubernetes first
     try:
         config.load_incluster_config()
@@ -328,11 +321,18 @@ async def get_scan_results(service_name: str):
         if e.status == 404:
             raise HTTPException(status_code=404, detail=f"Service '{service_name}' not found")
     
-    # Return scan results if available
-    if service_name in scan_results:
-        return scan_results[service_name]
+    # Fetch scan results from nikto-service (Redis-backed)
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as http_client:
+            response = await http_client.get(
+                f"{NIKTO_SERVICE_URL}/scan/service/{service_name}"
+            )
+            if response.status_code == 200:
+                return response.json()
+    except Exception as e:
+        logger.warning(f"Could not fetch scan results from nikto-service: {e}")
     
-    # Return default not scanned result
+    # Return default not-scanned result
     return ScanResult(
         service_name=service_name,
         scan_status="not_scanned",
@@ -343,32 +343,6 @@ async def get_scan_results(service_name: str):
         scan_duration=0,
         error=None
     )
-
-
-def _map_nikto_severity(osvdb: str) -> str:
-    """Map OSVDB or other identifiers to severity levels."""
-    # Simplified severity mapping
-    if not osvdb:
-        return "info"
-    return "medium"  # Default to medium for now
-
-
-def _parse_nikto_text(output: str) -> list[Vulnerability]:
-    """Fallback parser for Nikto text output."""
-    vulnerabilities = []
-    lines = output.split('\n')
-    
-    for line in lines:
-        if '+' in line and ('OSVDB' in line or 'vulnerability' in line.lower()):
-            vulnerabilities.append(Vulnerability(
-                id="NIKTO-TEXT",
-                severity="medium",
-                description=line.strip(),
-                url=None,
-                method=None
-            ))
-    
-    return vulnerabilities
 
 
 @app.get("/health")

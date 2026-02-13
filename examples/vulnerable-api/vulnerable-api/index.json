@@ -1,0 +1,1 @@
+{"schemaVersion":2,"mediaType":"application/vnd.oci.image.index.v1+json","manifests":[{"mediaType":"application/vnd.oci.image.index.v1+json","digest":"sha256:ab575e396f342dcff7005138c66ce012442cc807d6746986666fba3e4988c73b","size":856,"annotations":{"io.containerd.image.name":"docker.io/library/vulnerable-api:latest","org.opencontainers.image.ref.name":"latest"}}]}
