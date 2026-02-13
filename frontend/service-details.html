@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Service Details — Secure Microservice Deployer</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --bg-card: #1a2234;
+            --bg-input: #0d1321;
+            --accent: #6366f1;
+            --accent-hover: #818cf8;
+            --accent-glow: rgba(99, 102, 241, 0.15);
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: #1e293b;
+            --border-focus: #6366f1;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(ellipse 600px 400px at 20% 20%, rgba(99, 102, 241, 0.06), transparent),
+                radial-gradient(ellipse 500px 300px at 80% 80%, rgba(16, 185, 129, 0.04), transparent);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Back button */
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 14px;
+            font-weight: 500;
+            margin-bottom: 24px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover {
+            color: var(--accent-hover);
+        }
+
+        .back-link svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* Page header */
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .page-header-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .service-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--accent), #a78bfa);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);
+        }
+
+        .page-header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent-hover));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .page-header .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 14px;
+            border-radius: 24px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .status-pill.deployed {
+            background: rgba(16, 185, 129, 0.12);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--success);
+        }
+
+        .status-pill .pulse {
+            width: 8px;
+            height: 8px;
+            background: var(--success);
+            border-radius: 50%;
+            animation: pulse-anim 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-anim {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.3;
+            }
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 24px;
+            transition: border-color 0.3s;
+        }
+
+        .card:hover {
+            border-color: rgba(99, 102, 241, 0.2);
+        }
+
+        .card h2 {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--text-primary);
+        }
+
+        .card h2 .icon {
+            width: 30px;
+            height: 30px;
+            background: var(--accent-glow);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        /* Info grid */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .info-item .label {
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .info-item .value {
+            font-size: 15px;
+            font-weight: 500;
+            color: var(--text-primary);
+            word-break: break-all;
+        }
+
+        .info-item .value.mono {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            background: var(--bg-input);
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+        }
+
+        .info-item .value a {
+            color: var(--accent-hover);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .info-item .value a:hover {
+            color: var(--accent);
+            text-decoration: underline;
+        }
+
+        /* Action buttons row */
+        .actions-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 10px 22px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 24px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--error);
+        }
+
+        .btn-danger:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-secondary {
+            background: rgba(99, 102, 241, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            color: var(--accent-hover);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(99, 102, 241, 0.2);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* Scan summary */
+        .scan-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .scan-stat {
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .scan-stat .number {
+            font-size: 28px;
+            font-weight: 700;
+            line-height: 1;
+            margin-bottom: 4px;
+        }
+
+        .scan-stat .stat-label {
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+
+        .scan-stat.critical .number {
+            color: #ef4444;
+        }
+
+        .scan-stat.medium .number {
+            color: #eab308;
+        }
+
+        .scan-stat.low .number {
+            color: #3b82f6;
+        }
+
+        .scan-stat.info .number {
+            color: #6b7280;
+        }
+
+        .scan-stat.total .number {
+            color: var(--accent-hover);
+        }
+
+        .scan-stat.duration .number {
+            color: var(--success);
+            font-size: 22px;
+        }
+
+        /* Status badge */
+        .scan-status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .scan-status-badge.completed {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+        }
+
+        .scan-status-badge.running {
+            background: rgba(59, 130, 246, 0.15);
+            color: #3b82f6;
+        }
+
+        .scan-status-badge.failed {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--error);
+        }
+
+        .scan-status-badge.not_scanned {
+            background: rgba(100, 116, 139, 0.15);
+            color: var(--text-muted);
+        }
+
+        /* Vulnerability list */
+        .vuln-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .vuln-item {
+            background: var(--bg-input);
+            border-left: 4px solid;
+            padding: 16px 20px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            transition: background 0.15s;
+        }
+
+        .vuln-item:hover {
+            background: rgba(13, 19, 33, 0.8);
+        }
+
+        .vuln-item.critical {
+            border-color: #ef4444;
+        }
+
+        .vuln-item.high {
+            border-color: #f59e0b;
+        }
+
+        .vuln-item.medium {
+            border-color: #eab308;
+        }
+
+        .vuln-item.low {
+            border-color: #3b82f6;
+        }
+
+        .vuln-item.info {
+            border-color: #6b7280;
+        }
+
+        .vuln-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+        .vuln-id {
+            font-weight: 600;
+            color: var(--accent);
+            font-size: 13px;
+        }
+
+        .vuln-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .vuln-badge.critical {
+            background: #ef4444;
+            color: white;
+        }
+
+        .vuln-badge.high {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .vuln-badge.medium {
+            background: #eab308;
+            color: #000;
+        }
+
+        .vuln-badge.low {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .vuln-badge.info {
+            background: #6b7280;
+            color: white;
+        }
+
+        .vuln-description {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .vuln-url {
+            margin-top: 6px;
+            font-size: 12px;
+            color: var(--text-muted);
+            font-family: monospace;
+        }
+
+        /* Empty / loading states */
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--text-muted);
+        }
+
+        .empty-state .empty-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.4;
+        }
+
+        .empty-state p {
+            font-size: 15px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(99, 102, 241, 0.1);
+            border-top: 4px solid var(--accent);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(12px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s ease;
+        }
+
+        /* Responsive */
+        @media (max-width: 640px) {
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .scan-summary {
+                grid-template-columns: 1fr 1fr;
+            }
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 48px;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- Back link -->
+        <a href="index.html" class="back-link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            Back to Dashboard
+        </a>
+
+        <!-- Loading state (shown initially) -->
+        <div id="loadingState">
+            <div style="text-align: center; padding: 80px 0;">
+                <div class="spinner"></div>
+                <p style="color: var(--text-secondary);">Loading service details...</p>
+            </div>
+        </div>
+
+        <!-- Error state (hidden initially) -->
+        <div id="errorState" style="display: none;">
+            <div class="empty-state">
+                <div class="empty-icon">⚠️</div>
+                <p>Service not found</p>
+                <a href="index.html" class="btn btn-secondary" style="margin-top: 16px;">Return to Dashboard</a>
+            </div>
+        </div>
+
+        <!-- Main content (hidden until loaded) -->
+        <div id="mainContent" style="display: none;" class="fade-in">
+
+            <!-- Page header -->
+            <div class="page-header">
+                <div class="page-header-left">
+                    <div class="service-icon">🐳</div>
+                    <div>
+                        <h1 id="serviceName">—</h1>
+                        <div style="margin-top: 4px;">
+                            <span class="status-pill deployed" id="statusPill">
+                                <span class="pulse"></span>
+                                <span id="statusText">deployed</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="actions-row">
+                    <button class="btn btn-primary" id="scanBtn" onclick="triggerScan()">🔍 Run Scan</button>
+                    <a class="btn btn-secondary" id="visitBtn" href="#" target="_blank">↗ Visit Service</a>
+                    <button class="btn btn-danger" id="deleteBtn" onclick="deleteService()">🗑 Delete</button>
+                </div>
+            </div>
+
+            <!-- Deployment Info -->
+            <div class="card">
+                <h2><span class="icon">📦</span> Deployment Info</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="label">Docker Image</span>
+                        <span class="value mono" id="dockerImage">—</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Container Port</span>
+                        <span class="value" id="containerPort">—</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Public URL</span>
+                        <span class="value" id="publicUrl">—</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">Status</span>
+                        <span class="value" id="deploymentStatus">—</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Scan Results -->
+            <div class="card">
+                <h2>
+                    <span class="icon">🛡️</span> Vulnerability Scan
+                    <span class="scan-status-badge not_scanned" id="scanStatusBadge">Not Scanned</span>
+                </h2>
+
+                <!-- Scan stats (hidden until scan exists) -->
+                <div id="scanStats" style="display: none;">
+                    <div class="scan-summary">
+                        <div class="scan-stat total">
+                            <div class="number" id="totalFindings">0</div>
+                            <div class="stat-label">Total</div>
+                        </div>
+                        <div class="scan-stat critical">
+                            <div class="number" id="criticalCount">0</div>
+                            <div class="stat-label">Critical</div>
+                        </div>
+                        <div class="scan-stat medium">
+                            <div class="number" id="mediumCount">0</div>
+                            <div class="stat-label">Medium</div>
+                        </div>
+                        <div class="scan-stat low">
+                            <div class="number" id="lowCount">0</div>
+                            <div class="stat-label">Low</div>
+                        </div>
+                        <div class="scan-stat info">
+                            <div class="number" id="infoCount">0</div>
+                            <div class="stat-label">Info</div>
+                        </div>
+                        <div class="scan-stat duration">
+                            <div class="number" id="scanDuration">—</div>
+                            <div class="stat-label">Duration</div>
+                        </div>
+                    </div>
+
+                    <div class="info-grid" style="margin-bottom: 24px;">
+                        <div class="info-item">
+                            <span class="label">Scanned At</span>
+                            <span class="value" id="scanTime">—</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Scan ID</span>
+                            <span class="value mono" id="scanId" style="font-size: 12px;">—</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vulnerability list container -->
+                <div id="vulnContainer">
+                    <div class="empty-state" id="noScanState">
+                        <div class="empty-icon">🔍</div>
+                        <p>No scan has been run yet</p>
+                        <button class="btn btn-primary" style="margin-top: 16px;" onclick="triggerScan()">Run First
+                            Scan</button>
+                    </div>
+                </div>
+
+                <!-- Scanning progress (hidden) -->
+                <div id="scanProgress" style="display: none;">
+                    <div style="text-align: center; padding: 48px;">
+                        <div class="spinner"></div>
+                        <h3 style="color: var(--accent); margin-bottom: 8px;">Scanning...</h3>
+                        <p style="color: var(--text-secondary); font-size: 14px;">Running Nikto vulnerability scan. This
+                            may take 1-2 minutes.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            Secure Microservice Deployer &bull; All traffic routed through API Gateway
+        </footer>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        const params = new URLSearchParams(window.location.search);
+        const SERVICE_NAME = params.get('name');
+
+        if (!SERVICE_NAME) {
+            document.getElementById('loadingState').style.display = 'none';
+            document.getElementById('errorState').style.display = 'block';
+        } else {
+            loadServiceDetails();
+        }
+
+        // ── Load service info ─────────────────────────────
+        async function loadServiceDetails() {
+            try {
+                const resp = await fetch(`${API_BASE}/services`);
+                const services = await resp.json();
+                const service = services.find(s => s.service_name === SERVICE_NAME);
+
+                if (!service) {
+                    document.getElementById('loadingState').style.display = 'none';
+                    document.getElementById('errorState').style.display = 'block';
+                    return;
+                }
+
+                // Populate header
+                document.getElementById('serviceName').textContent = service.service_name;
+                document.getElementById('statusText').textContent = service.status;
+                document.title = `${service.service_name} — Secure Microservice Deployer`;
+
+                // Populate deployment info
+                document.getElementById('dockerImage').textContent = service.docker_image;
+                document.getElementById('containerPort').textContent = service.container_port;
+                document.getElementById('deploymentStatus').innerHTML =
+                    `<span style="color: var(--success)">✓ ${service.status}</span>`;
+
+                const publicUrlEl = document.getElementById('publicUrl');
+                publicUrlEl.innerHTML = `<a href="${service.public_url}" target="_blank">${service.public_url}</a>`;
+
+                const visitBtn = document.getElementById('visitBtn');
+                visitBtn.href = service.public_url;
+
+                // Show main content
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+
+                // Load scan results
+                loadScanResults();
+
+            } catch (err) {
+                console.error('Failed to load service:', err);
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('errorState').style.display = 'block';
+            }
+        }
+
+        // ── Load scan results ─────────────────────────────
+        async function loadScanResults() {
+            try {
+                const resp = await fetch(`${API_BASE}/services/${SERVICE_NAME}/scan`);
+                if (!resp.ok) return;
+
+                const scan = await resp.json();
+
+                if (scan.scan_status === 'not_scanned') return;
+
+                // Update scan status badge
+                const badge = document.getElementById('scanStatusBadge');
+                badge.className = `scan-status-badge ${scan.scan_status}`;
+                badge.textContent = scan.scan_status;
+
+                // Update scan button
+                const scanBtn = document.getElementById('scanBtn');
+                if (scan.scan_status === 'running') {
+                    scanBtn.textContent = '⏳ Scanning...';
+                    scanBtn.disabled = true;
+                    // Poll for updates
+                    setTimeout(() => loadScanResults(), 5000);
+                    document.getElementById('scanProgress').style.display = 'block';
+                    document.getElementById('noScanState').style.display = 'none';
+                    return;
+                } else {
+                    scanBtn.textContent = '🔍 Re-scan';
+                    scanBtn.disabled = false;
+                }
+
+                // Show scan stats
+                document.getElementById('scanStats').style.display = 'block';
+                document.getElementById('scanProgress').style.display = 'none';
+
+                // Count severities
+                const vulns = scan.vulnerabilities || [];
+                const counts = { critical: 0, high: 0, medium: 0, low: 0, info: 0 };
+                vulns.forEach(v => { counts[v.severity] = (counts[v.severity] || 0) + 1; });
+
+                document.getElementById('totalFindings').textContent = scan.total_findings || vulns.length;
+                document.getElementById('criticalCount').textContent = counts.critical;
+                document.getElementById('mediumCount').textContent = counts.medium;
+                document.getElementById('lowCount').textContent = counts.low;
+                document.getElementById('infoCount').textContent = counts.info;
+                document.getElementById('scanDuration').textContent =
+                    scan.scan_duration ? scan.scan_duration.toFixed(1) + 's' : '—';
+
+                if (scan.started_at) {
+                    document.getElementById('scanTime').textContent = new Date(scan.started_at).toLocaleString();
+                }
+                if (scan.scan_id) {
+                    document.getElementById('scanId').textContent = scan.scan_id;
+                }
+
+                // Render vulnerability list
+                const container = document.getElementById('vulnContainer');
+
+                if (vulns.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">✅</div>
+                            <p style="color: var(--success); font-weight: 600;">No vulnerabilities found!</p>
+                            <p style="color: var(--text-muted); margin-top: 8px; font-size: 13px;">This service passed the scan with no issues detected.</p>
+                        </div>
+                    `;
+                } else {
+                    let html = '<ul class="vuln-list">';
+                    vulns.forEach(v => {
+                        html += `
+                            <li class="vuln-item ${v.severity}">
+                                <div class="vuln-header">
+                                    <span class="vuln-id">${v.id}</span>
+                                    <span class="vuln-badge ${v.severity}">${v.severity.toUpperCase()}</span>
+                                </div>
+                                <div class="vuln-description">${v.description}</div>
+                                ${v.url ? `<div class="vuln-url">URL: ${v.url}</div>` : ''}
+                            </li>
+                        `;
+                    });
+                    html += '</ul>';
+                    container.innerHTML = html;
+                }
+
+            } catch (err) {
+                console.error('Failed to load scan:', err);
+            }
+        }
+
+        // ── Trigger scan ──────────────────────────────────
+        async function triggerScan() {
+            const scanBtn = document.getElementById('scanBtn');
+            scanBtn.disabled = true;
+            scanBtn.textContent = '⏳ Scanning...';
+
+            document.getElementById('scanProgress').style.display = 'block';
+            document.getElementById('noScanState').style.display = 'none';
+
+            try {
+                const resp = await fetch(`${API_BASE}/services/${SERVICE_NAME}/scan`, {
+                    method: 'POST'
+                });
+
+                if (resp.ok) {
+                    // Results came back immediately (sync scan)
+                    await loadScanResults();
+                } else {
+                    const err = await resp.json();
+                    alert(`Scan failed: ${err.detail}`);
+                    scanBtn.disabled = false;
+                    scanBtn.textContent = '🔍 Run Scan';
+                    document.getElementById('scanProgress').style.display = 'none';
+                }
+            } catch (err) {
+                alert(`Scan error: ${err.message}`);
+                scanBtn.disabled = false;
+                scanBtn.textContent = '🔍 Run Scan';
+                document.getElementById('scanProgress').style.display = 'none';
+            }
+        }
+
+        // ── Delete service ────────────────────────────────
+        async function deleteService() {
+            if (!confirm(`Are you sure you want to delete "${SERVICE_NAME}"? This cannot be undone.`)) return;
+
+            try {
+                const resp = await fetch(`${API_BASE}/services/${SERVICE_NAME}`, { method: 'DELETE' });
+                if (resp.ok) {
+                    window.location.href = 'index.html';
+                } else {
+                    const err = await resp.json();
+                    alert(`Delete failed: ${err.detail}`);
+                }
+            } catch (err) {
+                alert(`Delete error: ${err.message}`);
+            }
+        }
+    </script>
+</body>
+
+</html>

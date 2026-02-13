@@ -719,15 +719,7 @@
     </div>
 
     <!-- Scan Results Modal -->
-    <div id="scanModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>🔍 Vulnerability Scan Results</h2>
-                <button class="close-btn" onclick="closeScanModal()">&times;</button>
-            </div>
-            <div id="scanResults"></div>
-        </div>
-    </div>
+
 
     <script>
         const API_BASE = '/api';
@@ -903,7 +895,8 @@
                     const row = tbody.insertRow();
 
                     // Service name cell
-                    row.insertCell().textContent = s.service_name;
+                    const nameCell = row.insertCell();
+                    nameCell.innerHTML = `<a href="service-details.html?name=${s.service_name}" style="color: var(--text-primary); text-decoration: none; font-weight: 600;">${s.service_name}</a>`;
 
                     // Docker image cell
                     row.insertCell().textContent = s.docker_image;
@@ -949,23 +942,14 @@
                     actionsCell.style.display = 'flex';
                     actionsCell.style.gap = '8px';
 
-                    // Scan button
-                    const scanBtn = document.createElement('button');
-                    scanBtn.textContent = s.scan_status === 'completed' ? 'View Scan' : 'Scan';
-                    scanBtn.className = 'scan-btn';
-                    scanBtn.onclick = () => s.scan_status === 'completed' ? viewScanResults(s.service_name) : scanService(s.service_name);
-                    if (s.scan_status === 'running') {
-                        scanBtn.textContent = 'Scanning...';
-                        scanBtn.disabled = true;
-                    }
-                    actionsCell.appendChild(scanBtn);
-
-                    // Delete button
-                    const btn = document.createElement('button');
-                    btn.textContent = 'Delete';
-                    btn.className = 'btn-secondary';
-                    btn.onclick = () => deleteService(s.service_name);
-                    actionsCell.appendChild(btn);
+                    // Details button
+                    const detailsBtn = document.createElement('a');
+                    detailsBtn.textContent = 'View Details';
+                    detailsBtn.className = 'scan-btn';
+                    detailsBtn.href = `service-details.html?name=${s.service_name}`;
+                    detailsBtn.style.textDecoration = 'none';
+                    detailsBtn.style.textAlign = 'center';
+                    actionsCell.appendChild(detailsBtn);
                 });
 
                 container.appendChild(table);
@@ -977,144 +961,6 @@
                     </div>
                 `;
             }
-        }
-
-        // ---------- Delete service ----------
-        async function deleteService(name) {
-            if (!confirm(`Delete service "${name}"?`)) return;
-
-            try {
-                await fetch(`${API_BASE}/services/${name}`, { method: 'DELETE' });
-                loadServices();
-            } catch (err) {
-                alert(`Failed to delete service: ${err.message}`);
-            }
-        }
-
-        // ---------- Scan service ----------
-        async function scanService(serviceName) {
-            try {
-                // Show loading modal immediately
-                showScanProgress(serviceName);
-
-                const response = await fetch(`${API_BASE}/services/${serviceName}/scan`, {
-                    method: 'POST'
-                });
-
-                if (response.ok) {
-                    loadServices(); // Refresh to show scanning status
-                    // Poll for results
-                    pollScanResults(serviceName);
-                } else {
-                    const error = await response.json();
-                    closeScanModal();
-                    alert(`Scan failed: ${error.detail}`);
-                }
-            } catch (error) {
-                closeScanModal();
-                alert(`Scan error: ${error.message}`);
-            }
-        }
-
-        function showScanProgress(serviceName) {
-            const modal = document.getElementById('scanModal');
-            const resultsDiv = document.getElementById('scanResults');
-
-            resultsDiv.innerHTML = `
-                <div class="scan-progress">
-                    <div class="spinner"></div>
-                    <h3>Scanning ${serviceName}...</h3>
-                    <p>Running Nikto vulnerability scan. This may take 1-2 minutes.</p>
-                    <p style="margin-top: 16px; font-size: 13px; color: var(--text-muted);">Please wait while we analyze the service for security vulnerabilities.</p>
-                </div>
-            `;
-
-            modal.classList.add('active');
-        }
-
-        async function pollScanResults(serviceName, retries = 30) {
-            if (retries <= 0) {
-                await loadServices();
-                return;
-            }
-
-            await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
-
-            try {
-                const response = await fetch(`${API_BASE}/services/${serviceName}/scan`);
-                if (response.ok) {
-                    const scan = await response.json();
-                    if (scan.scan_status === 'completed' || scan.scan_status === 'failed') {
-                        await loadServices();
-                        if (scan.scan_status === 'completed') {
-                            viewScanResults(serviceName);
-                        }
-                        return;
-                    }
-                }
-            } catch (e) {
-                // Scan not ready yet, continue polling
-            }
-
-            pollScanResults(serviceName, retries - 1);
-        }
-
-        async function viewScanResults(serviceName) {
-            try {
-                const response = await fetch(`${API_BASE}/services/${serviceName}/scan`);
-                if (!response.ok) {
-                    alert('No scan results found');
-                    return;
-                }
-
-                const scan = await response.json();
-                displayScanResults(scan);
-            } catch (error) {
-                alert(`Error fetching scan results: ${error.message}`);
-            }
-        }
-
-        function displayScanResults(scan) {
-            const modal = document.getElementById('scanModal');
-            const resultsDiv = document.getElementById('scanResults');
-
-            let html = `
-                <div style="margin-bottom: 24px;">
-                    <h3 style="margin-bottom: 8px;">${scan.service_name}</h3>
-                    <p style="color: var(--text-secondary); font-size: 14px;">
-                        Scanned: ${new Date(scan.started_at).toLocaleString()}<br>
-                        Duration: ${scan.scan_duration ? scan.scan_duration.toFixed(1) + 's' : 'N/A'}<br>
-                        Total Findings: ${scan.total_findings}
-                    </p>
-                </div>
-            `;
-
-            if (scan.vulnerabilities && scan.vulnerabilities.length > 0) {
-                html += '<ul class="vuln-list">';
-                scan.vulnerabilities.forEach(vuln => {
-                    html += `
-                        <li class="vuln-item ${vuln.severity}">
-                            <div class="vuln-header">
-                                <span class="vuln-id">${vuln.id}</span>
-                                <span class="vuln-badge ${vuln.severity}">${vuln.severity.toUpperCase()}</span>
-                            </div>
-                            <div class="vuln-description">${vuln.description}</div>
-                            ${vuln.url ? `<div style="margin-top: 8px; font-size: 12px; color: var(--text-muted);">URL: ${vuln.url}</div>` : ''}
-                        </li>
-                    `;
-                });
-                html += '</ul>';
-            } else {
-                html += '<p style="color: var(--success); text-align: center; padding: 32px;">✓ No vulnerabilities found!</p>';
-            }
-
-            resultsDiv.innerHTML = html;
-            modal.classList.add('active');
-        }
-
-        function closeScanModal() {
-            const modal = document.getElementById('scanModal');
-            modal.classList.remove('active');
         }
 
         // ---------- Initialize ----------
