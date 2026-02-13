@@ -35,6 +35,18 @@ class ScanResult(BaseModel):
     error: Optional[str] = None
 
 
+class RouteLimit(BaseModel):
+    path: str  # OpenAPI path, e.g. /users/{id}
+    method: str = "ALL"  # GET, POST, or ALL
+    limit: int
+    window: int
+
+class RateLimitConfig(BaseModel):
+    enabled: bool = True
+    limit: int = 100
+    window: int = 60
+    routes: List[RouteLimit] = []
+
 class ServiceInfo(BaseModel):
     service_name: str
     docker_image: str

@@ -19,10 +19,11 @@ import docker
 import tempfile
 import subprocess
 import json
+import redis
 from datetime import datetime
 from kubernetes import client, config
 
-from models import DeployRequest, DeployResponse, ServiceInfo, ScanResult, Vulnerability
+from models import DeployRequest, DeployResponse, ServiceInfo, ScanResult, Vulnerability, RateLimitConfig
 from k8s_client import create_deployment, create_service, delete_deployment, delete_service
 
 logging.basicConfig(level=logging.INFO)
@@ -53,6 +54,86 @@ try:
 except Exception as e:
     logger.warning(f"Docker client initialization failed: {e}")
     docker_client = None
+
+
+
+# Redis connection
+REDIS_HOST = os.getenv("REDIS_HOST", "redis-service.deployer-system.svc.cluster.local")
+try:
+    redis_client = redis.Redis(host=REDIS_HOST, port=6379, decode_responses=True)
+except Exception as e:
+    logger.warning(f"Redis connection failed: {e}")
+    redis_client = None
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Sync in-memory state with actual Kubernetes state on startup."""
+    logger.info("Deployer service starting... syncing with Kubernetes.")
+    try:
+        config.load_incluster_config()
+    except:
+        try:
+            config.load_kube_config()
+        except:
+            logger.warning("Could not load K8s config, skipping sync.")
+            return
+
+    apps_v1 = client.AppsV1Api()
+    
+    try:
+        # List items in user-services namespace
+        namespace = "user-services"
+        deployments = apps_v1.list_namespaced_deployment(namespace=namespace)
+        
+        async with httpx.AsyncClient() as http_client:
+            for dep in deployments.items:
+                name = dep.metadata.name
+                
+                # Try to extract info
+                try:
+                    container = dep.spec.template.spec.containers[0]
+                    image = container.image
+                    # Best effort port extraction
+                    port = 80
+                    if container.ports:
+                        port = container.ports[0].container_port
+                    
+                    status = "deployed"
+                    if not dep.status.ready_replicas:
+                        status = "stopped"
+                        
+                    public_url = f"http://{GATEWAY_HOST}:{GATEWAY_PORT}/{name}"
+                    
+                    # Add to memory
+                    deployed_services[name] = ServiceInfo(
+                        service_name=name,
+                        docker_image=image,
+                        container_port=port,
+                        public_url=public_url,
+                        status=status,
+                        scan_status="unscanned" # Reset scan status as we don't store it persistently yet
+                    )
+                    logger.info(f"Discovered existing service: {name}")
+
+                    # Re-register with Gateway (fire and forget-ish)
+                    try:
+                        service_fqdn = f"http://{name}-service.user-services.svc.cluster.local:{port}"
+                        await http_client.post(
+                            f"{GATEWAY_REGISTER_URL}/register",
+                            json={
+                                "service_name": name,
+                                "target_url": service_fqdn,
+                            },
+                        )
+                    except Exception as gw_e:
+                        logger.warning(f"Failed to re-register {name} with gateway: {gw_e}")
+
+                except Exception as parse_e:
+                    logger.warning(f"Failed to parse deployment {name}: {parse_e}")
+
+    except Exception as e:
+        logger.error(f"Failed to sync with Kubernetes: {e}")
 
 
 @app.post("/upload-image")
@@ -163,6 +244,189 @@ async def deploy_service(req: DeployRequest):
     )
 
 
+@app.post("/services/{service_name}/redeploy")
+async def redeploy_service_endpoint(service_name: str, req: DeployRequest):
+    """Restart a service deployment and re-sync gateway route."""
+    
+    # Load K8s config
+    try:
+        config.load_incluster_config()
+    except config.ConfigException:
+        config.load_kube_config()
+    
+    # 1. Update Deployment (or just restart if no changes)
+    # We'll use the provided image and port to ensure it matches intent
+    try:
+        # Check if deployment exists
+        apps_v1 = client.AppsV1Api()
+        try:
+            deployment = apps_v1.read_namespaced_deployment(name=service_name, namespace="user-services")
+            
+            # Update image if changed
+            if deployment.spec.template.spec.containers[0].image != req.docker_image:
+                deployment.spec.template.spec.containers[0].image = req.docker_image
+                apps_v1.patch_namespaced_deployment(name=service_name, namespace="user-services", body=deployment)
+                logger.info(f"Updated image for {service_name} to {req.docker_image}")
+
+            # Trigger rollout restart with zero-downtime strategy
+            # Ensure replicas >= 1 (service may have been stopped/scaled to 0)
+            current_replicas = deployment.spec.replicas or 0
+            patch = {
+                "spec": {
+                    "replicas": max(current_replicas, 1),
+                    "strategy": {
+                        "type": "RollingUpdate",
+                        "rollingUpdate": {
+                            "maxSurge": 1,
+                            "maxUnavailable": 0
+                        }
+                    },
+                    "template": {
+                        "metadata": {
+                            "annotations": {
+                                "kubectl.kubernetes.io/restartedAt": datetime.utcnow().isoformat()
+                            }
+                        }
+                    }
+                }
+            }
+            apps_v1.patch_namespaced_deployment(name=service_name, namespace="user-services", body=patch)
+            logger.info(f"Triggered rollout restart for {service_name}")
+
+            # Ensure K8s Service still exists (it may have been deleted)
+            try:
+                core_v1 = client.CoreV1Api()
+                core_v1.read_namespaced_service(name=f"{service_name}-service", namespace="user-services")
+            except client.exceptions.ApiException as svc_e:
+                if svc_e.status == 404:
+                    logger.info(f"K8s Service missing for {service_name}, recreating...")
+                    create_service(service_name, req.container_port)
+                else:
+                    logger.warning(f"Error checking K8s Service: {svc_e}")
+
+        except client.exceptions.ApiException as e:
+            if e.status == 404:
+                # If not found, create it (fallback to deploy)
+                logger.info(f"Service {service_name} not found, creating new deployment...")
+                create_deployment(service_name, req.docker_image, req.container_port)
+                create_service(service_name, req.container_port)
+            else:
+                raise e
+
+    except Exception as e:
+        logger.error(f"Failed to redeploy: {e}")
+        raise HTTPException(status_code=500, detail=f"Redeploy failed: {str(e)}")
+
+    # 2. Force Re-register route in gateway
+    try:
+        async with httpx.AsyncClient() as http_client:
+            service_fqdn = f"http://{service_name}-service.user-services.svc.cluster.local:{req.container_port}"
+            resp = await http_client.post(
+                f"{GATEWAY_REGISTER_URL}/register",
+                json={
+                    "service_name": service_name,
+                    "target_url": service_fqdn,
+                },
+            )
+            resp.raise_for_status()
+            logger.info(f"Re-registered route in gateway for {service_name}")
+    except Exception as e:
+        logger.warning(f"Gateway re-registration failed: {e}")
+
+    # 3. Update Registry
+    public_url = f"http://{GATEWAY_HOST}:{GATEWAY_PORT}/{service_name}"
+    
+    info = ServiceInfo(
+        service_name=service_name,
+        docker_image=req.docker_image,
+        container_port=req.container_port,
+        public_url=public_url,
+        status="deployed"
+    )
+    deployed_services[service_name] = info
+
+    return {"status": "success", "message": f"Service '{service_name}' redeployed"}
+
+
+@app.post("/services/{service_name}/stop")
+async def stop_service(service_name: str):
+    """Stop a service by scaling its deployment to 0 replicas."""
+    try:
+        config.load_incluster_config()
+    except config.ConfigException:
+        config.load_kube_config()
+
+    apps_v1 = client.AppsV1Api()
+
+    try:
+        # Scale to 0
+        patch = {"spec": {"replicas": 0}}
+        apps_v1.patch_namespaced_deployment(name=service_name, namespace="user-services", body=patch)
+        logger.info(f"Stopped service (scaled to 0): {service_name}")
+    except client.exceptions.ApiException as e:
+        if e.status == 404:
+            raise HTTPException(status_code=404, detail=f"Service '{service_name}' not found")
+        raise HTTPException(status_code=500, detail=f"Failed to stop: {str(e)}")
+
+    # Deregister from gateway
+    try:
+        async with httpx.AsyncClient() as http_client:
+            await http_client.delete(f"{GATEWAY_REGISTER_URL}/register/{service_name}")
+    except Exception as e:
+        logger.warning(f"Gateway deregistration failed: {e}")
+
+    # Update in-memory status
+    if service_name in deployed_services:
+        deployed_services[service_name].status = "stopped"
+
+    return {"status": "success", "message": f"Service '{service_name}' stopped"}
+
+
+@app.post("/services/{service_name}/start")
+async def start_service(service_name: str):
+    """Start a stopped service by scaling its deployment to 1 replica."""
+    try:
+        config.load_incluster_config()
+    except config.ConfigException:
+        config.load_kube_config()
+
+    apps_v1 = client.AppsV1Api()
+
+    try:
+        # Scale to 1
+        patch = {"spec": {"replicas": 1}}
+        apps_v1.patch_namespaced_deployment(name=service_name, namespace="user-services", body=patch)
+        logger.info(f"Started service (scaled to 1): {service_name}")
+    except client.exceptions.ApiException as e:
+        if e.status == 404:
+            raise HTTPException(status_code=404, detail=f"Service '{service_name}' not found")
+        raise HTTPException(status_code=500, detail=f"Failed to start: {str(e)}")
+
+    # Re-register with gateway
+    try:
+        # Get deployment info for port
+        dep = apps_v1.read_namespaced_deployment(name=service_name, namespace="user-services")
+        port = 80
+        if dep.spec.template.spec.containers[0].ports:
+            port = dep.spec.template.spec.containers[0].ports[0].container_port
+
+        service_fqdn = f"http://{service_name}-service.user-services.svc.cluster.local:{port}"
+        async with httpx.AsyncClient() as http_client:
+            await http_client.post(
+                f"{GATEWAY_REGISTER_URL}/register",
+                json={"service_name": service_name, "target_url": service_fqdn},
+            )
+    except Exception as e:
+        logger.warning(f"Gateway registration failed: {e}")
+
+    # Update in-memory status
+    if service_name in deployed_services:
+        deployed_services[service_name].status = "deployed"
+
+    return {"status": "success", "message": f"Service '{service_name}' started"}
+
+
+
 @app.get("/services", response_model=list[ServiceInfo])
 async def list_services():
     """List all deployed user services from user-services namespace."""
@@ -185,29 +449,49 @@ async def list_services():
         image = container.image
         port = container.ports[0].container_port if container.ports else 0
 
-        # Get service info
-        svc_name = f"{name}-service"
-        service_info_k8s = next((s for s in services_list.items if s.metadata.name == svc_name), None)
-        
         public_url = f"http://{GATEWAY_HOST}:{GATEWAY_PORT}/{name}"
         
-        # Check if service is in our in-memory registry to get scan status and other details
-        # If not, default to deployed status
-        if name in deployed_services:
-            info = deployed_services[name]
-            info.status = "deployed" # Assume deployed if found in k8s
-            info.public_url = public_url # Ensure public_url is up-to-date
+        # Determine real status from K8s state
+        desired_replicas = dep.spec.replicas if dep.spec.replicas is not None else 1
+        ready_replicas = dep.status.ready_replicas or 0
+
+        if desired_replicas == 0:
+            status = "stopped"
+        elif ready_replicas >= desired_replicas:
+            status = "deployed"
+        elif ready_replicas > 0:
+            status = "deploying"
         else:
-            info = ServiceInfo(
-                service_name=name,
-                docker_image=image,
-                container_port=port,
-                public_url=public_url,
-                status="deployed",
-                scan_status="unknown",
-                last_scan=None,
-                vulnerability_count=0
-            )
+            status = "deploying"
+
+        # Default info
+        info = ServiceInfo(
+            service_name=name,
+            docker_image=image,
+            container_port=port,
+            public_url=public_url,
+            status=status,
+            scan_status="unknown",
+            last_scan=None,
+            vulnerability_count=0
+        )
+
+        # Enhance with Scan Data from Redis (Source of Truth)
+        if redis_client:
+            try:
+                # 1. Get latest scan ID
+                scan_id = redis_client.get(f"service_scan:{name}")
+                if scan_id:
+                    # 2. Get scan details
+                    scan_data = redis_client.get(f"scan:{scan_id}")
+                    if scan_data:
+                        scan_result = json.loads(scan_data)
+                        info.scan_status = scan_result.get("scan_status", "unknown")
+                        info.last_scan = scan_result.get("started_at")
+                        info.vulnerability_count = scan_result.get("total_findings", 0)
+            except Exception as e:
+                logger.warning(f"Failed to fetch scan info for {name} from Redis: {e}")
+
         result.append(info)
     return result
 
@@ -215,7 +499,25 @@ async def list_services():
 @app.delete("/services/{service_name}")
 async def delete_service_endpoint(service_name: str):
     """Delete a deployed service from user-services namespace."""
-    if service_name not in deployed_services:
+    # Check both in-memory registry and Kubernetes
+    service_exists_in_k8s = False
+    try:
+        config.load_incluster_config()
+    except config.ConfigException:
+        config.load_kube_config()
+    try:
+        apps_v1 = client.AppsV1Api()
+        apps_v1.read_namespaced_deployment(name=service_name, namespace="user-services")
+        service_exists_in_k8s = True
+    except client.exceptions.ApiException as e:
+        if e.status == 404:
+            service_exists_in_k8s = False
+        else:
+            logger.warning(f"Error checking K8s for {service_name}: {e}")
+    except Exception:
+        pass
+
+    if service_name not in deployed_services and not service_exists_in_k8s:
         raise HTTPException(status_code=404, detail=f"Service '{service_name}' not found")
 
     # 1. Deregister from gateway
@@ -241,7 +543,8 @@ async def delete_service_endpoint(service_name: str):
         logger.error(f"Failed to delete service: {e}")
 
     # 4. Remove from in-memory registry
-    del deployed_services[service_name]
+    if service_name in deployed_services:
+        del deployed_services[service_name]
     
     logger.info(f"Service '{service_name}' deleted successfully")
     return {"message": f"Service '{service_name}' deleted successfully"}
@@ -348,6 +651,39 @@ async def get_scan_results(service_name: str):
         )
 
 
+@app.post("/services/{service_name}/ratelimit")
+async def set_rate_limit(service_name: str, rl_config: RateLimitConfig):
+    """Set rate limit configuration."""
+    if not redis_client:
+        raise HTTPException(503, "Redis unavailable")
+        
+    key = f"config:ratelimit:{service_name}"
+    try:
+        redis_client.set(key, rl_config.model_dump_json())
+        logger.info(f"Updated rate limit for {service_name}: {rl_config}")
+        return {"status": "updated", "config": rl_config}
+    except Exception as e:
+        logger.error(f"Failed to set rate limit: {e}")
+        raise HTTPException(500, detail=str(e))
+
+
+@app.get("/services/{service_name}/ratelimit", response_model=RateLimitConfig)
+async def get_rate_limit(service_name: str):
+    """Get rate limit configuration."""
+    if not redis_client:
+        return RateLimitConfig()
+        
+    key = f"config:ratelimit:{service_name}"
+    try:
+        data = redis_client.get(key)
+        if data:
+            return RateLimitConfig.model_validate_json(data)
+        return RateLimitConfig()
+    except Exception as e:
+        logger.error(f"Failed to get rate limit: {e}")
+        return RateLimitConfig()
+
+
 @app.get("/services/{service_name}/apis")
 async def get_service_apis(service_name: str):
     """Detect and return API documentation info for a service."""
@@ -367,30 +703,50 @@ async def get_service_apis(service_name: str):
         logger.warning(f"Failed to resolve service port for {service_name}: {e}")
         target_url = f"http://{service_name}-service.user-services.svc.cluster.local:8000"
 
-    # Call nikto-service to discover
+    # API Discovery Logic (Decoupled from Nikto)
+    paths = [
+        "/openapi.json", 
+        "/swagger.json", 
+        "/api/openapi.json", 
+        "/v1/openapi.json",
+        "/docs/openapi.json"
+    ]
+
+    found_data = {"status": "not_found", "spec_path": None}
+
     try:
-        async with httpx.AsyncClient(timeout=5.0) as http_client:
-            resp = await http_client.post(
-                "http://nikto-service.deployer-system.svc.cluster.local:8002/discover",
-                json={"target_url": target_url}
-            )
-            data = resp.json()
-            # Enrich with public gateway URL
-            if data.get("status") == "found" and data.get("spec_path"):
-                # The browser can access via Gateway
-                # http://localhost:30080/{service_name}{spec_path}
-                # But we should return the relative path from gateway root or full URL?
-                # Let's return the full gateway URL relative to current host
-                # The frontend knows the Gateway URL usually, but let's be helpful.
-                # Actually, just return path relevant to gateway.
-                # Gateway maps /{service_name} -> {target_url}
-                # So if spec is at /openapi.json, public is /{service_name}/openapi.json
-                data["public_url"] = f"/{service_name}{data['spec_path']}"
-            
-            return data
+        async with httpx.AsyncClient(timeout=3.0, verify=False) as http_client:
+            for path in paths:
+                try:
+                    url = f"{target_url.rstrip('/')}{path}"
+                    logger.info(f"Probing {url} for OpenAPI spec...")
+                    resp = await http_client.get(url)
+                    
+                    if resp.status_code == 200:
+                        try:
+                            data = resp.json()
+                            if "openapi" in data or "swagger" in data:
+                                version = data.get("openapi") or data.get("swagger")
+                                logger.info(f"Found OpenAPI {version} at {path}")
+                                found_data = {
+                                    "spec_path": path, 
+                                    "type": "openapi", 
+                                    "version": version,
+                                    "status": "found",
+                                    "spec_content": data,
+                                    "public_url": f"/{service_name}{path}"
+                                }
+                                break 
+                        except json.JSONDecodeError:
+                            continue
+                except Exception as e:
+                    logger.warning(f"Probe failed for {url}: {e}")
+                    continue
     except Exception as e:
         logger.error(f"Discovery failed: {e}")
         return {"status": "error", "spec_path": None}
+
+    return found_data
 
 
 @app.get("/health")

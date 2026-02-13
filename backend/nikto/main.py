@@ -151,7 +151,8 @@ async def discover_api(payload: dict):
                                 "spec_path": path, 
                                 "type": "openapi", 
                                 "version": version,
-                                "status": "found"
+                                "status": "found",
+                                "spec_content": data  # Return actual content
                             }
                     except json.JSONDecodeError:
                         continue
