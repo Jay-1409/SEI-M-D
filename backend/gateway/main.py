@@ -12,6 +12,9 @@ from fastapi.responses import StreamingResponse, JSONResponse
 import httpx
 import logging
 from datetime import datetime, timezone
+import redis
+import json
+import os
 
 logging.basicConfig(
     level=logging.INFO,
@@ -20,6 +23,86 @@ logging.basicConfig(
 logger = logging.getLogger("gateway")
 
 app = FastAPI(title="Microservice Gateway", version="1.0.0")
+
+
+# Redis configuration for rate limiting
+REDIS_HOST = os.getenv("REDIS_HOST", "redis-service.deployer-system.svc.cluster.local")
+REDIS_PORT = int(os.getenv("REDIS_PORT", "6379"))
+
+try:
+    redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
+    redis_client.ping()
+    logger.info(f"Connected to Redis for Rate Limiting at {REDIS_HOST}")
+except Exception as e:
+    logger.warning(f"Redis connection failed: {e}. Rate limiting disabled.")
+    redis_client = None
+
+
+@app.middleware("http")
+async def rate_limit_middleware(request: Request, call_next):
+    # Only apply to valid requests that have Redis available
+    if not redis_client:
+        return await call_next(request)
+        
+    path = request.url.path
+    # Extract service name from path (e.g. /service-name/api/...)
+    parts = path.strip('/').split('/')
+    if not parts:
+        return await call_next(request)
+        
+    service_name = parts[0]
+    
+    # Skip gateway's own routes
+    if service_name in ("register", "routes", "health", "docs", "openapi.json"):
+        return await call_next(request)
+
+    try:
+        # Check if rate limiting is enabled for this service
+        # Config key: config:ratelimit:{service_name}
+        config_key = f"config:ratelimit:{service_name}"
+        config_data = redis_client.get(config_key)
+        
+        if config_data:
+            config = json.loads(config_data)
+            limit = int(config.get("limit", 100))
+            window = int(config.get("window", 60))
+            enabled = config.get("enabled", True)
+            
+            if enabled:
+                client_ip = request.client.host
+                # Rate limit key: ratelimit:{service_name}:{client_ip}
+                key = f"ratelimit:{service_name}:{client_ip}"
+                
+                # Check current count using pipeline for atomicity
+                pipeline = redis_client.pipeline()
+                pipeline.incr(key)
+                pipeline.ttl(key)
+                result = pipeline.execute()
+                
+                current = result[0]
+                ttl = result[1]
+                
+                # Set expiry if key is new (ttl == -1)
+                if ttl == -1:
+                    redis_client.expire(key, window)
+                
+                if current > limit:
+                    logger.warning(f"Rate limit exceeded for {service_name} from {client_ip} ({current}/{limit})")
+                    return JSONResponse(
+                        status_code=429,
+                        content={
+                            "detail": "Rate limit exceeded",
+                            "limit": limit,
+                            "window_seconds": window,
+                            "retry_after": ttl if ttl > 0 else window
+                        }
+                    )
+    except Exception as e:
+        logger.error(f"Rate limit middleware error: {e}")
+        # Fail open
+        pass
+
+    return await call_next(request)
 
 from fastapi.middleware.cors import CORSMiddleware
 

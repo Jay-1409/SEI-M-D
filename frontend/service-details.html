@@ -7,30 +7,124 @@
     <title>Service Details — Secure Microservice Deployer</title>
     <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui.css" />
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
 
         :root {
-            --bg-primary: #0a0e1a;
-            --bg-secondary: #111827;
-            --bg-card: #1a2234;
-            --bg-input: #0d1321;
-            --accent: #6366f1;
-            --accent-hover: #818cf8;
-            --accent-glow: rgba(99, 102, 241, 0.15);
-            --success: #10b981;
-            --error: #ef4444;
-            --warning: #f59e0b;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            --border: #1e293b;
-            --border-focus: #6366f1;
+            /* Classy Pastel - Light Theme (Default) */
+            --bg-primary: #FFFEF9;
+            /* Cream/Ivory */
+
+            --text-primary: #1A202C;
+            --text-secondary: #4A5568;
+            --text-muted: #718096;
+
+            --border: #E2E8F0;
+            --border-focus: #F57799;
+
+            /* The Palette */
+            --color-yellow: #FFF7CD;
+            --color-orange: #FDC3A1;
+            --color-red: #FB9B8F;
+            --color-pink: #F57799;
+
+            --accent: #F57799;
+            --accent-hover: #FB9B8F;
+            --accent-glow: rgba(245, 119, 153, 0.2);
+
+            --success: #10B981;
+            --error: #E53E3E;
+
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+
+            --theme-toggle-bg: #EDF2F7;
+            --theme-toggle-icon: #F6E05E;
+
+            --card-bg: rgba(255, 255, 255, 0.8);
+            --card-border: rgba(255, 255, 255, 0.6);
+
+            --back-btn-bg: rgba(255, 255, 255, 0.8);
+            --back-btn-border: rgba(255, 255, 255, 0.5);
+            --back-btn-hover: white;
+
+            --tab-nav-bg: rgba(255, 255, 255, 0.6);
+            --tab-btn-hover-bg: rgba(255, 255, 255, 0.5);
+            --tab-btn-active-bg: white;
+
+            --info-item-bg: rgba(255, 255, 255, 0.5);
+            --info-item-border: rgba(255, 255, 255, 0.6);
+
+            --vuln-item-bg: white;
+            --vuln-item-shadow: rgba(0, 0, 0, 0.05);
+
+            --input-bg: white;
+            --input-border: transparent;
+            --input-text: #1A202C;
+            --input-placeholder: #718096;
+        }
+
+        [data-theme="dark"] {
+            /* Midnight Classy - Dark Theme */
+            --bg-primary: #171923;
+            /* Deep Navy/Black */
+
+            --text-primary: #F7FAFC;
+            /* Off-white */
+            --text-secondary: #A0AEC0;
+            /* Light Slate */
+            --text-muted: #718096;
+
+            --border: #2D3748;
+            --border-focus: #F57799;
+
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+
+            --theme-toggle-bg: #2D3748;
+            --theme-toggle-icon: #FAF089;
+
+            --card-bg: rgba(26, 32, 44, 0.8);
+            /* Dark Gray Transparent */
+            --card-border: rgba(255, 255, 255, 0.08);
+
+            --back-btn-bg: rgba(45, 55, 72, 0.8);
+            --back-btn-border: rgba(255, 255, 255, 0.1);
+            --back-btn-hover: #2D3748;
+
+            --tab-nav-bg: rgba(26, 32, 44, 0.6);
+            --tab-btn-hover-bg: rgba(255, 255, 255, 0.05);
+            --tab-btn-active-bg: #2D3748;
+
+            --info-item-bg: rgba(255, 255, 255, 0.05);
+            --info-item-border: rgba(255, 255, 255, 0.05);
+
+            --vuln-item-bg: #2D3748;
+            --vuln-item-shadow: rgba(0, 0, 0, 0.2);
+
+            --input-bg: #2D3748;
+            --input-border: transparent;
+            --input-text: #F7FAFC;
+            --input-placeholder: #718096;
+
+            /* Dims for dark mode */
+            --color-yellow: rgba(255, 247, 205, 0.2);
+            --color-orange: rgba(253, 195, 161, 0.2);
+            --color-red: rgba(251, 155, 143, 0.2);
+            --color-pink: rgba(245, 119, 153, 0.2);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
         }
 
         body {
@@ -39,8 +133,10 @@
             color: var(--text-primary);
             min-height: 100vh;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
         }
 
+        /* Gradient Background */
         body::before {
             content: '';
             position: fixed;
@@ -49,21 +145,57 @@
             width: 100%;
             height: 100%;
             background:
-                radial-gradient(ellipse 600px 400px at 20% 20%, rgba(99, 102, 241, 0.06), transparent),
-                radial-gradient(ellipse 500px 300px at 80% 80%, rgba(16, 185, 129, 0.04), transparent);
+                radial-gradient(circle at 10% 10%, var(--color-yellow) 0%, transparent 50%),
+                /* Yellow */
+                radial-gradient(circle at 90% 10%, var(--color-orange) 0%, transparent 40%),
+                /* Orange */
+                radial-gradient(circle at 90% 90%, var(--color-red) 0%, transparent 50%),
+                /* Salmon */
+                radial-gradient(circle at 10% 90%, var(--color-pink) 0%, transparent 50%);
+            /* Pink */
+            filter: blur(40px);
             pointer-events: none;
-            z-index: 0;
+            z-index: -1;
+            transition: opacity 0.5s ease;
+        }
+
+        [data-theme="dark"] body::before {
+            opacity: 0.5;
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 0 auto;
             padding: 40px 24px;
             position: relative;
-            z-index: 1;
         }
 
-        /* Back button */
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: absolute;
+            top: 40px;
+            right: 24px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--theme-toggle-bg);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: var(--theme-toggle-icon);
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 100;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1) rotate(15deg);
+        }
+
+        /* NAVIGATION/BACK BTN */
         .back-link {
             display: inline-flex;
             align-items: center;
@@ -71,459 +203,223 @@
             color: var(--text-secondary);
             text-decoration: none;
             font-size: 14px;
-            font-weight: 500;
-            margin-bottom: 24px;
-            transition: color 0.2s;
+            font-weight: 600;
+            margin-bottom: 32px;
+            transition: all 0.2s;
+            background: var(--back-btn-bg);
+            padding: 10px 20px;
+            border-radius: 99px;
+            box-shadow: var(--shadow-sm);
+            backdrop-filter: blur(4px);
+            border: 1px solid var(--back-btn-border);
         }
 
         .back-link:hover {
-            color: var(--accent-hover);
+            transform: translateX(-4px);
+            background: var(--back-btn-hover);
+            color: var(--text-primary);
+            box-shadow: var(--shadow);
         }
 
         .back-link svg {
-            width: 16px;
-            height: 16px;
+            transition: transform 0.2s;
         }
 
-        /* Page header */
+        .back-link:hover svg {
+            transform: translateX(-2px);
+        }
+
+        /* HEADER SECTION */
         .page-header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 32px;
+            margin-bottom: 40px;
             flex-wrap: wrap;
-            gap: 16px;
+            gap: 24px;
         }
 
         .page-header-left {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 24px;
         }
 
         .service-icon {
-            width: 56px;
-            height: 56px;
-            background: linear-gradient(135deg, var(--accent), #a78bfa);
-            border-radius: 16px;
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, var(--color-pink), var(--color-orange));
+            border-radius: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 26px;
-            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.25);
+            font-size: 36px;
+            box-shadow: 0 10px 25px rgba(245, 119, 153, 0.4);
+            color: white;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .service-icon:hover {
+            transform: scale(1.05) rotate(3deg);
         }
 
         .page-header h1 {
-            font-size: 28px;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--text-primary), var(--accent-hover));
+            font-size: 36px;
+            font-weight: 800;
+            color: var(--text-primary);
+            letter-spacing: -1px;
+            margin-bottom: 4px;
+        }
+
+        [data-theme="dark"] .page-header h1 {
+            background: linear-gradient(135deg, #F7FAFC 0%, #CBD5E0 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
-        .page-header .status-pill {
+        /* STATUS BADGE */
+        .status-pill {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 6px 14px;
-            border-radius: 24px;
-            font-size: 13px;
+            gap: 8px;
+            font-size: 14px;
             font-weight: 600;
+            color: #2F855A;
+            background: #F0FFF4;
+            padding: 6px 16px;
+            border-radius: 99px;
+            border: 1px solid #C6F6D5;
         }
 
-        .status-pill.deployed {
-            background: rgba(16, 185, 129, 0.12);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            color: var(--success);
+        [data-theme="dark"] .status-pill {
+            background: rgba(47, 133, 90, 0.2);
+            color: #68D391;
+            border-color: rgba(47, 133, 90, 0.4);
         }
 
-        .status-pill .pulse {
+        .pulse {
             width: 8px;
             height: 8px;
-            background: var(--success);
+            background: #48BB78;
             border-radius: 50%;
-            animation: pulse-anim 2s ease-in-out infinite;
+            box-shadow: 0 0 0 0 rgba(72, 187, 120, 0.7);
+            animation: pulse-anim 2s infinite;
         }
 
         @keyframes pulse-anim {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(72, 187, 120, 0.7);
+            }
 
-            0%,
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 10px rgba(72, 187, 120, 0);
+            }
+
             100% {
-                opacity: 1;
-            }
-
-            50% {
-                opacity: 0.3;
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(72, 187, 120, 0);
             }
         }
 
-        /* Cards */
-        .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 28px;
-            margin-bottom: 24px;
-            transition: border-color 0.3s;
-        }
-
-        .card:hover {
-            border-color: rgba(99, 102, 241, 0.2);
-        }
-
-        .card h2 {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--text-primary);
-        }
-
-        .card h2 .icon {
-            width: 30px;
-            height: 30px;
-            background: var(--accent-glow);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-        }
-
-        /* Info grid */
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
-        }
-
-        .info-item {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-        }
-
-        .info-item .label {
-            font-size: 11px;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-        }
-
-        .info-item .value {
-            font-size: 15px;
-            font-weight: 500;
-            color: var(--text-primary);
-            word-break: break-all;
-        }
-
-        .info-item .value.mono {
-            font-family: 'Courier New', monospace;
-            font-size: 14px;
-            background: var(--bg-input);
-            padding: 6px 10px;
-            border-radius: 6px;
-            border: 1px solid var(--border);
-        }
-
-        .info-item .value a {
-            color: var(--accent-hover);
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        .info-item .value a:hover {
-            color: var(--accent);
-            text-decoration: underline;
-        }
-
-        /* Action buttons row */
+        /* ACTION BUTTONS */
         .actions-row {
             display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 10px 22px;
-            border: none;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 600;
-            font-family: 'Inter', sans-serif;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: #fff;
-            box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 24px rgba(102, 126, 234, 0.4);
-        }
-
-        .btn-danger {
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: var(--error);
-        }
-
-        .btn-danger:hover {
-            background: rgba(239, 68, 68, 0.2);
-        }
-
-        .btn-secondary {
-            background: rgba(99, 102, 241, 0.1);
-            border: 1px solid rgba(99, 102, 241, 0.3);
-            color: var(--accent-hover);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(99, 102, 241, 0.2);
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        /* Scan summary */
-        .scan-summary {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
             gap: 16px;
-            margin-bottom: 24px;
         }
 
-        .scan-stat {
-            background: var(--bg-input);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 16px;
-            text-align: center;
+        /* TABS NAVIGATION */
+        .tabs-container {
+            position: relative;
+            margin-bottom: 32px;
         }
 
-        .scan-stat .number {
-            font-size: 28px;
-            font-weight: 700;
-            line-height: 1;
-            margin-bottom: 4px;
-        }
-
-        .scan-stat .stat-label {
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            color: var(--text-muted);
-        }
-
-        .scan-stat.critical .number {
-            color: #ef4444;
-        }
-
-        .scan-stat.medium .number {
-            color: #eab308;
-        }
-
-        .scan-stat.low .number {
-            color: #3b82f6;
-        }
-
-        .scan-stat.info .number {
-            color: #6b7280;
-        }
-
-        .scan-stat.total .number {
-            color: var(--accent-hover);
-        }
-
-        .scan-stat.duration .number {
-            color: var(--success);
-            font-size: 22px;
-        }
-
-        /* Status badge */
-        .scan-status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 4px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .scan-status-badge.completed {
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--success);
-        }
-
-        .scan-status-badge.running {
-            background: rgba(59, 130, 246, 0.15);
-            color: #3b82f6;
-        }
-
-        .scan-status-badge.failed {
-            background: rgba(239, 68, 68, 0.15);
-            color: var(--error);
-        }
-
-        .scan-status-badge.not_scanned {
-            background: rgba(100, 116, 139, 0.15);
-            color: var(--text-muted);
-        }
-
-        /* Vulnerability list */
-        .vuln-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        .vuln-item {
-            background: var(--bg-input);
-            border-left: 4px solid;
-            padding: 16px 20px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            transition: background 0.15s;
-        }
-
-        .vuln-item:hover {
-            background: rgba(13, 19, 33, 0.8);
-        }
-
-        .vuln-item.critical {
-            border-color: #ef4444;
-        }
-
-        .vuln-item.high {
-            border-color: #f59e0b;
-        }
-
-        .vuln-item.medium {
-            border-color: #eab308;
-        }
-
-        .vuln-item.low {
-            border-color: #3b82f6;
-        }
-
-        .vuln-item.info {
-            border-color: #6b7280;
-        }
-
-        .vuln-header {
+        .tabs-nav {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 6px;
+            gap: 8px;
+            background: var(--tab-nav-bg);
+            padding: 6px;
+            border-radius: 16px;
+            backdrop-filter: blur(8px);
+            border: 1px solid var(--card-border);
+            width: fit-content;
+            box-shadow: var(--shadow-sm);
         }
 
-        .vuln-id {
-            font-weight: 600;
-            color: var(--accent);
-            font-size: 13px;
-        }
-
-        .vuln-badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 10px;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .vuln-badge.critical {
-            background: #ef4444;
-            color: white;
-        }
-
-        .vuln-badge.high {
-            background: #f59e0b;
-            color: white;
-        }
-
-        .vuln-badge.medium {
-            background: #eab308;
-            color: #000;
-        }
-
-        .vuln-badge.low {
-            background: #3b82f6;
-            color: white;
-        }
-
-        .vuln-badge.info {
-            background: #6b7280;
-            color: white;
-        }
-
-        .vuln-description {
+        .tab-btn {
+            padding: 10px 24px;
             color: var(--text-secondary);
+            font-weight: 600;
             font-size: 14px;
-            line-height: 1.6;
+            cursor: pointer;
+            border-radius: 12px;
+            border: none;
+            background: transparent;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .vuln-url {
-            margin-top: 6px;
-            font-size: 12px;
-            color: var(--text-muted);
-            font-family: monospace;
+        .tab-btn:hover {
+            color: var(--text-primary);
+            background: var(--tab-btn-hover-bg);
         }
 
-        /* Empty / loading states */
-        .empty-state {
-            text-align: center;
-            padding: 48px 24px;
-            color: var(--text-muted);
+        /* Active Tab States */
+        .tab-btn.active {
+            background: var(--tab-btn-active-bg);
+            color: var(--text-primary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            font-weight: 700;
         }
 
-        .empty-state .empty-icon {
-            font-size: 48px;
-            margin-bottom: 12px;
-            opacity: 0.4;
+        /* Colored Active States */
+        .tab-btn[data-tab="api"].active {
+            background: #FFF9DB;
+            color: #744210;
         }
 
-        .empty-state p {
-            font-size: 15px;
+        .tab-btn[data-tab="security"].active {
+            background: #FFF5F5;
+            color: #742A2A;
         }
 
-        .spinner {
-            border: 4px solid rgba(99, 102, 241, 0.1);
-            border-top: 4px solid var(--accent);
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 16px;
+        .tab-btn[data-tab="settings"].active {
+            background: #FFEDDF;
+            color: #7B341E;
         }
 
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
+        /* Dark Mode Active Colors */
+        [data-theme="dark"] .tab-btn[data-tab="api"].active {
+            background: rgba(255, 249, 219, 0.1);
+            color: #FFF9DB;
         }
 
-        @keyframes fadeIn {
+        [data-theme="dark"] .tab-btn[data-tab="security"].active {
+            background: rgba(255, 245, 245, 0.1);
+            color: #FFF5F5;
+        }
+
+        [data-theme="dark"] .tab-btn[data-tab="settings"].active {
+            background: rgba(255, 237, 223, 0.1);
+            color: #FFEDDF;
+        }
+
+        .tab-content {
+            display: none;
+            animation: cubic-bezier(0.16, 1, 0.3, 1) 0.5s slideFade;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes slideFade {
             from {
                 opacity: 0;
-                transform: translateY(12px);
+                transform: translateY(10px);
             }
 
             to {
@@ -532,244 +428,504 @@
             }
         }
 
-        .fade-in {
-            animation: fadeIn 0.4s ease;
+        /* CARDS */
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: var(--radius-xl);
+            padding: 40px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+            transition: transform 0.3s;
         }
 
-        /* Responsive */
-        @media (max-width: 640px) {
-            .page-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .info-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .scan-summary {
-                grid-template-columns: 1fr 1fr;
-            }
+        /* Special Colored Cards */
+        .card.api-theme {
+            background: linear-gradient(135deg, #FFFFF0 0%, #FEFCBF 100%);
+            border: 1px solid #FAF089;
         }
 
-        footer {
-            text-align: center;
-            margin-top: 48px;
-            color: var(--text-muted);
-            font-size: 13px;
+        .card.security-theme {
+            background: linear-gradient(135deg, #FFF5F5 0%, #FED7D7 100%);
+            border: 1px solid #FEB2B2;
         }
 
-        /* Swagger UI customization */
-        #swagger-ui {
-            background: #ffffff;
+        .card.settings-theme {
+            background: linear-gradient(135deg, #FFFBF0 0%, #FFF5EB 100%);
+            border: 1px solid #FFE8CC;
+        }
+
+        /* Dark Mode Special Cards */
+        [data-theme="dark"] .card.api-theme {
+            background: linear-gradient(135deg, rgba(30, 30, 20, 0.8) 0%, rgba(40, 40, 20, 0.8) 100%);
+            border-color: rgba(250, 240, 137, 0.1);
+        }
+
+        [data-theme="dark"] .card.security-theme {
+            background: linear-gradient(135deg, rgba(40, 20, 20, 0.8) 0%, rgba(50, 20, 20, 0.8) 100%);
+            border-color: rgba(254, 178, 178, 0.1);
+        }
+
+        [data-theme="dark"] .card.settings-theme {
+            background: linear-gradient(135deg, rgba(40, 30, 20, 0.8) 0%, rgba(50, 30, 20, 0.8) 100%);
+            border-color: rgba(255, 232, 204, 0.1);
+        }
+
+        .card h2 {
+            font-size: 20px;
+            font-weight: 800;
+            margin-bottom: 32px;
+            color: var(--text-primary);
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        /* BUTTONS */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 12px 24px;
+            border: none;
             border-radius: 12px;
-            padding: 24px;
-            margin-top: 16px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
         }
 
-        .swagger-ui {
-            color: #3b4151 !important;
+        .btn-primary {
+            background: linear-gradient(135deg, var(--color-pink), #ED64A6);
+            color: white;
+            box-shadow: 0 10px 20px -5px rgba(245, 119, 153, 0.4);
         }
 
-        .swagger-ui .info .title,
-        .swagger-ui .info h1,
-        .swagger-ui .info h2,
-        .swagger-ui .info h3,
-        .swagger-ui .info h4,
-        .swagger-ui .info h5 {
-            color: #3b4151 !important;
-            font-family: 'Inter', sans-serif !important;
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 25px -5px rgba(245, 119, 153, 0.5);
         }
 
-        .swagger-ui .scheme-container {
-            background: transparent !important;
-            box-shadow: none !important;
-            padding: 0 !important;
-            margin: 0 0 20px 0 !important;
+        .btn-danger {
+            background: white;
+            color: #C53030;
+            border: 1px solid #FC8181;
+            box-shadow: var(--shadow-sm);
         }
 
-        /* Fix code block colors in Swagger */
-        .swagger-ui .opblock-body pre.microlight {
-            background: #1e293b !important;
+        .btn-danger:hover {
+            background: #FFF5F5;
+            transform: translateY(-1px);
+        }
+
+        [data-theme="dark"] .btn-danger {
+            background: #2D3748;
+            color: #FC8181;
+            border-color: #C53030;
+        }
+
+        /* INFO GRID (Overview) */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 24px;
+        }
+
+        .info-item {
+            background: var(--info-item-bg);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid var(--info-item-border);
+        }
+
+        .info-item .label {
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .info-item .value {
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--text-primary);
+            word-break: break-all;
+        }
+
+        .code-pill {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(0, 0, 0, 0.05);
+            padding: 4px 8px;
             border-radius: 6px;
+            font-size: 14px;
+            color: var(--text-primary);
+        }
+
+        [data-theme="dark"] .code-pill {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        /* SWAGGER UI OVERRIDES */
+        .swagger-ui .opblock {
+            box-shadow: none !important;
+            border-radius: 12px !important;
+            border: 1px solid rgba(0, 0, 0, 0.05) !important;
+            margin-bottom: 16px !important;
+        }
+
+        .swagger-ui .opblock-summary {
+            border-radius: 12px !important;
+            padding: 12px !important;
+        }
+
+        .swagger-ui .btn {
+            padding: 8px 16px !important;
+            border-radius: 8px !important;
+            box-shadow: none !important;
+        }
+
+        .swagger-ui input,
+        .swagger-ui select {
+            border-radius: 8px !important;
+            border: 1px solid #E2E8F0 !important;
+        }
+
+        /* Dark Mode Swagger Inversion (Simple fix) */
+        [data-theme="dark"] .swagger-ui {
+            filter: hue-rotate(180deg) invert(1);
+        }
+
+        [data-theme="dark"] .swagger-ui img {
+            filter: hue-rotate(180deg) invert(1);
+        }
+
+        /* FORMS */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 700;
+            font-size: 13px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 12px;
+            border: 2px solid var(--input-border);
+            background: var(--input-bg);
+            color: var(--text-primary);
+            font-size: 15px;
+            font-family: inherit;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+        }
+
+        .form-hint {
+            font-size: 13px;
+            opacity: 0.7;
+            margin-top: 8px;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        /* LOADING SPINNER */
+        .spinner {
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-top: 3px solid currentColor;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            animation: spin 0.8s linear infinite;
+            display: inline-block;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
         }
     </style>
 </head>
 
 <body>
     <div class="container">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode" title="Toggle Dark Mode">
+            ☀️
+        </button>
+
         <!-- Back link -->
         <a href="index.html" class="back-link">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M19 12H5M12 19l-7-7 7-7" />
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M19 12H5" />
+                <path d="M12 19l-7-7 7-7" />
             </svg>
-            Back to Dashboard
+            Dashboard
         </a>
 
-        <!-- Loading state (shown initially) -->
-        <div id="loadingState">
-            <div style="text-align: center; padding: 80px 0;">
-                <div class="spinner"></div>
-                <p style="color: var(--text-secondary);">Loading service details...</p>
+        <!-- Loading state -->
+        <div id="loadingState" style="text-align: center; padding: 120px;">
+            <div class="spinner" style="color: var(--accent); width:50px; height:50px; border-width:5px;"></div>
+            <div style="margin-top:20px; color: var(--text-secondary); font-weight:500;">Retrieving service details...
             </div>
         </div>
 
-        <!-- Error state (hidden initially) -->
-        <div id="errorState" style="display: none;">
-            <div class="empty-state">
-                <div class="empty-icon">⚠️</div>
-                <p>Service not found</p>
-                <a href="index.html" class="btn btn-secondary" style="margin-top: 16px;">Return to Dashboard</a>
-            </div>
-        </div>
-
-        <!-- Main content (hidden until loaded) -->
-        <div id="mainContent" style="display: none;" class="fade-in">
+        <!-- Main content -->
+        <div id="mainContent" style="display: none;">
 
             <!-- Page header -->
             <div class="page-header">
                 <div class="page-header-left">
                     <div class="service-icon">🐳</div>
                     <div>
-                        <h1 id="serviceName">—</h1>
-                        <div style="margin-top: 4px;">
-                            <span class="status-pill deployed" id="statusPill">
+                        <h1 id="serviceName">Loading...</h1>
+                        <div style="margin-top: 8px;">
+                            <span class="status-pill">
                                 <span class="pulse"></span>
-                                <span id="statusText">deployed</span>
+                                <span id="statusText">Active</span>
                             </span>
                         </div>
                     </div>
                 </div>
                 <div class="actions-row">
-                    <button class="btn btn-primary" id="scanBtn" onclick="triggerScan()">🔍 Run Scan</button>
-                    <a class="btn btn-secondary" id="visitBtn" href="#" target="_blank">↗ Visit Service</a>
-                    <button class="btn btn-danger" id="deleteBtn" onclick="deleteService()">🗑 Delete</button>
+                    <a class="btn btn-primary" id="visitBtn" href="#" target="_blank">
+                        <span>Visit Service</span>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                            stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                            <polyline points="15 3 21 3 21 9" />
+                            <line x1="10" y1="14" x2="21" y2="3" />
+                        </svg>
+                    </a>
+                    <button class="btn btn-danger" onclick="deleteService()">Delete</button>
                 </div>
             </div>
 
-            <!-- Deployment Info -->
-            <div class="card">
-                <h2><span class="icon">📦</span> Deployment Info</h2>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <span class="label">Docker Image</span>
-                        <span class="value mono" id="dockerImage">—</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">Container Port</span>
-                        <span class="value" id="containerPort">—</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">Public URL</span>
-                        <span class="value" id="publicUrl">—</span>
-                    </div>
-                    <div class="info-item">
-                        <span class="label">Status</span>
-                        <span class="value" id="deploymentStatus">—</span>
-                    </div>
+            <!-- Tabs Navigation -->
+            <div class="tabs-container">
+                <div class="tabs-nav">
+                    <button class="tab-btn active" data-tab="overview" onclick="switchTab('overview')">
+                        <span>📦</span> Overview
+                    </button>
+                    <button class="tab-btn" data-tab="api" onclick="switchTab('api')">
+                        <span>🔌</span> API Docs
+                    </button>
+                    <button class="tab-btn" data-tab="security" onclick="switchTab('security')">
+                        <span>🛡️</span> Security
+                    </button>
+                    <button class="tab-btn" data-tab="settings" onclick="switchTab('settings')">
+                        <span>⚙️</span> Settings
+                    </button>
                 </div>
             </div>
 
-            <!-- API Documentation (hidden if not found) -->
-            <div class="card" id="apiCard" style="display: none;">
-                <h2><span class="icon">🔌</span> API Documentation</h2>
-                <div id="apiLoading" style="padding: 24px; text-align: center; color: var(--text-secondary);">
-                    Detecting APIs...
-                </div>
-                <div id="swagger-ui"></div>
-            </div>
-
-            <!-- Scan Results -->
-            <div class="card">
-                <h2>
-                    <span class="icon">🛡️</span> Vulnerability Scan
-                    <span class="scan-status-badge not_scanned" id="scanStatusBadge">Not Scanned</span>
-                </h2>
-
-                <!-- Scan stats (hidden until scan exists) -->
-                <div id="scanStats" style="display: none;">
-                    <div class="scan-summary">
-                        <div class="scan-stat total">
-                            <div class="number" id="totalFindings">0</div>
-                            <div class="stat-label">Total</div>
-                        </div>
-                        <div class="scan-stat critical">
-                            <div class="number" id="criticalCount">0</div>
-                            <div class="stat-label">Critical</div>
-                        </div>
-                        <div class="scan-stat medium">
-                            <div class="number" id="mediumCount">0</div>
-                            <div class="stat-label">Medium</div>
-                        </div>
-                        <div class="scan-stat low">
-                            <div class="number" id="lowCount">0</div>
-                            <div class="stat-label">Low</div>
-                        </div>
-                        <div class="scan-stat info">
-                            <div class="number" id="infoCount">0</div>
-                            <div class="stat-label">Info</div>
-                        </div>
-                        <div class="scan-stat duration">
-                            <div class="number" id="scanDuration">—</div>
-                            <div class="stat-label">Duration</div>
-                        </div>
-                    </div>
-
-                    <div class="info-grid" style="margin-bottom: 24px;">
+            <!-- TAB 1: OVERVIEW -->
+            <div id="tab-overview" class="tab-content active">
+                <div class="card">
+                    <h2>Deployment Specifications</h2>
+                    <div class="info-grid">
                         <div class="info-item">
-                            <span class="label">Scanned At</span>
-                            <span class="value" id="scanTime">—</span>
+                            <span class="label">Docker Image</span>
+                            <span class="value code-pill" id="dockerImage">—</span>
                         </div>
                         <div class="info-item">
-                            <span class="label">Scan ID</span>
-                            <span class="value mono" id="scanId" style="font-size: 12px;">—</span>
+                            <span class="label">Internal Port</span>
+                            <span class="value" id="containerPort">—</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="label">Replicas</span>
+                            <span class="value">1 / 1</span>
+                        </div>
+                        <div class="info-item" style="grid-column: span 2;">
+                            <span class="label">Public Access Point</span>
+                            <span class="value" id="publicUrl"
+                                style="color:var(--accent); text-decoration:underline;">—</span>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <!-- Vulnerability list container -->
-                <div id="vulnContainer">
-                    <div class="empty-state" id="noScanState">
-                        <div class="empty-icon">🔍</div>
-                        <p>No scan has been run yet</p>
-                        <button class="btn btn-primary" style="margin-top: 16px;" onclick="triggerScan()">Run First
-                            Scan</button>
+            <!-- TAB 2: API DOCS (Yellow Theme) -->
+            <div id="tab-api" class="tab-content">
+                <div class="card api-theme">
+                    <h2>API Documentation & Testing</h2>
+                    <div id="apiLoading" style="text-align: center; opacity: 0.6; padding: 40px;">
+                        <div class="spinner" style="margin-bottom:12px; color:#744210;"></div>
+                        <div>Auto-discovering OpenAPI specs...</div>
                     </div>
+                    <div id="swagger-ui"></div>
                 </div>
+            </div>
 
-                <!-- Scanning progress (hidden) -->
-                <div id="scanProgress" style="display: none;">
-                    <div style="text-align: center; padding: 48px;">
-                        <div class="spinner"></div>
-                        <h3 style="color: var(--accent); margin-bottom: 8px;">Scanning...</h3>
-                        <p style="color: var(--text-secondary); font-size: 14px;">Running Nikto vulnerability scan. This
-                            may take 1-2 minutes.</p>
+            <!-- TAB 3: SECURITY (Red Theme) -->
+            <div id="tab-security" class="tab-content">
+                <div class="card security-theme">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 2px solid rgba(0,0,0,0.05); padding-bottom: 20px;">
+                        <div>
+                            <h2 style="margin: 0; padding: 0;">Vulnerability Scanner</h2>
+                            <p style="margin-top:4px; font-size:14px; opacity:0.7;">Powered by Nikto</p>
+                        </div>
+                        <button class="btn"
+                            style="background: white; color: #742A2A; box-shadow: 0 4px 6px rgba(0,0,0,0.05);"
+                            onclick="triggerScan()">
+                            🔄 Start New Scan
+                        </button>
+                    </div>
+
+                    <div id="scanStatus"
+                        style="background: rgba(255,255,255,0.7); padding: 24px; border-radius: 16px; margin-bottom: 24px; display:flex; align-items:center; gap:16px;">
+                        <div style="flex:1;">
+                            <div
+                                style="font-size: 11px; text-transform: uppercase; font-weight: 800; color: #742A2A; margin-bottom: 4px; letter-spacing:1px;">
+                                Scan Status</div>
+                            <div id="scanBadge"
+                                style="font-weight: 800; text-transform: uppercase; font-size: 18px; color: #2D3748;">
+                                READY</div>
+                        </div>
+                    </div>
+
+                    <div id="vulnList">
+                        <div
+                            style="padding: 30px; background: white; border-radius: 12px; text-align:center; color: #742A2A; opacity: 0.8;">
+                            No recent findings. Run a scan to check for vulnerabilities.
+                        </div>
                     </div>
                 </div>
             </div>
+
+            <!-- TAB 4: SETTINGS (Orange Theme) -->
+            <div id="tab-settings" class="tab-content">
+                <div class="card settings-theme">
+                    <h2>Rate Limiting Configuration</h2>
+                    <p
+                        style="opacity: 0.8; margin-bottom: 32px; color: #7B341E; font-size: 15px; max-width:600px; line-height:1.6;">
+                        Control traffic flow to your service. Limits are enforced per unique client IP address
+                        maintained in a Redis store.
+                    </p>
+
+                    <div style="max-width: 500px;">
+                        <div class="form-group">
+                            <label class="form-label">Status</label>
+                            <div style="position:relative;">
+                                <select id="rlEnabled" class="form-input" style="appearance:none; font-weight:600;">
+                                    <option value="true">Enabled</option>
+                                    <option value="false">Disabled</option>
+                                </select>
+                                <div
+                                    style="position:absolute; right:16px; top:16px; pointer-events:none; font-size:12px;">
+                                    ▼</div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Max Requests</label>
+                            <input type="number" id="rlLimit" class="form-input" value="100">
+                            <div class="form-hint">ℹ️ Number of requests allowed before 429</div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Time Window (seconds)</label>
+                            <input type="number" id="rlWindow" class="form-input" value="60">
+                            <div class="form-hint">ℹ️ Reset period for the counter</div>
+                        </div>
+
+                        <button class="btn btn-primary"
+                            style="background: #DD6B20; box-shadow: 0 10px 20px -5px rgba(221, 107, 32, 0.4); margin-top:10px;"
+                            onclick="saveRateLimit()">
+                            💾 Save Changes
+                        </button>
+                        <span id="rlSaveStatus" style="margin-left: 16px; font-weight: 700; color: #7B341E;"></span>
+                    </div>
+                </div>
+            </div>
+
         </div>
-
-        <footer>
-            Secure Microservice Deployer &bull; All traffic routed through API Gateway
-        </footer>
     </div>
 
+    <!-- Scripts -->
     <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-bundle.js"></script>
-    <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-standalone-preset.js"></script>
     <script>
         const API_BASE = '/api';
         const params = new URLSearchParams(window.location.search);
         const SERVICE_NAME = params.get('name');
+        let currentServiceInfo = null;
 
-        if (!SERVICE_NAME) {
-            document.getElementById('loadingState').style.display = 'none';
-            document.getElementById('errorState').style.display = 'block';
-        } else {
+        // --- Dark Mode Logic ---
+        const toggleBtn = document.getElementById('themeToggle');
+        const root = document.documentElement;
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+                root.setAttribute('data-theme', 'dark');
+                toggleBtn.textContent = '🌙';
+            } else {
+                root.setAttribute('data-theme', 'light');
+                toggleBtn.textContent = '☀️';
+            }
+        }
+
+        toggleBtn.addEventListener('click', () => {
+            const currentTheme = root.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+            root.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            toggleBtn.textContent = newTheme === 'dark' ? '🌙' : '☀️';
+
+            toggleBtn.animate([
+                { transform: 'rotate(0deg) scale(1)' },
+                { transform: 'rotate(360deg) scale(1.2)' },
+                { transform: 'rotate(0deg) scale(1)' }
+            ], { duration: 500 });
+        });
+
+        initTheme();
+        // -----------------------
+
+        // Init
+        if (SERVICE_NAME) {
             loadServiceDetails();
         }
 
-        // ── Load service info ─────────────────────────────
+        // Tab Switching
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector(`.tab-btn[data-tab="${tabId}"]`).classList.add('active');
+
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+
+            if (tabId === 'settings') loadRateLimit();
+            if (tabId === 'security') fetchScanResults();
+        }
+
         async function loadServiceDetails() {
             try {
                 const resp = await fetch(`${API_BASE}/services`);
@@ -777,223 +933,155 @@
                 const service = services.find(s => s.service_name === SERVICE_NAME);
 
                 if (!service) {
-                    document.getElementById('loadingState').style.display = 'none';
-                    document.getElementById('errorState').style.display = 'block';
+                    alert('Service not found');
+                    window.location.href = 'index.html';
                     return;
                 }
+                currentServiceInfo = service;
 
-                // Populate header
                 document.getElementById('serviceName').textContent = service.service_name;
                 document.getElementById('statusText').textContent = service.status;
-                document.title = `${service.service_name} — Secure Microservice Deployer`;
-
-                // Populate deployment info
                 document.getElementById('dockerImage').textContent = service.docker_image;
                 document.getElementById('containerPort').textContent = service.container_port;
-                document.getElementById('deploymentStatus').innerHTML =
-                    `<span style="color: var(--success)">✓ ${service.status}</span>`;
 
-                const publicUrlEl = document.getElementById('publicUrl');
-                publicUrlEl.innerHTML = `<a href="${service.public_url}" target="_blank">${service.public_url}</a>`;
+                // Update Link
+                const linkContainer = document.getElementById('publicUrl');
+                linkContainer.textContent = service.public_url;
+                linkContainer.parentNode.onclick = () => window.open(service.public_url, '_blank');
+                linkContainer.parentNode.style.cursor = 'pointer';
 
-                const visitBtn = document.getElementById('visitBtn');
-                visitBtn.href = service.public_url;
+                document.getElementById('visitBtn').href = service.public_url;
 
-                // Show main content
                 document.getElementById('loadingState').style.display = 'none';
                 document.getElementById('mainContent').style.display = 'block';
 
-                // Load scan results
-                loadScanResults();
-
-                // Load API docs
-                loadApiDocs();
-
-            } catch (err) {
-                console.error('Failed to load service:', err);
-                document.getElementById('loadingState').style.display = 'none';
-                document.getElementById('errorState').style.display = 'block';
+                loadSwagger();
+                fetchScanResults();
+            } catch (e) {
+                console.error(e);
             }
         }
 
-        // ── Load scan results ─────────────────────────────
-        async function loadScanResults() {
+        // Swagger
+        async function loadSwagger() {
             try {
-                const resp = await fetch(`${API_BASE}/services/${SERVICE_NAME}/scan`);
-                if (!resp.ok) return;
-
-                const scan = await resp.json();
-
-                if (scan.scan_status === 'not_scanned') return;
-
-                // Update scan status badge
-                const badge = document.getElementById('scanStatusBadge');
-                badge.className = `scan-status-badge ${scan.scan_status}`;
-                badge.textContent = scan.scan_status;
-
-                // Update scan button
-                const scanBtn = document.getElementById('scanBtn');
-                if (scan.scan_status === 'running') {
-                    scanBtn.textContent = '⏳ Scanning...';
-                    scanBtn.disabled = true;
-                    // Poll for updates
-                    setTimeout(() => loadScanResults(), 5000);
-                    document.getElementById('scanProgress').style.display = 'block';
-                    document.getElementById('noScanState').style.display = 'none';
-                    return;
-                } else {
-                    scanBtn.textContent = '🔍 Re-scan';
-                    scanBtn.disabled = false;
-                }
-
-                // Show scan stats
-                document.getElementById('scanStats').style.display = 'block';
-                document.getElementById('scanProgress').style.display = 'none';
-
-                // Count severities
-                const vulns = scan.vulnerabilities || [];
-                const counts = { critical: 0, high: 0, medium: 0, low: 0, info: 0 };
-                vulns.forEach(v => { counts[v.severity] = (counts[v.severity] || 0) + 1; });
-
-                document.getElementById('totalFindings').textContent = scan.total_findings || vulns.length;
-                document.getElementById('criticalCount').textContent = counts.critical;
-                document.getElementById('mediumCount').textContent = counts.medium;
-                document.getElementById('lowCount').textContent = counts.low;
-                document.getElementById('infoCount').textContent = counts.info;
-                document.getElementById('scanDuration').textContent =
-                    scan.scan_duration ? scan.scan_duration.toFixed(1) + 's' : '—';
-
-                if (scan.started_at) {
-                    document.getElementById('scanTime').textContent = new Date(scan.started_at).toLocaleString();
-                }
-                if (scan.scan_id) {
-                    document.getElementById('scanId').textContent = scan.scan_id;
-                }
-
-                // Render vulnerability list
-                const container = document.getElementById('vulnContainer');
-
-                if (vulns.length === 0) {
-                    container.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-icon">✅</div>
-                            <p style="color: var(--success); font-weight: 600;">No vulnerabilities found!</p>
-                            <p style="color: var(--text-muted); margin-top: 8px; font-size: 13px;">This service passed the scan with no issues detected.</p>
-                        </div>
-                    `;
-                } else {
-                    let html = '<ul class="vuln-list">';
-                    vulns.forEach(v => {
-                        html += `
-                            <li class="vuln-item ${v.severity}">
-                                <div class="vuln-header">
-                                    <span class="vuln-id">${v.id}</span>
-                                    <span class="vuln-badge ${v.severity}">${v.severity.toUpperCase()}</span>
-                                </div>
-                                <div class="vuln-description">${v.description}</div>
-                                ${v.url ? `<div class="vuln-url">URL: ${v.url}</div>` : ''}
-                            </li>
-                        `;
-                    });
-                    html += '</ul>';
-                    container.innerHTML = html;
-                }
-
-            } catch (err) {
-                console.error('Failed to load scan:', err);
-            }
-        }
-
-        // ── Load API docs ─────────────────────────────────
-        async function loadApiDocs() {
-            const apiCard = document.getElementById('apiCard');
-            const apiLoading = document.getElementById('apiLoading');
-
-            try {
-                // Show card wrapper but keep it hidden until we know we have docs?
-                // Or show "Detecting..."
-                apiCard.style.display = 'block';
-
                 const resp = await fetch(`${API_BASE}/services/${SERVICE_NAME}/apis`);
                 const data = await resp.json();
 
-                if (data.status === 'found' && data.public_url) {
-                    apiLoading.style.display = 'none';
-
-                    // Gateway URL (hardcoded for demo logic)
-                    // In real app, we might get this from config
-                    const GATEWAY_BASE = window.location.protocol + '//' + window.location.hostname + ':30080';
-                    const specUrl = GATEWAY_BASE + data.public_url;
-
-                    console.log('Rendering Swagger UI for:', specUrl);
-
-                    // Initialize Swagger UI
+                if (data.spec) {
+                    document.getElementById('apiLoading').style.display = 'none';
                     SwaggerUIBundle({
-                        url: specUrl,
+                        spec: JSON.parse(data.spec),
                         dom_id: '#swagger-ui',
-                        presets: [
-                            SwaggerUIBundle.presets.apis,
-                            SwaggerUIBundle.SwaggerUIStandalonePreset
-                        ],
-                        layout: "BaseLayout",
-                        deepLinking: true
                     });
                 } else {
-                    apiCard.style.display = 'none';
+                    document.getElementById('apiLoading').innerHTML = "<div style='opacity:0.6; font-style:italic;'>No OpenAPI spec detected for this service.</div>";
                 }
-            } catch (err) {
-                console.error('Failed to load API docs:', err);
-                apiCard.style.display = 'none';
+            } catch (e) {
+                document.getElementById('apiLoading').textContent = "Failed to load API docs.";
             }
         }
 
-        // ── Trigger scan ──────────────────────────────────
-        async function triggerScan() {
-            const scanBtn = document.getElementById('scanBtn');
-            scanBtn.disabled = true;
-            scanBtn.textContent = '⏳ Scanning...';
+        // Rate Limiting
+        async function loadRateLimit() {
+            try {
+                const resp = await fetch(`${API_BASE}/services/${SERVICE_NAME}/ratelimit`);
+                const config = await resp.json();
 
-            document.getElementById('scanProgress').style.display = 'block';
-            document.getElementById('noScanState').style.display = 'none';
+                document.getElementById('rlEnabled').value = config.enabled.toString();
+                document.getElementById('rlLimit').value = config.limit;
+                document.getElementById('rlWindow').value = config.window;
+            } catch (e) {
+                console.error('Failed to load rate limit config', e);
+            }
+        }
+
+        async function saveRateLimit() {
+            const config = {
+                enabled: document.getElementById('rlEnabled').value === 'true',
+                limit: parseInt(document.getElementById('rlLimit').value),
+                window: parseInt(document.getElementById('rlWindow').value)
+            };
+
+            const statusEl = document.getElementById('rlSaveStatus');
+            statusEl.textContent = 'Saving...';
+            statusEl.style.opacity = '1';
 
             try {
-                const resp = await fetch(`${API_BASE}/services/${SERVICE_NAME}/scan`, {
-                    method: 'POST'
+                await fetch(`${API_BASE}/services/${SERVICE_NAME}/ratelimit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(config)
                 });
-
-                if (resp.ok) {
-                    // Results came back immediately (sync scan)
-                    await loadScanResults();
-                } else {
-                    const err = await resp.json();
-                    alert(`Scan failed: ${err.detail}`);
-                    scanBtn.disabled = false;
-                    scanBtn.textContent = '🔍 Run Scan';
-                    document.getElementById('scanProgress').style.display = 'none';
-                }
-            } catch (err) {
-                alert(`Scan error: ${err.message}`);
-                scanBtn.disabled = false;
-                scanBtn.textContent = '🔍 Run Scan';
-                document.getElementById('scanProgress').style.display = 'none';
+                statusEl.textContent = '✓ Saved Successfully';
+                setTimeout(() => statusEl.style.opacity = '0', 2000);
+            } catch (e) {
+                statusEl.textContent = '❌ Error saving';
             }
         }
 
-        // ── Delete service ────────────────────────────────
-        async function deleteService() {
-            if (!confirm(`Are you sure you want to delete "${SERVICE_NAME}"? This cannot be undone.`)) return;
+        // Scan Utils
+        async function triggerScan() {
+            if (!confirm('Start a new vulnerability scan? This may take a few minutes.')) return;
+
+            switchTab('security');
+            document.getElementById('scanBadge').textContent = 'STARTING...';
 
             try {
-                const resp = await fetch(`${API_BASE}/services/${SERVICE_NAME}`, { method: 'DELETE' });
-                if (resp.ok) {
-                    window.location.href = 'index.html';
-                } else {
-                    const err = await resp.json();
-                    alert(`Delete failed: ${err.detail}`);
-                }
-            } catch (err) {
-                alert(`Delete error: ${err.message}`);
+                await fetch(`${API_BASE}/services/${SERVICE_NAME}/scan`, { method: 'POST' });
+                pollScan();
+            } catch (e) {
+                alert('Failed to start scan');
             }
+        }
+
+        async function fetchScanResults() {
+            try {
+                const resp = await fetch(`${API_BASE}/services/${SERVICE_NAME}/scan`);
+                const result = await resp.json();
+                renderScanResults(result);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function pollScan() {
+            const interval = setInterval(async () => {
+                const resp = await fetch(`${API_BASE}/services/${SERVICE_NAME}/scan`);
+                const result = await resp.json();
+                renderScanResults(result);
+                if (result.scan_status !== 'running') clearInterval(interval);
+            }, 3000);
+        }
+
+        function renderScanResults(result) {
+            const badge = document.getElementById('scanBadge');
+            badge.textContent = result.scan_status;
+
+            if (result.scan_status === 'running') {
+                badge.style.color = '#DD6B20';
+                badge.innerHTML += ' <span class="spinner" style="width:16px; height:16px; border-width:2px; color:inherit; vertical-align:middle;"></span>';
+            } else {
+                badge.style.color = 'var(--text-primary)';
+            }
+
+            const list = document.getElementById('vulnList');
+            if (result.vulnerabilities && result.vulnerabilities.length > 0) {
+                list.innerHTML = result.vulnerabilities.map(v => `
+                    <div style="background: var(--vuln-item-bg); padding: 20px; margin-bottom: 16px; border-radius: 12px; border-left: 5px solid #ef4444; box-shadow: 0 4px 6px var(--vuln-item-shadow);">
+                        <div style="font-weight:700; color:#C53030; margin-bottom:4px;">${v.id}</div> 
+                        <div style="color:var(--text-secondary); line-height:1.5;">${v.description}</div>
+                    </div>
+                `).join('');
+            } else if (result.scan_status === 'completed') {
+                list.innerHTML = '<div style="padding: 30px; background: var(--vuln-item-bg); border-radius: 12px; color: #2F855A; border: 2px dashed #C6F6D5; text-align:center; font-weight:600;">✓ Clean scan. No issues found.</div>';
+            }
+        }
+
+        async function deleteService() {
+            if (!confirm(`Are you sure you want to delete ${SERVICE_NAME}? This action cannot be undone.`)) return;
+            await fetch(`${API_BASE}/services/${SERVICE_NAME}`, { method: 'DELETE' });
+            window.location.href = 'index.html';
         }
     </script>
 </body>

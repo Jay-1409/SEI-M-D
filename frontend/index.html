@@ -7,29 +7,117 @@
     <title>Secure Microservice Deployer</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
 
         :root {
-            --bg-primary: #0a0e1a;
-            --bg-secondary: #111827;
-            --bg-card: #1a2234;
-            --bg-input: #0d1321;
-            --accent: #6366f1;
-            --accent-hover: #818cf8;
-            --accent-glow: rgba(99, 102, 241, 0.15);
-            --success: #10b981;
-            --error: #ef4444;
-            --warning: #f59e0b;
-            --text-primary: #f1f5f9;
-            --text-secondary: #94a3b8;
-            --text-muted: #64748b;
-            --border: #1e293b;
-            --border-focus: #6366f1;
+            /* Classy Pastel - Light Theme (Default) */
+            --bg-primary: #FFFEF9;
+            /* Cream/Ivory */
+
+            --text-primary: #1A202C;
+            /* Very Dark Gray */
+            --text-secondary: #4A5568;
+            /* Slate */
+            --text-muted: #718096;
+
+            --border: #E2E8F0;
+            --border-focus: #F57799;
+
+            /* The Palette */
+            --color-yellow: #FFF7CD;
+            --color-orange: #FDC3A1;
+            --color-red: #FB9B8F;
+            --color-pink: #F57799;
+
+            --accent: #F57799;
+            --accent-hover: #FB9B8F;
+            --accent-glow: rgba(245, 119, 153, 0.25);
+
+            --success: #10B981;
+            --error: #E53E3E;
+
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 24px;
+
+            --theme-toggle-bg: #EDF2F7;
+            --theme-toggle-icon: #F6E05E;
+            /* Sun yellow */
+
+            --card-bg: rgba(255, 255, 255, 0.7);
+            --card-border: rgba(255, 255, 255, 0.5);
+
+            --input-bg: white;
+            --input-border: transparent;
+            --input-text: #1A202C;
+            --input-placeholder: #CBD5E0;
+
+            --dropzone-bg: white;
+            --dropzone-border: #CBD5E0;
+            --dropzone-text: #4A5568;
+            --dropzone-hover-bg: #FFF5F7;
+
+            --table-row-hover: white;
+            --table-row-shadow: var(--shadow-sm);
+        }
+
+        [data-theme="dark"] {
+            /* Midnight Classy - Dark Theme */
+            --bg-primary: #171923;
+            /* Deep Navy/Black */
+
+            --text-primary: #F7FAFC;
+            /* Off-white */
+            --text-secondary: #A0AEC0;
+            /* Light Slate */
+            --text-muted: #718096;
+
+            --border: #2D3748;
+            --border-focus: #F57799;
+            /* Keep accent same */
+
+            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+
+            --theme-toggle-bg: #2D3748;
+            --theme-toggle-icon: #FAF089;
+            /* Moon white/yellow */
+
+            /* Adjust gradients for dark mode visibility */
+            --color-yellow: rgba(255, 247, 205, 0.15);
+            --color-orange: rgba(253, 195, 161, 0.15);
+            --color-red: rgba(251, 155, 143, 0.15);
+            --color-pink: rgba(245, 119, 153, 0.15);
+
+            --card-bg: rgba(26, 32, 44, 0.7);
+            --card-border: rgba(255, 255, 255, 0.08);
+
+            --input-bg: #2D3748;
+            --input-border: transparent;
+            --input-text: #F7FAFC;
+            --input-placeholder: #718096;
+
+            --dropzone-bg: #2D3748;
+            --dropzone-border: #4A5568;
+            --dropzone-text: #A0AEC0;
+            --dropzone-hover-bg: rgba(245, 119, 153, 0.1);
+
+            --table-row-hover: rgba(45, 55, 72, 0.8);
+            --table-row-shadow: var(--shadow);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
         }
 
         body {
@@ -38,9 +126,11 @@
             color: var(--text-primary);
             min-height: 100vh;
             overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
-        /* Animated background */
+        /* Elegant Gradient Background */
         body::before {
             content: '';
             position: fixed;
@@ -49,188 +139,517 @@
             width: 100%;
             height: 100%;
             background:
-                radial-gradient(ellipse 600px 400px at 20% 20%, rgba(99, 102, 241, 0.06), transparent),
-                radial-gradient(ellipse 500px 300px at 80% 80%, rgba(16, 185, 129, 0.04), transparent);
+                radial-gradient(circle at 10% 10%, var(--color-yellow) 0%, transparent 50%),
+                /* Yellow */
+                radial-gradient(circle at 90% 10%, var(--color-orange) 0%, transparent 40%),
+                /* Orange */
+                radial-gradient(circle at 90% 90%, var(--color-red) 0%, transparent 50%),
+                /* Salmon */
+                radial-gradient(circle at 10% 90%, var(--color-pink) 0%, transparent 50%);
+            /* Pink */
+            filter: blur(40px);
             pointer-events: none;
-            z-index: 0;
+            z-index: -1;
+            transition: opacity 0.5s ease;
+        }
+
+        [data-theme="dark"] body::before {
+            opacity: 0.6;
         }
 
         .container {
             max-width: 1000px;
             margin: 0 auto;
-            padding: 40px 24px;
+            padding: 60px 24px;
             position: relative;
-            z-index: 1;
+        }
+
+        /* Theme Toggle Button */
+        .theme-toggle {
+            position: absolute;
+            top: 40px;
+            right: 24px;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--theme-toggle-bg);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: var(--shadow-sm);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 100;
+        }
+
+        .theme-toggle:hover {
+            transform: scale(1.1) rotate(15deg);
         }
 
         /* Header */
         header {
             text-align: center;
-            margin-bottom: 48px;
+            margin-bottom: 64px;
+            animation: fadeInDown 0.8s ease-out;
         }
 
-        header .logo {
+        header .logo-container {
             display: inline-flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 12px;
+            justify-content: center;
+            margin-bottom: 20px;
+            position: relative;
         }
 
         header .logo-icon {
-            width: 44px;
-            height: 44px;
-            background: linear-gradient(135deg, var(--accent), #a78bfa);
-            border-radius: 12px;
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, var(--color-pink), var(--color-orange));
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
+            font-size: 32px;
+            box-shadow: 0 12px 30px rgba(245, 119, 153, 0.4);
+            color: white;
+            z-index: 2;
+        }
+
+        header .logo-glow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: var(--color-pink);
+            filter: blur(20px);
+            opacity: 0.4;
+            z-index: 1;
+            border-radius: 50%;
         }
 
         header h1 {
-            font-size: 28px;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--text-primary), var(--accent-hover));
+            font-size: 42px;
+            font-weight: 800;
+            letter-spacing: -1px;
+            color: #1A202C;
+            background: linear-gradient(135deg, #1A202C 0%, #4A5568 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        [data-theme="dark"] header h1 {
+            background: linear-gradient(135deg, #F7FAFC 0%, #CBD5E0 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
         header p {
             color: var(--text-secondary);
-            font-size: 15px;
-            margin-top: 6px;
+            font-size: 18px;
+            font-weight: 400;
+            max-width: 500px;
+            margin: 0 auto;
+            line-height: 1.6;
         }
 
-        /* Cards */
+        /* CARD STYLES & ANIMATIONS */
         .card {
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 32px;
-            margin-bottom: 28px;
-            transition: border-color 0.3s;
+            border-radius: var(--radius-xl);
+            padding: 48px;
+            margin-bottom: 40px;
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--card-border);
+            background: var(--card-bg);
+            backdrop-filter: blur(12px);
         }
 
         .card:hover {
-            border-color: rgba(99, 102, 241, 0.3);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
         }
 
         .card h2 {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 24px;
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 32px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 16px;
+            color: var(--text-primary);
         }
 
-        .card h2 .icon {
-            width: 32px;
-            height: 32px;
-            background: var(--accent-glow);
-            border-radius: 8px;
+        /* Themes - Light Mode Overrides */
+        .card.deploy-theme {
+            background: linear-gradient(145deg, rgba(255, 251, 240, 0.9) 0%, rgba(255, 245, 235, 0.9) 100%);
+            box-shadow: var(--shadow-lg), 0 0 0 1px rgba(253, 195, 161, 0.2);
+        }
+
+        .card.list-theme {
+            background: linear-gradient(145deg, rgba(255, 255, 240, 0.9) 0%, rgba(254, 252, 191, 0.2) 100%);
+            box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255, 247, 205, 0.3);
+            min-height: 300px;
+        }
+
+        /* Dark Mode Theme Overrides */
+        [data-theme="dark"] .card.deploy-theme {
+            background: linear-gradient(145deg, rgba(35, 25, 20, 0.8) 0%, rgba(20, 20, 30, 0.8) 100%);
+            box-shadow: var(--shadow-lg), 0 0 0 1px rgba(253, 195, 161, 0.1);
+        }
+
+        [data-theme="dark"] .card.list-theme {
+            background: linear-gradient(145deg, rgba(30, 30, 20, 0.8) 0%, rgba(20, 20, 30, 0.8) 100%);
+            box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255, 247, 205, 0.1);
+        }
+
+        .icon-box {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            font-size: 20px;
         }
 
-        /* Form */
+        .deploy-theme .icon-box {
+            background: rgba(253, 195, 161, 0.3);
+            color: #9C4221;
+        }
+
+        .list-theme .icon-box {
+            background: rgba(255, 247, 205, 0.6);
+            color: #744210;
+        }
+
+        [data-theme="dark"] .deploy-theme .icon-box {
+            background: rgba(253, 195, 161, 0.2);
+            color: #FDC3A1;
+        }
+
+        [data-theme="dark"] .list-theme .icon-box {
+            background: rgba(255, 247, 205, 0.15);
+            color: #FFF7CD;
+        }
+
+        /* FORM STYLES */
         .form-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 16px;
+            grid-template-columns: 1.2fr 1.5fr 0.8fr;
+            gap: 32px;
+            align-items: start;
         }
 
-        @media (max-width: 700px) {
-            .form-grid {
-                grid-template-columns: 1fr;
-            }
+        .form-group {
+            position: relative;
         }
 
         .form-group label {
             display: block;
-            font-size: 13px;
-            font-weight: 500;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-bottom: 10px;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 12px 16px;
-            background: var(--bg-input);
-            border: 1px solid var(--border);
-            border-radius: 10px;
-            color: var(--text-primary);
-            font-size: 14px;
-            font-family: 'Inter', sans-serif;
-            transition: border-color 0.2s, box-shadow 0.2s;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--border-focus);
-            box-shadow: 0 0 0 3px var(--accent-glow);
-        }
-
-        .form-group input::placeholder {
+            letter-spacing: 1px;
             color: var(--text-muted);
+            transition: color 0.2s;
         }
 
+        .form-group:focus-within label {
+            color: var(--accent);
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 16px 20px;
+            border-radius: var(--radius-lg);
+            border: 2px solid var(--input-border);
+            background: var(--input-bg);
+            color: var(--text-primary);
+            font-size: 16px;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            transition: all 0.25s ease;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .form-input:hover {
+            box-shadow: var(--shadow);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px var(--accent-glow);
+        }
+
+        .form-input::placeholder {
+            color: var(--input-placeholder);
+        }
+
+        /* DROP ZONE */
+        .drop-zone {
+            width: 100%;
+            padding: 32px;
+            background: var(--dropzone-bg);
+            border: 2px dashed var(--dropzone-border);
+            border-radius: var(--radius-lg);
+            text-align: center;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            cursor: pointer;
+            box-shadow: var(--shadow-sm);
+            position: relative;
+            overflow: hidden;
+            color: var(--dropzone-text);
+        }
+
+        .drop-zone:hover {
+            border-color: var(--accent);
+            background: var(--dropzone-hover-bg);
+            transform: scale(1.01);
+        }
+
+        .drop-zone.has-file {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.1);
+        }
+
+        .drop-zone-icon {
+            font-size: 40px;
+            margin-bottom: 16px;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .drop-zone:hover .drop-zone-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .drop-zone-text {
+            color: var(--text-secondary);
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .drop-zone-file-name {
+            margin-top: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* BUTTONS */
         .btn {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
-            padding: 12px 28px;
+            gap: 12px;
+            padding: 16px 36px;
             border: none;
-            border-radius: 10px;
-            font-size: 14px;
-            font-weight: 600;
-            font-family: 'Inter', sans-serif;
+            border-radius: var(--radius-lg);
+            font-size: 16px;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.2s;
-            margin-top: 20px;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            margin-top: 40px;
+            letter-spacing: 0.5px;
+            position: relative;
+            overflow: hidden;
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--accent), #7c3aed);
-            color: #fff;
-            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 24px rgba(99, 102, 241, 0.4);
+            background: linear-gradient(135deg, var(--color-pink), #ED64A6);
+            color: white;
+            box-shadow: 0 10px 20px -5px rgba(245, 119, 153, 0.5);
         }
 
         .btn-primary:active {
-            transform: translateY(0);
+            transform: scale(0.97);
         }
 
-        .btn-primary:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 15px 30px -5px rgba(245, 119, 153, 0.6);
         }
 
-        /* Status box */
-        .status-box {
-            margin-top: 20px;
-            padding: 16px 20px;
+        /* TABLE STYLES */
+        .services-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0 12px;
+            margin-top: -12px;
+        }
+
+        .services-table th {
+            text-align: left;
+            font-size: 11px;
+            font-weight: 800;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0 24px 8px 24px;
+            border: none;
+            opacity: 0.7;
+        }
+
+        .services-table tr.service-row {
+            background: var(--input-bg);
+            box-shadow: var(--table-row-shadow);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .services-table tr.service-row:hover {
+            transform: translateY(-2px) scale(1.005);
+            background: var(--table-row-hover);
+            box-shadow: var(--shadow-lg);
+            z-index: 10;
+            position: relative;
+        }
+
+        .services-table td {
+            padding: 20px 24px;
+            font-size: 15px;
+            color: var(--text-secondary);
+            border: none;
+        }
+
+        .services-table td:first-child {
+            border-top-left-radius: 16px;
+            border-bottom-left-radius: 16px;
+        }
+
+        .services-table td:last-child {
+            border-top-right-radius: 16px;
+            border-bottom-right-radius: 16px;
+        }
+
+        .service-name {
+            font-weight: 700;
+            color: var(--text-primary);
+            font-size: 16px;
+        }
+
+        .service-meta {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            background: var(--bg-primary);
+            padding: 4px 8px;
+            border-radius: 6px;
+            color: var(--text-secondary);
+            border: 1px solid var(--border);
+        }
+
+        /* BADGES & URLS */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 99px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .badge.running {
+            background: rgba(49, 151, 149, 0.2);
+            color: #319795;
+        }
+
+        .badge.deployed {
+            background: rgba(47, 133, 90, 0.2);
+            color: #2F855A;
+        }
+
+        [data-theme="dark"] .badge.running {
+            color: #81E6D9;
+        }
+
+        [data-theme="dark"] .badge.deployed {
+            color: #68D391;
+        }
+
+        a.external-link {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            padding-bottom: 1px;
+            border-bottom: 1px dotted var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        a.external-link:hover {
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .action-btn {
+            background: rgba(245, 119, 153, 0.1);
+            color: var(--accent);
+            padding: 8px 16px;
             border-radius: 10px;
-            font-size: 14px;
-            display: none;
-            animation: slideIn 0.3s ease;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
         }
 
-        @keyframes slideIn {
+        .action-btn:hover {
+            background: var(--accent);
+            color: white;
+        }
+
+        /* STATUS BOX */
+        .status-box {
+            margin-top: 32px;
+            padding: 20px;
+            border-radius: var(--radius-lg);
+            font-size: 15px;
+            line-height: 1.5;
+            display: none;
+            animation: slideUp 0.4s ease-out;
+        }
+
+        .status-box.success {
+            background: rgba(16, 185, 129, 0.1);
+            color: #22543D;
+            border-left: 5px solid #48BB78;
+        }
+
+        .status-box.error {
+            background: rgba(229, 62, 62, 0.1);
+            color: #742A2A;
+            border-left: 5px solid #F56565;
+        }
+
+        [data-theme="dark"] .status-box.success {
+            color: #9AE6B4;
+        }
+
+        [data-theme="dark"] .status-box.error {
+            color: #FEB2B2;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 80px;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
+            opacity: 0.6;
+        }
+
+        /* ANIMATIONS */
+        @keyframes fadeInDown {
             from {
                 opacity: 0;
-                transform: translateY(-8px);
+                transform: translateY(-20px);
             }
 
             to {
@@ -239,130 +658,25 @@
             }
         }
 
-        .status-box.success {
-            display: block;
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.3);
-            color: var(--success);
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
-        .status-box.error {
-            display: block;
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: var(--error);
-        }
-
-        .status-box .url {
-            display: inline-block;
-            margin-top: 8px;
-            padding: 6px 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 6px;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-            color: var(--accent-hover);
-            word-break: break-all;
-        }
-
-        /* Services Table */
-        .services-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        .services-table thead th {
-            text-align: left;
-            font-size: 12px;
-            font-weight: 600;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.8px;
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--border);
-        }
-
-        .services-table tbody tr {
-            transition: background 0.15s;
-        }
-
-        .services-table tbody tr:hover {
-            background: rgba(99, 102, 241, 0.04);
-        }
-
-        .services-table tbody td {
-            padding: 14px 16px;
-            font-size: 14px;
-            border-bottom: 1px solid rgba(30, 41, 59, 0.5);
-            color: var(--text-secondary);
-        }
-
-        .services-table tbody td:first-child {
-            color: var(--text-primary);
-            font-weight: 500;
-        }
-
-        .badge {
-            display: inline-block;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .badge-deployed {
-            background: rgba(16, 185, 129, 0.15);
-            color: var(--success);
-        }
-
-        .url-link {
-            color: var(--accent-hover);
-            text-decoration: none;
-            font-family: 'Courier New', monospace;
-            font-size: 13px;
-        }
-
-        .url-link:hover {
-            text-decoration: underline;
-        }
-
-        .btn-delete {
-            padding: 6px 14px;
-            background: rgba(239, 68, 68, 0.1);
-            border: 1px solid rgba(239, 68, 68, 0.3);
-            color: var(--error);
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .btn-delete:hover {
-            background: rgba(239, 68, 68, 0.2);
-        }
-
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: var(--text-muted);
-            font-size: 14px;
-        }
-
-        .empty-state .empty-icon {
-            font-size: 40px;
-            margin-bottom: 12px;
-            opacity: 0.4;
-        }
-
-        /* Spinner */
         .spinner {
-            width: 18px;
-            height: 18px;
-            border: 2px solid rgba(255, 255, 255, 0.2);
-            border-top-color: #fff;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
             border-radius: 50%;
-            animation: spin 0.6s linear infinite;
+            animation: spin 0.8s linear infinite;
         }
 
         @keyframes spin {
@@ -371,602 +685,326 @@
             }
         }
 
-        /* Drop zone */
-        .drop-zone {
-            width: 100%;
-            padding: 32px;
-            background: var(--bg-input);
-            border: 2px dashed var(--border);
-            border-radius: 10px;
-            text-align: center;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-
-        .drop-zone:hover,
-        .drop-zone.dragover {
-            border-color: var(--accent);
-            background: rgba(99, 102, 241, 0.05);
-        }
-
-        .drop-zone.has-file {
-            border-color: var(--success);
-            background: rgba(16, 185, 129, 0.05);
-        }
-
-        .drop-zone-content {
-            pointer-events: none;
-        }
-
-        .drop-zone-icon {
-            font-size: 32px;
-            margin-bottom: 12px;
-        }
-
-        .drop-zone-text {
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-
-        .drop-zone-file-name {
-            margin-top: 8px;
-            color: var(--success);
-            font-weight: 500;
-            font-size: 13px;
-        }
-
-        .file-input-hidden {
-            display: none;
-        }
-
-        /* Footer */
-        /* Scan button */
-        .scan-btn {
-            padding: 6px 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
-            border-radius: 6px;
-            color: white;
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 500;
-            transition: all 0.3s;
-        }
-
-        .scan-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-        }
-
-        .scan-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        /* Scan status badge */
-        .scan-status {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .scan-status.running {
-            background: rgba(59, 130, 246, 0.2);
-            color: #3b82f6;
-        }
-
-        .scan-status.completed {
-            background: rgba(16, 185, 129, 0.2);
-            color: #10b981;
-        }
-
-        .scan-status.failed {
-            background: rgba(239, 68, 68, 0.2);
-            color: #ef4444;
-        }
-
-        /* Vulnerability badge */
-        .vuln-badge {
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 3px;
-            font-size: 11px;
-            font-weight: 600;
-            margin-left: 4px;
-        }
-
-        .vuln-badge.critical {
-            background: #dc2626;
-            color: white;
-        }
-
-        .vuln-badge.high {
-            background: #f59e0b;
-            color: white;
-        }
-
-        .vuln-badge.medium {
-            background: #eab308;
-            color: #000;
-        }
-
-        .vuln-badge.low {
-            background: #3b82f6;
-            color: white;
-        }
-
-        .vuln-badge.info {
-            background: #6b7280;
-            color: white;
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
-        }
-
-        .modal.active {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal-content {
-            background: var(--bg-card);
-            border-radius: 16px;
-            padding: 32px;
-            max-width: 800px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-        }
-
-        .modal-header h2 {
-            margin: 0;
-            font-size: 24px;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            font-size: 28px;
-            color: var(--text-secondary);
-            cursor: pointer;
-            padding: 0;
-            width: 32px;
-            height: 32px;
-            line-height: 1;
-        }
-
-        .close-btn:hover {
-            color: var(--text-primary);
-        }
-
-        .vuln-list {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .vuln-item {
-            background: var(--bg-input);
-            border-left: 4px solid;
-            padding: 16px;
-            margin-bottom: 12px;
-            border-radius: 8px;
-        }
-
-        .vuln-item.critical {
-            border-color: #dc2626;
-        }
-
-        .vuln-item.high {
-            border-color: #f59e0b;
-        }
-
-        .vuln-item.medium {
-            border-color: #eab308;
-        }
-
-        .vuln-item.low {
-            border-color: #3b82f6;
-        }
-
-        .vuln-item.info {
-            border-color: #6b7280;
-        }
-
-        .vuln-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .vuln-id {
-            font-weight: 600;
-            color: var(--accent);
-        }
-
-        .vuln-description {
-            color: var(--text-secondary);
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        /* Loading spinner */
-        .spinner {
-            border: 4px solid rgba(99, 102, 241, 0.1);
-            border-top: 4px solid var(--accent);
-            border-radius: 50%;
-            width: 48px;
-            height: 48px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
-        }
-
-        @keyframes spin {
-            0% {
-                transform: rotate(0deg);
+        @media (max-width: 800px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+                gap: 24px;
             }
 
-            100% {
-                transform: rotate(360deg);
+            .container {
+                padding: 40px 20px;
             }
-        }
 
-        .scan-progress {
-            text-align: center;
-            padding: 48px 24px;
-        }
-
-        .scan-progress h3 {
-            margin-top: 24px;
-            color: var(--accent);
-        }
-
-        .scan-progress p {
-            color: var(--text-secondary);
-            margin-top: 8px;
-        }
-
-        footer {
-            text-align: center;
-            margin-top: 48px;
-            color: var(--text-muted);
-            font-size: 13px;
+            header h1 {
+                font-size: 32px;
+            }
         }
     </style>
 </head>
 
 <body>
     <div class="container">
+        <!-- Theme Toggle -->
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode" title="Toggle Dark Mode">
+            ☀️
+        </button>
+
         <header>
-            <div class="logo">
+            <div class="logo-container">
+                <div class="logo-glow"></div>
                 <div class="logo-icon">🚀</div>
-                <h1>Secure Microservice Deployer</h1>
             </div>
-            <p>Deploy containers into Kubernetes through a secure gateway</p>
+            <h1>Secure Microservice Deployer</h1>
+            <p>Orchestrate your containers with enterprise-grade security and reliability.</p>
         </header>
 
-        <!-- Deploy Form -->
-        <div class="card">
-            <h2><span class="icon">📦</span> Deploy New Service</h2>
+        <!-- Deploy Form (Orange Theme) -->
+        <div class="card deploy-theme">
+            <h2>
+                <div class="icon-box">📦</div> Deploy New Service
+            </h2>
             <form id="deployForm">
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="serviceName">Service Name</label>
-                        <input type="text" id="serviceName" placeholder="e.g. payment"
+                        <input type="text" id="serviceName" class="form-input" placeholder="e.g. payment-service"
                             pattern="^[a-z][a-z0-9\-]{1,61}[a-z0-9]$" required>
                     </div>
+
                     <div class="form-group">
-                        <label>Docker Image (.tar file)</label>
+                        <label>Docker Image</label>
                         <div class="drop-zone" id="dropZone">
                             <div class="drop-zone-content">
-                                <div class="drop-zone-icon">📦</div>
-                                <div class="drop-zone-text">Drop .tar image here or click to browse</div>
+                                <div class="drop-zone-icon">☁️</div>
+                                <div class="drop-zone-text">Click or drop .tar file</div>
                                 <div class="drop-zone-file-name" id="fileName"></div>
                             </div>
                         </div>
                         <input type="file" id="imageFile" class="file-input-hidden" accept=".tar">
                         <input type="hidden" id="dockerImage" required>
                     </div>
+
                     <div class="form-group">
-                        <label for="containerPort">Container Port</label>
-                        <input type="number" id="containerPort" placeholder="e.g. 80" min="1" max="65535" required>
+                        <label for="containerPort">Port</label>
+                        <input type="number" id="containerPort" class="form-input" placeholder="8080" min="1"
+                            max="65535" required>
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary" id="deployBtn">
-                    🚀 Deploy Service
-                </button>
+
+                <div id="statusBox" class="status-box"></div>
+
+                <div style="text-align: right;">
+                    <button type="submit" class="btn btn-primary" id="deployBtn">
+                        <span class="btn-text">Data Center Deploy</span>
+                        <span>→</span>
+                    </button>
+                </div>
             </form>
-            <div id="statusBox" class="status-box"></div>
         </div>
 
-        <!-- Services List -->
-        <div class="card">
-            <h2><span class="icon">📡</span> Deployed Services</h2>
+        <!-- Services List (Yellow Theme) -->
+        <div class="card list-theme">
+            <h2>
+                <div class="icon-box">📡</div> Active Deployments
+            </h2>
             <div id="servicesContainer">
-                <div class="empty-state">
-                    <div class="empty-icon">📭</div>
-                    <p>No services deployed yet</p>
+                <!-- Skeleton Loader -->
+                <div style="padding: 24px; opacity: 0.5;">
+                    <div
+                        style="height: 60px; background: rgba(255,255,255,0.2); margin-bottom: 12px; border-radius: 12px;">
+                    </div>
+                    <div
+                        style="height: 60px; background: rgba(255,255,255,0.2); margin-bottom: 12px; border-radius: 12px;">
+                    </div>
                 </div>
             </div>
         </div>
 
         <footer>
-            Secure Microservice Deployer &bull; All traffic routed through API Gateway
+            Built with ❤️ for Cyber • Scalable • Secure • 2026
         </footer>
     </div>
 
-    <!-- Scan Results Modal -->
-
-
     <script>
+        // Init properties
         const API_BASE = '/api';
         let uploadedImageName = null;
 
-        // ---------- File upload / drag-drop ----------
+        // --- Dark Mode Logic ---
+        const toggleBtn = document.getElementById('themeToggle');
+        const root = document.documentElement;
+
+        function initTheme() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+            if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+                root.setAttribute('data-theme', 'dark');
+                toggleBtn.textContent = '🌙';
+            } else {
+                root.setAttribute('data-theme', 'light');
+                toggleBtn.textContent = '☀️';
+            }
+        }
+
+        toggleBtn.addEventListener('click', () => {
+            const currentTheme = root.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+
+            root.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            toggleBtn.textContent = newTheme === 'dark' ? '🌙' : '☀️';
+
+            toggleBtn.animate([
+                { transform: 'rotate(0deg) scale(1)' },
+                { transform: 'rotate(360deg) scale(1.2)' },
+                { transform: 'rotate(0deg) scale(1)' }
+            ], { duration: 500 });
+        });
+
+        initTheme();
+        // -----------------------
+
         const dropZone = document.getElementById('dropZone');
         const fileInput = document.getElementById('imageFile');
         const dockerImageInput = document.getElementById('dockerImage');
         const fileNameDisplay = document.getElementById('fileName');
+        const statusBox = document.getElementById('statusBox');
 
+        // Drag & Drop Interactions
         dropZone.addEventListener('click', () => fileInput.click());
-
         fileInput.addEventListener('change', async (e) => {
             const file = e.target.files[0];
             if (file) await handleFile(file);
         });
 
-        dropZone.addEventListener('dragover', (e) => {
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
             e.preventDefault();
-            dropZone.classList.add('dragover');
-        });
+            e.stopPropagation();
+        }
 
-        dropZone.addEventListener('dragleave', () => {
-            dropZone.classList.remove('dragover');
-        });
-
+        dropZone.addEventListener('dragover', () => dropZone.classList.add('hover'));
+        dropZone.addEventListener('dragleave', () => dropZone.classList.remove('hover'));
         dropZone.addEventListener('drop', async (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('dragover');
+            dropZone.classList.remove('hover');
             const file = e.dataTransfer.files[0];
             if (file) await handleFile(file);
         });
 
         async function handleFile(file) {
             if (!file.name.endsWith('.tar')) {
-                alert('Please upload a .tar Docker image file');
+                shakeElement(dropZone);
+                alert('Please use a .tar file');
                 return;
             }
 
-            fileNameDisplay.textContent = `Uploading ${file.name}...`;
+            fileNameDisplay.innerHTML = `<span class="spinner" style="border-top-color: currentColor; width:16px; height:16px; border-width:2px; vertical-align:middle; display:inline-block; margin-right:8px;"></span> Uploading ${file.name}...`;
             dropZone.classList.add('has-file');
 
             const formData = new FormData();
             formData.append('file', file);
 
             try {
-                const resp = await fetch(`${API_BASE}/upload-image`, {
-                    method: 'POST',
-                    body: formData,
-                });
-
+                const resp = await fetch(`${API_BASE}/upload-image`, { method: 'POST', body: formData });
                 const data = await resp.json();
 
                 if (resp.ok) {
                     uploadedImageName = data.image_name;
                     dockerImageInput.value = data.image_name;
 
-                    // Auto-fill container port with detected port
-                    const containerPortInput = document.getElementById('containerPort');
+                    fileNameDisplay.textContent = `✓ ${data.image_name}`;
+                    fileNameDisplay.style.color = 'var(--success)';
+
                     if (data.suggested_port) {
-                        containerPortInput.value = data.suggested_port;
-                        fileNameDisplay.textContent = `✓ ${data.image_name} (port ${data.suggested_port} detected)`;
-                    } else {
-                        fileNameDisplay.textContent = `✓ ${data.image_name}`;
+                        const portInput = document.getElementById('containerPort');
+                        portInput.value = data.suggested_port;
+                        // Visual feedback for auto-fill
+                        portInput.style.borderColor = 'var(--success)';
+                        setTimeout(() => portInput.style.borderColor = 'var(--accent)', 1000);
                     }
                 } else {
-                    fileNameDisplay.textContent = `✗ Upload failed`;
-                    dropZone.classList.remove('has-file');
-                    alert(`Upload failed: ${data.detail}`);
+                    throw new Error(data.detail);
                 }
             } catch (err) {
                 fileNameDisplay.textContent = `✗ Upload failed`;
-                dropZone.classList.remove('has-file');
-                alert(`Upload error: ${err.message}`);
+                fileNameDisplay.style.color = 'var(--error)';
+                shakeElement(dropZone);
+                console.error(err);
             }
         }
 
-        // ---------- Deploy form ----------
+        // Deploy Submission with Animation
         document.getElementById('deployForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-
             const btn = document.getElementById('deployBtn');
-            const statusBox = document.getElementById('statusBox');
 
             if (!uploadedImageName) {
-                statusBox.className = 'status-box error';
-                statusBox.style.display = 'block';
-                statusBox.innerHTML = '❌ Please upload a Docker image .tar file first';
-                btn.disabled = false;
+                shakeElement(dropZone);
                 return;
             }
 
-            const payload = {
-                service_name: document.getElementById('serviceName').value.trim(),
-                docker_image: uploadedImageName,
-                container_port: parseInt(document.getElementById('containerPort').value),
-            };
-
             btn.disabled = true;
+            const originalText = btn.innerHTML;
             btn.innerHTML = '<div class="spinner"></div> Deploying...';
-            statusBox.className = 'status-box';
+            statusBox.style.display = 'none';
 
             try {
                 const resp = await fetch(`${API_BASE}/deploy-service`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload),
+                    body: JSON.stringify({
+                        service_name: document.getElementById('serviceName').value.trim(),
+                        docker_image: uploadedImageName,
+                        container_port: parseInt(document.getElementById('containerPort').value),
+                    }),
                 });
 
                 const data = await resp.json();
 
                 if (resp.ok) {
                     statusBox.className = 'status-box success';
-                    statusBox.innerHTML = `
-                        ✅ ${data.message}<br>
-                        <span class="url">Public URL: <a href="${data.public_url}" target="_blank" style="color:inherit">${data.public_url}</a></span>
-                    `;
+                    statusBox.innerHTML = `<strong>Success!</strong> Service is live.<br><a href="${data.public_url}" target="_blank" style="color:inherit; text-decoration:underline; font-weight:700; margin-top:8px; display:inline-block;">Visit ${data.public_url} ↗</a>`;
+                    statusBox.style.display = 'block';
+
                     document.getElementById('deployForm').reset();
                     uploadedImageName = null;
                     fileNameDisplay.textContent = '';
-                    dropZone.classList.remove('has-file');
                     loadServices();
                 } else {
-                    statusBox.className = 'status-box error';
-                    statusBox.innerHTML = `❌ ${data.detail || 'Deployment failed'}`;
+                    throw new Error(data.detail);
                 }
             } catch (err) {
                 statusBox.className = 'status-box error';
-                statusBox.innerHTML = `❌ Network error: ${err.message}`;
+                statusBox.innerHTML = `<strong>Deployment Failed</strong><br>${err.message}`;
+                statusBox.style.display = 'block';
+                shakeElement(statusBox);
             } finally {
                 btn.disabled = false;
-                btn.innerHTML = '🚀 Deploy Service';
+                btn.innerHTML = originalText;
             }
         });
 
-        // ---------- Load services ----------
+        // Interactive Service Loader
         async function loadServices() {
             const container = document.getElementById('servicesContainer');
-            container.innerHTML = ''; // Clear previous content
-
             try {
                 const resp = await fetch(`${API_BASE}/services`);
                 const services = await resp.json();
 
                 if (!services.length) {
                     container.innerHTML = `
-                        <div class="empty-state">
-                            <div class="empty-icon">📭</div>
-                            <p>No services deployed yet</p>
-                        </div>
-                    `;
+                        <div style="text-align:center; padding:60px; color:var(--text-muted);">
+                            <div style="font-size:48px; margin-bottom:16px; opacity:0.3;">📭</div>
+                            <p>No services active. Deploy one above!</p>
+                        </div>`;
                     return;
                 }
 
-                // Create table
-                const table = document.createElement('table');
-                table.className = 'services-table';
-
-                // Table header
-                const thead = table.createTHead();
-                const headerRow = thead.insertRow();
-                ['Service Name', 'Image', 'Port', 'Scan Status', 'Service Status', 'URL', ''].forEach(text => {
-                    const th = document.createElement('th');
-                    th.textContent = text;
-                    headerRow.appendChild(th);
-                });
-
-                // Table body
-                const tbody = table.createTBody();
+                let html = '<table class="services-table"><thead><tr><th>Service</th><th>Image</th><th>Port</th><th>Status</th><th>Access</th><th></th></tr></thead><tbody>';
 
                 services.forEach(s => {
-                    const row = tbody.insertRow();
-
-                    // Service name cell
-                    const nameCell = row.insertCell();
-                    nameCell.innerHTML = `<a href="service-details.html?name=${s.service_name}" style="color: var(--text-primary); text-decoration: none; font-weight: 600;">${s.service_name}</a>`;
-
-                    // Docker image cell
-                    row.insertCell().textContent = s.docker_image;
-
-                    // Container port cell
-                    row.insertCell().textContent = s.container_port;
-
-                    // Scan status cell
-                    const scanCell = row.insertCell();
-                    if (s.scan_status) {
-                        const badge = document.createElement('span');
-                        badge.className = `scan-status ${s.scan_status}`;
-                        badge.textContent = s.scan_status;
-                        scanCell.appendChild(badge);
-
-                        if (s.vulnerability_count > 0) {
-                            const vulnBadge = document.createElement('span');
-                            vulnBadge.className = 'vuln-badge medium';
-                            vulnBadge.textContent = `${s.vulnerability_count} findings`;
-                            scanCell.appendChild(vulnBadge);
-                        }
-                    } else {
-                        scanCell.textContent = 'Not scanned';
-                    }
-
-                    // Service status cell
-                    const statusCell = row.insertCell();
-                    statusCell.innerHTML = s.status === 'deployed'
-                        ? '<span style="color: var(--success)">✓ deployed</span>'
-                        : s.status;
-
-                    // Public URL cell
-                    const urlCell = row.insertCell();
-                    const link = document.createElement('a');
-                    link.href = s.public_url;
-                    link.target = '_blank';
-                    link.textContent = s.public_url;
-                    link.style.color = 'var(--accent)';
-                    urlCell.appendChild(link);
-
-                    // Actions cell
-                    const actionsCell = row.insertCell();
-                    actionsCell.style.display = 'flex';
-                    actionsCell.style.gap = '8px';
-
-                    // Details button
-                    const detailsBtn = document.createElement('a');
-                    detailsBtn.textContent = 'View Details';
-                    detailsBtn.className = 'scan-btn';
-                    detailsBtn.href = `service-details.html?name=${s.service_name}`;
-                    detailsBtn.style.textDecoration = 'none';
-                    detailsBtn.style.textAlign = 'center';
-                    actionsCell.appendChild(detailsBtn);
+                    const scanStatus = s.scan_status === 'running' ? 'Scanning...' : (s.scan_status || 'Unscanned');
+                    html += `
+                        <tr class="service-row" onclick="window.location.href='service-details.html?name=${s.service_name}'">
+                            <td>
+                                <div class="service-name">${s.service_name}</div>
+                            </td>
+                            <td><span class="service-meta">${s.docker_image}</span></td>
+                            <td><span style="font-weight:600; color:var(--text-muted);">:${s.container_port}</span></td>
+                            <td>
+                                <span class="badge ${s.status === 'deployed' ? 'deployed' : ''}">${s.status}</span>
+                            </td>
+                            <td>
+                                <a href="${s.public_url}" target="_blank" class="external-link" onclick="event.stopPropagation()">link ↗</a>
+                            </td>
+                            <td style="text-align:right;">
+                                <a href="service-details.html?name=${s.service_name}" class="action-btn">Manage</a>
+                            </td>
+                        </tr>
+                    `;
                 });
-
-                container.appendChild(table);
-            } catch (err) {
-                container.innerHTML = `
-                    <div class="empty-state">
-                        <div class="empty-icon">⚠️</div>
-                        <p>Failed to load services</p>
-                    </div>
-                `;
+                html += '</tbody></table>';
+                container.innerHTML = html;
+            } catch (e) {
+                console.error(e);
             }
         }
 
-        // ---------- Initialize ----------
+        function shakeElement(el) {
+            el.animate([
+                { transform: 'translateX(0)' },
+                { transform: 'translateX(-5px)' },
+                { transform: 'translateX(5px)' },
+                { transform: 'translateX(0)' }
+            ], { duration: 300 });
+        }
+
         loadServices();
-        // Auto-refresh every 15 seconds
-        setInterval(loadServices, 15000);
+        setInterval(loadServices, 10000);
     </script>
 </body>
 

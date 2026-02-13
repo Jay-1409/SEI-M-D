@@ -19,10 +19,11 @@ import docker
 import tempfile
 import subprocess
 import json
+import redis
 from datetime import datetime
 from kubernetes import client, config
 
-from models import DeployRequest, DeployResponse, ServiceInfo, ScanResult, Vulnerability
+from models import DeployRequest, DeployResponse, ServiceInfo, ScanResult, Vulnerability, RateLimitConfig
 from k8s_client import create_deployment, create_service, delete_deployment, delete_service
 
 logging.basicConfig(level=logging.INFO)
@@ -53,7 +54,16 @@ try:
 except Exception as e:
     logger.warning(f"Docker client initialization failed: {e}")
     docker_client = None
+    docker_client = None
 
+
+# Redis connection
+REDIS_HOST = os.getenv("REDIS_HOST", "redis-service.deployer-system.svc.cluster.local")
+try:
+    redis_client = redis.Redis(host=REDIS_HOST, port=6379, decode_responses=True)
+except Exception as e:
+    logger.warning(f"Redis connection failed: {e}")
+    redis_client = None
 
 @app.post("/upload-image")
 async def upload_image(file: UploadFile = File(...)):
@@ -346,6 +356,39 @@ async def get_scan_results(service_name: str):
             scan_duration=0.0,
             error=str(e)
         )
+
+
+@app.post("/services/{service_name}/ratelimit")
+async def set_rate_limit(service_name: str, config: RateLimitConfig):
+    """Set rate limit configuration."""
+    if not redis_client:
+        raise HTTPException(503, "Redis unavailable")
+        
+    key = f"config:ratelimit:{service_name}"
+    try:
+        redis_client.set(key, config.model_dump_json())
+        logger.info(f"Updated rate limit for {service_name}: {config}")
+        return {"status": "updated", "config": config}
+    except Exception as e:
+        logger.error(f"Failed to set rate limit: {e}")
+        raise HTTPException(500, detail=str(e))
+
+
+@app.get("/services/{service_name}/ratelimit", response_model=RateLimitConfig)
+async def get_rate_limit(service_name: str):
+    """Get rate limit configuration."""
+    if not redis_client:
+        return RateLimitConfig()
+        
+    key = f"config:ratelimit:{service_name}"
+    try:
+        data = redis_client.get(key)
+        if data:
+            return RateLimitConfig.model_validate_json(data)
+        return RateLimitConfig()
+    except Exception as e:
+        logger.error(f"Failed to get rate limit: {e}")
+        return RateLimitConfig()
 
 
 @app.get("/services/{service_name}/apis")

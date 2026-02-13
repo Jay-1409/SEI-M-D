@@ -35,6 +35,11 @@ class ScanResult(BaseModel):
     error: Optional[str] = None
 
 
+class RateLimitConfig(BaseModel):
+    enabled: bool = True
+    limit: int = 100
+    window: int = 60
+
 class ServiceInfo(BaseModel):
     service_name: str
     docker_image: str
