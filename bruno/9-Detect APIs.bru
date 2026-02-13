@@ -1,0 +1,26 @@
+meta {
+  name: 9-Detect APIs
+  type: http
+  seq: 9
+}
+
+get {
+  url: http://localhost:30000/api/services/api1/apis
+  body: none
+  auth: none
+}
+
+docs {
+  # Detect API Documentation
+
+  Checks if the service exposes an OpenAPI/Swagger specification.
+  
+  ## Usage
+  1. Make sure a service is deployed (e.g., "api1")
+  2. Change the service name in the URL if needed
+  3. Send the request
+  
+  ## Response
+  - Returns `{"status": "found", "spec_path": "...", "public_url": "..."}` if found
+  - Returns `{"status": "not_found"}` if not found
+}

@@ -3,7 +3,7 @@ Nikto Service - Handles vulnerability scanning with Nikto
 Scan results are persisted in Redis.
 """
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, BackgroundTasks
 from fastapi.middleware.cors import CORSMiddleware
 import subprocess
 import logging
@@ -109,29 +109,72 @@ def _list_all_scans() -> list[ScanResult]:
     return results
 
 
+import httpx
+
+# ... (existing imports)
+
+# ... (existing Redis helpers)
+
 # ── Endpoints ──────────────────────────────────────────────────
 
-@app.post("/scan", response_model=ScanResult)
-async def trigger_scan(request: ScanRequest):
-    """Trigger a Nikto vulnerability scan."""
-    scan_id = str(uuid.uuid4())
+@app.post("/discover")
+async def discover_api(payload: dict):
+    """Detect if the service exposes an OpenAPI/Swagger specification."""
+    target_url = payload.get("target_url")
+    if not target_url:
+        raise HTTPException(status_code=400, detail="Missing target_url")
+
+    # Common locations for OpenAPI specs
+    paths = [
+        "/openapi.json", 
+        "/swagger.json", 
+        "/api/openapi.json", 
+        "/v1/openapi.json",
+        "/docs/openapi.json"
+    ]
     
-    logger.info(f"Starting scan {scan_id} for {request.service_name} at {request.target_url}")
+    async with httpx.AsyncClient(timeout=3.0, verify=False) as client:
+        for path in paths:
+            try:
+                url = f"{target_url.rstrip('/')}{path}"
+                logger.info(f"Probing {url} for OpenAPI spec...")
+                resp = await client.get(url)
+                
+                if resp.status_code == 200:
+                    try:
+                        # Validation: is it JSON and does it look like OpenAPI?
+                        data = resp.json()
+                        if "openapi" in data or "swagger" in data:
+                            version = data.get("openapi") or data.get("swagger")
+                            logger.info(f"Found OpenAPI {version} at {path}")
+                            return {
+                                "spec_path": path, 
+                                "type": "openapi", 
+                                "version": version,
+                                "status": "found"
+                            }
+                    except json.JSONDecodeError:
+                        continue
+            except Exception as e:
+                logger.warning(f"Probe failed for {url}: {e}")
+                continue
     
-    # Initialize scan result
-    scan_result = ScanResult(
-        scan_id=scan_id,
-        service_name=request.service_name,
-        scan_status="running",
-        started_at=datetime.utcnow().isoformat()
-    )
-    _save_scan(scan_result)
-    
+    # Not found
+    return {"status": "not_found", "spec_path": None}
+
+def run_nikto_scan(scan_id: str, target_url: str):
+    """Background task to run Nikto scan."""
+    # Retrieve current state
+    scan_result = _get_scan(scan_id)
+    if not scan_result:
+        logger.error(f"Scan {scan_id} not found for background execution")
+        return
+
     try:
         # Run Nikto scan
         result = subprocess.run([
             'nikto',
-            '-h', request.target_url,
+            '-h', target_url,
             '-Tuning', '123456789abc',  # All scan types
             '-maxtime', '60',  # 1 minute max
             '-nointeractive'  # No prompts
@@ -176,7 +219,7 @@ async def trigger_scan(request: ScanRequest):
                         id=f"NIKTO-{vuln_id}",
                         severity=severity,
                         description=description,
-                        url=request.target_url,
+                        url=target_url,
                         method=None
                     ))
                 except (ValueError, IndexError):
@@ -189,30 +232,48 @@ async def trigger_scan(request: ScanRequest):
         scan_result.total_findings = len(vulnerabilities)
         
         # Calculate duration
-        started = datetime.fromisoformat(scan_result.started_at)
-        completed = datetime.fromisoformat(scan_result.completed_at)
-        scan_result.scan_duration = (completed - started).total_seconds()
+        if scan_result.started_at:
+            started = datetime.fromisoformat(scan_result.started_at)
+            completed = datetime.fromisoformat(scan_result.completed_at)
+            scan_result.scan_duration = (completed - started).total_seconds()
         
         # Persist to Redis
         _save_scan(scan_result)
         
         logger.info(f"Scan {scan_id} completed: {len(vulnerabilities)} findings")
         
-        return scan_result
-    
     except subprocess.TimeoutExpired:
         scan_result.scan_status = "failed"
         scan_result.error = "Scan timeout"
         _save_scan(scan_result)
         logger.error(f"Scan {scan_id} timed out")
-        raise HTTPException(status_code=500, detail="Scan timed out")
-    
     except Exception as e:
         scan_result.scan_status = "failed"
         scan_result.error = str(e)
         _save_scan(scan_result)
         logger.error(f"Scan {scan_id} failed: {e}")
-        raise HTTPException(status_code=500, detail=f"Scan failed: {str(e)}")
+
+
+@app.post("/scan", response_model=ScanResult)
+async def trigger_scan(request: ScanRequest, background_tasks: BackgroundTasks):
+    """Trigger a Nikto vulnerability scan."""
+    scan_id = str(uuid.uuid4())
+    
+    logger.info(f"Queueing scan {scan_id} for {request.service_name} at {request.target_url}")
+    
+    # Initialize scan result
+    scan_result = ScanResult(
+        scan_id=scan_id,
+        service_name=request.service_name,
+        scan_status="running",
+        started_at=datetime.utcnow().isoformat()
+    )
+    _save_scan(scan_result)
+    
+    # Run scan in background task
+    background_tasks.add_task(run_nikto_scan, scan_id, request.target_url)
+    
+    return scan_result
 
 
 @app.get("/scan/{scan_id}", response_model=ScanResult)

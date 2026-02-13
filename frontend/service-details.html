@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Service Details — Secure Microservice Deployer</title>
+    <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui.css" />
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
@@ -634,6 +635,15 @@
                 </div>
             </div>
 
+            <!-- API Documentation (hidden if not found) -->
+            <div class="card" id="apiCard" style="display: none;">
+                <h2><span class="icon">🔌</span> API Documentation</h2>
+                <div id="apiLoading" style="padding: 24px; text-align: center; color: var(--text-secondary);">
+                    Detecting APIs...
+                </div>
+                <div id="swagger-ui"></div>
+            </div>
+
             <!-- Scan Results -->
             <div class="card">
                 <h2>
@@ -709,6 +719,8 @@
         </footer>
     </div>
 
+    <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-bundle.js"></script>
+    <script src="https://unpkg.com/swagger-ui-dist@5.11.0/swagger-ui-standalone-preset.js"></script>
     <script>
         const API_BASE = '/api';
         const params = new URLSearchParams(window.location.search);
@@ -757,6 +769,9 @@
 
                 // Load scan results
                 loadScanResults();
+
+                // Load API docs
+                loadApiDocs();
 
             } catch (err) {
                 console.error('Failed to load service:', err);
@@ -850,6 +865,49 @@
 
             } catch (err) {
                 console.error('Failed to load scan:', err);
+            }
+        }
+
+        // ── Load API docs ─────────────────────────────────
+        async function loadApiDocs() {
+            const apiCard = document.getElementById('apiCard');
+            const apiLoading = document.getElementById('apiLoading');
+
+            try {
+                // Show card wrapper but keep it hidden until we know we have docs?
+                // Or show "Detecting..."
+                apiCard.style.display = 'block';
+
+                const resp = await fetch(`${API_BASE}/services/${SERVICE_NAME}/apis`);
+                const data = await resp.json();
+
+                if (data.status === 'found' && data.public_url) {
+                    apiLoading.style.display = 'none';
+
+                    // Gateway URL (hardcoded for demo logic)
+                    // In real app, we might get this from config
+                    const GATEWAY_BASE = window.location.protocol + '//' + window.location.hostname + ':30080';
+                    const specUrl = GATEWAY_BASE + data.public_url;
+
+                    console.log('Rendering Swagger UI for:', specUrl);
+
+                    // Initialize Swagger UI
+                    SwaggerUIBundle({
+                        url: specUrl,
+                        dom_id: '#swagger-ui',
+                        presets: [
+                            SwaggerUIBundle.presets.apis,
+                            SwaggerUIBundle.SwaggerUIStandalonePreset
+                        ],
+                        layout: "BaseLayout",
+                        deepLinking: true
+                    });
+                } else {
+                    apiCard.style.display = 'none';
+                }
+            } catch (err) {
+                console.error('Failed to load API docs:', err);
+                apiCard.style.display = 'none';
             }
         }
 

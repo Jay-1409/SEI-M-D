@@ -1,5 +1,3 @@
-from pydantic import BaseModel, Field
-from typing import Optional
 from pydantic import BaseModel
 from typing import Optional, List
 from datetime import datetime
@@ -28,8 +26,8 @@ class Vulnerability(BaseModel):
 
 class ScanResult(BaseModel):
     service_name: str
-    scan_status: str  # "running", "completed", "failed"
-    started_at: str
+    scan_status: str  # "running", "completed", "failed", "not_scanned"
+    started_at: Optional[str] = None
     completed_at: Optional[str] = None
     vulnerabilities: List[Vulnerability] = []
     total_findings: int = 0

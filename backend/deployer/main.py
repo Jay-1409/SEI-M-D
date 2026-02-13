@@ -313,36 +313,84 @@ async def get_scan_results(service_name: str):
     except config.ConfigException:
         config.load_kube_config()
     
-    apps_v1 = client.AppsV1Api()
-    
+    # Call nikto-service to get scan results
     try:
-        apps_v1.read_namespaced_deployment(name=service_name, namespace="user-services")
-    except client.exceptions.ApiException as e:
-        if e.status == 404:
-            raise HTTPException(status_code=404, detail=f"Service '{service_name}' not found")
-    
-    # Fetch scan results from nikto-service (Redis-backed)
-    try:
-        async with httpx.AsyncClient(timeout=10.0) as http_client:
-            response = await http_client.get(
-                f"{NIKTO_SERVICE_URL}/scan/service/{service_name}"
-            )
-            if response.status_code == 200:
-                return response.json()
+        async with httpx.AsyncClient(timeout=5.0) as http_client:
+            resp = await http_client.get(f"http://nikto-service.deployer-system.svc.cluster.local:8002/scan/service/{service_name}")
+            
+            if resp.status_code == 404:
+                return ScanResult(
+                    service_name=service_name,
+                    scan_status="not_scanned",
+                    started_at=None,
+                    completed_at=None,
+                    vulnerabilities=[],
+                    total_findings=0,
+                    scan_duration=0.0,
+                    error=None
+                )
+            
+            resp.raise_for_status()
+            return resp.json()
+            
     except Exception as e:
-        logger.warning(f"Could not fetch scan results from nikto-service: {e}")
+        logger.error(f"Failed to fetch scan results: {e}")
+        # Return error state or not_scanned
+        return ScanResult(
+            service_name=service_name,
+            scan_status="failed",
+            started_at=None,
+            completed_at=None,
+            vulnerabilities=[],
+            total_findings=0,
+            scan_duration=0.0,
+            error=str(e)
+        )
+
+
+@app.get("/services/{service_name}/apis")
+async def get_service_apis(service_name: str):
+    """Detect and return API documentation info for a service."""
+    # Check if deployment exists
+    try:
+        config.load_incluster_config()
+    except config.ConfigException:
+        config.load_kube_config()
     
-    # Return default not-scanned result
-    return ScanResult(
-        service_name=service_name,
-        scan_status="not_scanned",
-        started_at=None,
-        completed_at=None,
-        vulnerabilities=[],
-        total_findings=0,
-        scan_duration=0,
-        error=None
-    )
+    # Get service port
+    try:
+        core_v1 = client.CoreV1Api()
+        svc = core_v1.read_namespaced_service(name=f"{service_name}-service", namespace="user-services")
+        port = svc.spec.ports[0].port
+        target_url = f"http://{service_name}-service.user-services.svc.cluster.local:{port}"
+    except Exception as e:
+        logger.warning(f"Failed to resolve service port for {service_name}: {e}")
+        target_url = f"http://{service_name}-service.user-services.svc.cluster.local:8000"
+
+    # Call nikto-service to discover
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as http_client:
+            resp = await http_client.post(
+                "http://nikto-service.deployer-system.svc.cluster.local:8002/discover",
+                json={"target_url": target_url}
+            )
+            data = resp.json()
+            # Enrich with public gateway URL
+            if data.get("status") == "found" and data.get("spec_path"):
+                # The browser can access via Gateway
+                # http://localhost:30080/{service_name}{spec_path}
+                # But we should return the relative path from gateway root or full URL?
+                # Let's return the full gateway URL relative to current host
+                # The frontend knows the Gateway URL usually, but let's be helpful.
+                # Actually, just return path relevant to gateway.
+                # Gateway maps /{service_name} -> {target_url}
+                # So if spec is at /openapi.json, public is /{service_name}/openapi.json
+                data["public_url"] = f"/{service_name}{data['spec_path']}"
+            
+            return data
+    except Exception as e:
+        logger.error(f"Discovery failed: {e}")
+        return {"status": "error", "spec_path": None}
 
 
 @app.get("/health")

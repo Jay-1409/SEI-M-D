@@ -21,6 +21,16 @@ logger = logging.getLogger("gateway")
 
 app = FastAPI(title="Microservice Gateway", version="1.0.0")
 
+from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins for demo/testing
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Service registry: service_name -> target base URL
 route_table: dict[str, str] = {}
 
