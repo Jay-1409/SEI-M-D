@@ -2,9 +2,13 @@
 
 set -e
 
+echo "=========================================="
+echo "Building Vulnerable API Example"
+echo "=========================================="
+echo ""
 echo "Building vulnerable-api Docker image..."
-cd examples/vulnerable-api
 
+cd examples/vulnerable-api
 docker build -t vulnerable-api:latest .
 
 echo ""
@@ -12,16 +16,12 @@ echo "Saving image as tar file..."
 docker save vulnerable-api:latest -o vulnerable-api.tar
 
 echo ""
-echo "=========================================="
-echo "✅ vulnerable-api.tar created successfully!"
-echo "=========================================="
+echo "✓ vulnerable-api.tar created ($(du -h vulnerable-api.tar | cut -f1))"
 echo ""
-echo "File location: examples/vulnerable-api/vulnerable-api.tar"
-echo "File size: $(du -h vulnerable-api.tar | cut -f1)"
+echo "Upload via frontend at: http://localhost:30000"
+echo "  Service Name: vulnerable-api"
+echo "  Image File: examples/vulnerable-api/vulnerable-api.tar"
+echo "  Container Port: 8000"
 echo ""
-echo "To deploy:"
-echo "  1. Upload vulnerable-api.tar via the frontend"
-echo "  2. Service name: vulnerable-api"
-echo "  3. Port: 8000"
-echo "  4. Click 'Scan' to test Nikto vulnerability detection!"
+echo "💡 After deployment, click 'Scan' to test Nikto vulnerability detection!"
 echo ""

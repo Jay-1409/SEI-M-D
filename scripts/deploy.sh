@@ -33,11 +33,13 @@ echo -e "${BLUE}Building Docker images...${NC}"
 echo ""
 
 echo "  → Building deployer-backend:latest"
-docker build -t deployer-backend:latest ./backend -q
-
+docker build -t deployer-backend:latest ./backend/deployer -q
+echo "  → Building image-service:latest"
+docker build -t image-service:latest ./backend/image -q
+echo "  → Building nikto-service:latest"
+docker build -t nikto-service:latest ./backend/nikto -q
 echo "  → Building deployer-gateway:latest"
-docker build -t deployer-gateway:latest ./gateway -q
-
+docker build -t deployer-gateway:latest ./backend/gateway -q
 echo "  → Building deployer-frontend:latest"
 docker build -t deployer-frontend:latest ./frontend -q
 
@@ -54,6 +56,8 @@ kubectl apply -f k8s/namespace.yaml
 kubectl apply -f k8s/user-namespace.yaml
 kubectl apply -f k8s/rbac.yaml
 kubectl apply -f k8s/backend.yaml
+kubectl apply -f k8s/image-service.yaml
+kubectl apply -f k8s/nikto-service.yaml
 kubectl apply -f k8s/gateway.yaml
 kubectl apply -f k8s/frontend.yaml
 
@@ -67,6 +71,8 @@ echo ""
 
 kubectl wait --for=condition=ready pod -l app=frontend -n deployer-system --timeout=60s || true
 kubectl wait --for=condition=ready pod -l app=backend -n deployer-system --timeout=60s || true
+kubectl wait --for=condition=ready pod -l app=image-service -n deployer-system --timeout=60s || true
+kubectl wait --for=condition=ready pod -l app=nikto-service -n deployer-system --timeout=60s || true
 kubectl wait --for=condition=ready pod -l app=gateway -n deployer-system --timeout=60s || true
 
 echo ""

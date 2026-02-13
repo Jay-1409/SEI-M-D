@@ -1,34 +1,33 @@
-#!/usr/bin/env bash
-
+#!/bin/bash
 set -e
 
 echo "=========================================="
-echo "Building Docker Images"
+echo "Building Backend Microservices"
 echo "=========================================="
-echo ""
 
-# Build backend
-echo "→ Building backend image..."
-docker build -t deployer-backend:latest ./backend
-echo "✓ Backend built"
+# Build deployer service
 echo ""
+echo "→ Building deployer service..."
+docker build -t deployer-backend:latest ./backend/deployer
 
-# Build gateway
-echo "→ Building gateway image..."
-docker build -t deployer-gateway:latest ./gateway
-echo "✓ Gateway built"
-echo ""
+# Build image service  
+echo "→ Building image service..."
+docker build -t image-service:latest ./backend/image
+
+# Build nikto service
+echo "→ Building nikto service..."
+docker build -t nikto-service:latest ./backend/nikto
+
+# Build gateway service
+echo "→ Building gateway service..."
+docker build -t deployer-gateway:latest ./backend/gateway
 
 # Build frontend
-echo "→ Building frontend image..."
+echo "→ Building frontend..."
 docker build -t deployer-frontend:latest ./frontend
-echo "✓ Frontend built"
-echo ""
 
-echo "=========================================="
-echo "✅ All images built successfully!"
-echo "=========================================="
 echo ""
-echo "To deploy updates to Kubernetes:"
-echo "  kubectl rollout restart deployment/backend deployment/gateway deployment/frontend -n deployer"
+echo "✓ All images built successfully"
+echo ""
+echo "=========================================="
 echo ""
