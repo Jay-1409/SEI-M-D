@@ -949,13 +949,6 @@
                     actionsCell.style.display = 'flex';
                     actionsCell.style.gap = '8px';
 
-                    // Details button
-                    const detailsBtn = document.createElement('button');
-                    detailsBtn.textContent = 'Details';
-                    detailsBtn.className = 'btn-primary';
-                    detailsBtn.onclick = () => window.location.href = `service-details.html?service=${encodeURIComponent(s.service_name)}`;
-                    actionsCell.appendChild(detailsBtn);
-
                     // Scan button
                     const scanBtn = document.createElement('button');
                     scanBtn.textContent = s.scan_status === 'completed' ? 'View Scan' : 'Scan';

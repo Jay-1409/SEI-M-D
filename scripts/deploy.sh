@@ -34,12 +34,16 @@ echo ""
 
 echo "  → Building deployer-backend:latest"
 docker build -t deployer-backend:latest ./backend/deployer -q
+
 echo "  → Building image-service:latest"
 docker build -t image-service:latest ./backend/image -q
+
 echo "  → Building nikto-service:latest"
 docker build -t nikto-service:latest ./backend/nikto -q
+
 echo "  → Building deployer-gateway:latest"
 docker build -t deployer-gateway:latest ./backend/gateway -q
+
 echo "  → Building deployer-frontend:latest"
 docker build -t deployer-frontend:latest ./frontend -q
 

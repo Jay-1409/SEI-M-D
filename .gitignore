@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+venv/
+.env
+
+# IntelliJ / IDE
+.idea/
+.vscode/
+
+# System
+.DS_Store
+
+# Docker / Build Artifacts
+*.tar
+*.log
+
+# Redis
+dump.rdb
