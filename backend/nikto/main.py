@@ -143,16 +143,17 @@ async def discover_api(payload: dict):
                 if resp.status_code == 200:
                     try:
                         # Validation: is it JSON and does it look like OpenAPI?
-                        data = resp.json()
-                        if "openapi" in data or "swagger" in data:
-                            version = data.get("openapi") or data.get("swagger")
-                            logger.info(f"Found OpenAPI {version} at {path}")
-                            return {
-                                "spec_path": path, 
-                                "type": "openapi", 
-                                "version": version,
-                                "status": "found"
-                            }
+                            data = resp.json()
+                            if "openapi" in data or "swagger" in data:
+                                version = data.get("openapi") or data.get("swagger")
+                                logger.info(f"Found OpenAPI {version} at {path}")
+                                return {
+                                    "spec_path": path, 
+                                    "type": "openapi", 
+                                    "version": version,
+                                    "status": "found",
+                                    "spec_content": data  # Return actual content
+                                }
                     except json.JSONDecodeError:
                         continue
             except Exception as e:

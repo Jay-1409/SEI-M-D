@@ -274,6 +274,7 @@
         [data-theme="dark"] .page-header h1 {
             background: linear-gradient(135deg, #F7FAFC 0%, #CBD5E0 100%);
             -webkit-background-clip: text;
+            background-clip: text;
             -webkit-text-fill-color: transparent;
         }
 
@@ -640,6 +641,30 @@
             box-shadow: 0 0 0 4px var(--accent-glow);
         }
 
+        /* SUB-TABS */
+        .btn-subtab {
+            padding: 6px 12px;
+            border-radius: 6px;
+            border: none;
+            background: transparent;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            color: var(--text-secondary);
+            transition: all 0.2s;
+        }
+
+        .btn-subtab:hover {
+            color: var(--text-primary);
+            background: rgba(0, 0, 0, 0.03);
+        }
+
+        .btn-subtab.active {
+            background: var(--input-bg);
+            color: var(--text-primary);
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
         .form-hint {
             font-size: 13px;
             opacity: 0.7;
@@ -731,7 +756,7 @@
                         <span>📦</span> Overview
                     </button>
                     <button class="tab-btn" data-tab="api" onclick="switchTab('api')">
-                        <span>🔌</span> API Docs
+                        <span>🔌</span> API
                     </button>
                     <button class="tab-btn" data-tab="security" onclick="switchTab('security')">
                         <span>🛡️</span> Security
@@ -768,15 +793,100 @@
                 </div>
             </div>
 
-            <!-- TAB 2: API DOCS (Yellow Theme) -->
+            <!-- TAB 2: API (Yellow Theme) -->
             <div id="tab-api" class="tab-content">
-                <div class="card api-theme">
-                    <h2>API Documentation & Testing</h2>
-                    <div id="apiLoading" style="text-align: center; opacity: 0.6; padding: 40px;">
-                        <div class="spinner" style="margin-bottom:12px; color:#744210;"></div>
-                        <div>Auto-discovering OpenAPI specs...</div>
+                <div class="card api-docs-theme" style="min-height: 600px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 24px;">
+                        <div style="display:flex; gap:16px; align-items:center;">
+                            <h2 style="margin:0;">API</h2>
+                            <!-- Sub-tabs -->
+                            <div
+                                style="background:rgba(0,0,0,0.05); padding:4px; border-radius:8px; display:flex; gap:4px;">
+                                <button class="btn-subtab active" onclick="switchApiSubTab('ratelimit')"
+                                    id="subtab-ratelimit">Rate Limiting</button>
+                                <button class="btn-subtab" onclick="switchApiSubTab('docs')"
+                                    id="subtab-docs">Documentation</button>
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:12px;">
+                            <button onclick="renderEndpointGrid(); loadSwagger();" class="btn-secondary"
+                                style="font-size:14px; padding:6px 12px;">
+                                🔄 Refresh
+                            </button>
+                        </div>
                     </div>
-                    <div id="swagger-ui"></div>
+
+                    <!-- SUB-TAB: RATE LIMITING -->
+                    <div id="api-content-ratelimit">
+                        <!-- Global Config Summary -->
+                        <div id="globalConfigSummary"
+                            style="background: rgba(255,255,255,0.6); padding: 16px; border-radius: 8px; margin-bottom: 24px; display:flex; gap: 24px; align-items:center; border: 1px solid rgba(0,0,0,0.05);">
+                            <div><strong>Global Rate Limit:</strong> <span id="globalLimitDisplay">100</span> req /
+                                <span id="globalWindowDisplay">60</span>s
+                            </div>
+                            <div style="flex:1;"></div>
+                            <button onclick="switchTab('settings')"
+                                style="background:none; border:none; text-decoration:underline; cursor:pointer; color:var(--text-secondary); font-size:13px;">Configure
+                                Global Defaults</button>
+                        </div>
+
+                        <!-- Endpoints Grid -->
+                        <h3
+                            style="font-size:16px; margin-bottom:16px; text-transform:uppercase; letter-spacing:1px; opacity:0.8;">
+                            Detected Endpoints</h3>
+                        <div id="endpointsGrid"
+                            style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; margin-bottom: 40px;">
+                            <!-- Cells injected here -->
+                        </div>
+                    </div>
+
+                    <!-- SUB-TAB: DOCS -->
+                    <div id="api-content-docs" style="display:none;">
+                        <h3
+                            style="font-size:16px; margin-bottom:16px; text-transform:uppercase; letter-spacing:1px; opacity:0.8;">
+                            Interactive Documentation</h3>
+                        <div id="apiLoading"
+                            style="padding: 40px; text-align: center; color: #B7791F; background: rgba(255,255,255,0.5); border-radius: 12px;">
+                            Detecting OpenAPI specs...
+                        </div>
+                        <div id="swagger-ui"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rate Limit Modal -->
+            <div id="rlModal"
+                style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:1000; align-items:center; justify-content:center; backdrop-filter: blur(4px);">
+                <div
+                    style="background:var(--card-bg); width:400px; padding:24px; border-radius:16px; box-shadow:var(--shadow-lg); border:1px solid var(--border-color); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
+                    <h3 style="margin-top:0;">Configure Endpoint</h3>
+                    <div style="margin-bottom:16px; font-family:'JetBrains Mono'; font-size:13px; opacity:0.8;"
+                        id="rlModalEndpoint">GET /users</div>
+
+                    <div class="form-group">
+                        <label class="form-label">Rate Limit Overrides</label>
+                        <select id="rlModalType" class="form-input" onchange="toggleRlInputs()">
+                            <option value="inherit">Inherit Global</option>
+                            <option value="custom">Custom Limit</option>
+                        </select>
+                    </div>
+
+                    <div id="rlCustomInputs" style="display:none;">
+                        <div class="form-group">
+                            <label class="form-label">Max Requests</label>
+                            <input type="number" id="rlModalLimit" class="form-input" value="100">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Window (seconds)</label>
+                            <input type="number" id="rlModalWindow" class="form-input" value="60">
+                        </div>
+                    </div>
+
+                    <div style="display:flex; justify-content:flex-end; gap:12px; margin-top:24px;">
+                        <button onclick="closeRlModal()" class="btn-secondary">Cancel</button>
+                        <button onclick="saveEndpointRl()" class="btn-primary"
+                            style="background:var(--accent); color:white;">Save Params</button>
+                    </div>
                 </div>
             </div>
 
@@ -964,35 +1074,206 @@
 
         // Swagger
         async function loadSwagger() {
+            const loadingEl = document.getElementById('apiLoading');
+            const swaggerEl = document.getElementById('swagger-ui');
+
+            loadingEl.style.display = 'block';
+            loadingEl.innerHTML = "Detecting OpenAPI specs...";
+            swaggerEl.innerHTML = ''; // Clear previous
+
             try {
                 const resp = await fetch(`${API_BASE}/services/${SERVICE_NAME}/apis`);
                 const data = await resp.json();
 
-                if (data.spec) {
-                    document.getElementById('apiLoading').style.display = 'none';
+                if (data.spec_content) {
+                    loadingEl.style.display = 'none';
+
+                    // Parse if string, otherwise use directly
+                    let specObj = data.spec_content;
+                    if (typeof specObj === 'string') {
+                        try { specObj = JSON.parse(specObj); } catch (e) { }
+                    }
+
+                    currentSpec = specObj;
+                    renderEndpointGrid();
+
                     SwaggerUIBundle({
-                        spec: JSON.parse(data.spec),
+                        spec: specObj,
                         dom_id: '#swagger-ui',
+                        deepLinking: true,
+                        presets: [
+                            SwaggerUIBundle.presets.apis,
+                            SwaggerUIBundle.SwaggerUIStandalonePreset
+                        ]
                     });
                 } else {
-                    document.getElementById('apiLoading').innerHTML = "<div style='opacity:0.6; font-style:italic;'>No OpenAPI spec detected for this service.</div>";
+                    loadingEl.innerHTML = "<div style='opacity:0.6; font-style:italic; padding:20px;'>No OpenAPI spec detected for this service.<br><span style='font-size:12px'>(Checked /openapi.json, /swagger.json, etc.)</span></div>";
                 }
             } catch (e) {
-                document.getElementById('apiLoading').textContent = "Failed to load API docs.";
+                console.error(e);
+                loadingEl.textContent = "Failed to load API docs.";
             }
         }
+
+        let currentRateLimitConfig = { enabled: true, limit: 100, window: 60, routes: [] };
+        let currentSpec = null;
+        let selectedEndpoint = null; // { method, path }
 
         // Rate Limiting
         async function loadRateLimit() {
             try {
                 const resp = await fetch(`${API_BASE}/services/${SERVICE_NAME}/ratelimit`);
-                const config = await resp.json();
+                currentRateLimitConfig = await resp.json();
 
-                document.getElementById('rlEnabled').value = config.enabled.toString();
-                document.getElementById('rlLimit').value = config.limit;
-                document.getElementById('rlWindow').value = config.window;
+                // Update Form
+                document.getElementById('rlEnabled').value = currentRateLimitConfig.enabled.toString();
+                document.getElementById('rlLimit').value = currentRateLimitConfig.limit;
+                document.getElementById('rlWindow').value = currentRateLimitConfig.window;
+
+                // Update Global Display
+                if (document.getElementById('globalLimitDisplay')) {
+                    document.getElementById('globalLimitDisplay').textContent = currentRateLimitConfig.limit;
+                    document.getElementById('globalWindowDisplay').textContent = currentRateLimitConfig.window;
+                }
+
+                // Re-render grid if spec exists
+                if (currentSpec) renderEndpointGrid();
+
             } catch (e) {
                 console.error('Failed to load rate limit config', e);
+            }
+        }
+
+        function renderEndpointGrid() {
+            if (!currentSpec) {
+                // Try loading swagger if not loaded
+                loadSwagger();
+                return;
+            }
+
+            const grid = document.getElementById('endpointsGrid');
+            grid.innerHTML = '';
+
+            // Iterate paths
+            for (const [path, methods] of Object.entries(currentSpec.paths)) {
+                for (const [method, details] of Object.entries(methods)) {
+                    // Check for override
+                    const override = currentRateLimitConfig.routes?.find(
+                        r => r.path === path && (r.method === 'ALL' || r.method === method.toUpperCase())
+                    );
+
+                    const isOverridden = !!override;
+                    const displayLimit = isOverridden ? override.limit : currentRateLimitConfig.limit;
+                    const displayWindow = isOverridden ? override.window : currentRateLimitConfig.window;
+
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.style.padding = '16px';
+                    card.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+                    card.style.marginBottom = '0';
+                    card.style.border = isOverridden ? '1px solid var(--accent)' : 'none';
+
+                    const methodColor = {
+                        get: '#4299E1', post: '#48BB78', put: '#ED8936', delete: '#F56565'
+                    }[method.toLowerCase()] || '#A0AEC0';
+
+                    card.innerHTML = `
+                        <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                            <span style="background:${methodColor}; color:white; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:700; text-transform:uppercase;">${method}</span>
+                            <span style="font-family:'JetBrains Mono'; font-size:13px; word-break:break-all;">${path}</span>
+                        </div>
+                        <div style="font-size:12px; color:var(--text-secondary); margin-bottom:12px;">
+                            ${details.summary || 'No description'}
+                        </div>
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <div style="font-size:12px;">
+                                Limit: <strong>${displayLimit}</strong>/${displayWindow}s
+                                ${isOverridden ? '<span style="color:var(--accent); margin-left:4px;">(Custom)</span>' : '<span style="opacity:0.5; margin-left:4px;">(Global)</span>'}
+                            </div>
+                            <button onclick="openRlModal('${method.toUpperCase()}', '${path}')" class="btn-secondary" style="font-size:11px; padding:4px 8px; height:auto;">
+                                Configure
+                            </button>
+                        </div>
+                        <!-- Stub for Auth (Requested by user) -->
+                         <div style="margin-top:8px; padding-top:8px; border-top:1px solid rgba(0,0,0,0.05); display:flex; justify-content:flex-end;">
+                            <button onclick="alert('Authorization config coming soon!')" style="background:none; border:none; color:var(--text-secondary); cursor:pointer; font-size:11px;">🔒 Auth</button>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                }
+            }
+        }
+
+        // Modal Functions
+        function openRlModal(method, path) {
+            selectedEndpoint = { method, path };
+            const modal = document.getElementById('rlModal');
+            document.getElementById('rlModalEndpoint').textContent = `${method} ${path}`;
+
+            // Find existing
+            const override = currentRateLimitConfig.routes?.find(
+                r => r.path === path && r.method === method
+            );
+
+            if (override) {
+                document.getElementById('rlModalType').value = 'custom';
+                document.getElementById('rlModalLimit').value = override.limit;
+                document.getElementById('rlModalWindow').value = override.window;
+                document.getElementById('rlCustomInputs').style.display = 'block';
+            } else {
+                document.getElementById('rlModalType').value = 'inherit';
+                document.getElementById('rlCustomInputs').style.display = 'none';
+            }
+
+            modal.style.display = 'flex';
+        }
+
+        function closeRlModal() {
+            document.getElementById('rlModal').style.display = 'none';
+            selectedEndpoint = null;
+        }
+
+        function toggleRlInputs() {
+            const type = document.getElementById('rlModalType').value;
+            document.getElementById('rlCustomInputs').style.display = type === 'custom' ? 'block' : 'none';
+        }
+
+        async function saveEndpointRl() {
+            if (!selectedEndpoint) return;
+
+            const type = document.getElementById('rlModalType').value;
+
+            // Remove existing rule for this path/method
+            currentRateLimitConfig.routes = currentRateLimitConfig.routes.filter(
+                r => !(r.path === selectedEndpoint.path && r.method === selectedEndpoint.method)
+            );
+
+            if (type === 'custom') {
+                const limit = parseInt(document.getElementById('rlModalLimit').value);
+                const window = parseInt(document.getElementById('rlModalWindow').value);
+
+                currentRateLimitConfig.routes.push({
+                    path: selectedEndpoint.path,
+                    method: selectedEndpoint.method,
+                    limit: limit,
+                    window: window
+                });
+            }
+
+            // Save to backend
+            try {
+                await fetch(`${API_BASE}/services/${SERVICE_NAME}/ratelimit`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(currentRateLimitConfig)
+                });
+
+                closeRlModal();
+                loadRateLimit(); // Reload and re-render
+
+            } catch (e) {
+                alert('Failed to save configuration');
+                console.error(e);
             }
         }
 
@@ -1000,7 +1281,8 @@
             const config = {
                 enabled: document.getElementById('rlEnabled').value === 'true',
                 limit: parseInt(document.getElementById('rlLimit').value),
-                window: parseInt(document.getElementById('rlWindow').value)
+                window: parseInt(document.getElementById('rlWindow').value),
+                routes: currentRateLimitConfig.routes // Preserve routes when saving global
             };
 
             const statusEl = document.getElementById('rlSaveStatus');
@@ -1015,10 +1297,15 @@
                 });
                 statusEl.textContent = '✓ Saved Successfully';
                 setTimeout(() => statusEl.style.opacity = '0', 2000);
+
+                loadRateLimit(); // Refresh local state
             } catch (e) {
                 statusEl.textContent = '❌ Error saving';
             }
         }
+
+        // SWAGGER UPDATE
+        // ... (existing loadSwagger needs to set currentSpec and call renderEndpointGrid)
 
         // Scan Utils
         async function triggerScan() {
@@ -1075,6 +1362,23 @@
                 `).join('');
             } else if (result.scan_status === 'completed') {
                 list.innerHTML = '<div style="padding: 30px; background: var(--vuln-item-bg); border-radius: 12px; color: #2F855A; border: 2px dashed #C6F6D5; text-align:center; font-weight:600;">✓ Clean scan. No issues found.</div>';
+            }
+        }
+
+        function switchApiSubTab(subTab) {
+            // Buttons
+            document.querySelectorAll('.btn-subtab').forEach(b => b.classList.remove('active'));
+            document.getElementById(`subtab-${subTab}`).classList.add('active');
+
+            // Content
+            document.getElementById('api-content-ratelimit').style.display = 'none';
+            document.getElementById('api-content-docs').style.display = 'none';
+
+            document.getElementById(`api-content-${subTab}`).style.display = 'block';
+
+            if (subTab === 'docs') {
+                // Refresh swagger if needed
+                if (!currentSpec) loadSwagger();
             }
         }
 

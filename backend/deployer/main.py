@@ -410,30 +410,50 @@ async def get_service_apis(service_name: str):
         logger.warning(f"Failed to resolve service port for {service_name}: {e}")
         target_url = f"http://{service_name}-service.user-services.svc.cluster.local:8000"
 
-    # Call nikto-service to discover
+    # API Discovery Logic (Decoupled from Nikto)
+    paths = [
+        "/openapi.json", 
+        "/swagger.json", 
+        "/api/openapi.json", 
+        "/v1/openapi.json",
+        "/docs/openapi.json"
+    ]
+
+    found_data = {"status": "not_found", "spec_path": None}
+
     try:
-        async with httpx.AsyncClient(timeout=5.0) as http_client:
-            resp = await http_client.post(
-                "http://nikto-service.deployer-system.svc.cluster.local:8002/discover",
-                json={"target_url": target_url}
-            )
-            data = resp.json()
-            # Enrich with public gateway URL
-            if data.get("status") == "found" and data.get("spec_path"):
-                # The browser can access via Gateway
-                # http://localhost:30080/{service_name}{spec_path}
-                # But we should return the relative path from gateway root or full URL?
-                # Let's return the full gateway URL relative to current host
-                # The frontend knows the Gateway URL usually, but let's be helpful.
-                # Actually, just return path relevant to gateway.
-                # Gateway maps /{service_name} -> {target_url}
-                # So if spec is at /openapi.json, public is /{service_name}/openapi.json
-                data["public_url"] = f"/{service_name}{data['spec_path']}"
-            
-            return data
+        async with httpx.AsyncClient(timeout=3.0, verify=False) as client:
+            for path in paths:
+                try:
+                    url = f"{target_url.rstrip('/')}{path}"
+                    logger.info(f"Probing {url} for OpenAPI spec...")
+                    resp = await client.get(url)
+                    
+                    if resp.status_code == 200:
+                        try:
+                            data = resp.json()
+                            if "openapi" in data or "swagger" in data:
+                                version = data.get("openapi") or data.get("swagger")
+                                logger.info(f"Found OpenAPI {version} at {path}")
+                                found_data = {
+                                    "spec_path": path, 
+                                    "type": "openapi", 
+                                    "version": version,
+                                    "status": "found",
+                                    "spec_content": data,
+                                    "public_url": f"/{service_name}{path}"
+                                }
+                                break 
+                        except json.JSONDecodeError:
+                            continue
+                except Exception as e:
+                    logger.warning(f"Probe failed for {url}: {e}")
+                    continue
     except Exception as e:
         logger.error(f"Discovery failed: {e}")
         return {"status": "error", "spec_path": None}
+
+    return found_data
 
 
 @app.get("/health")

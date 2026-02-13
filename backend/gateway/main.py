@@ -38,6 +38,14 @@ except Exception as e:
     redis_client = None
 
 
+import re
+
+def match_route(pattern: str, path: str) -> bool:
+    """Match OpenAPI path pattern against actual request path."""
+    # Convert {param} to [^/]+ regex
+    regex_pattern = "^" + re.sub(r"\{[^}]+\}", "[^/]+", pattern) + "$"
+    return bool(re.match(regex_pattern, path))
+
 @app.middleware("http")
 async def rate_limit_middleware(request: Request, call_next):
     # Only apply to valid requests that have Redis available
@@ -56,6 +64,13 @@ async def rate_limit_middleware(request: Request, call_next):
     if service_name in ("register", "routes", "health", "docs", "openapi.json"):
         return await call_next(request)
 
+    # Calculate relative path for matching (e.g., /api/v1/users)
+    # The gateway path is /{service_name}/{rest_of_path}
+    # But route patterns in config likely assume root relative to service?
+    # Actually, config is based on OpenAPI which is relative to service root.
+    # So we need to strip /{service_name} from the request path.
+    relative_path = "/" + "/".join(parts[1:]) if len(parts) > 1 else "/"
+
     try:
         # Check if rate limiting is enabled for this service
         # Config key: config:ratelimit:{service_name}
@@ -64,39 +79,85 @@ async def rate_limit_middleware(request: Request, call_next):
         
         if config_data:
             config = json.loads(config_data)
+            
+            if not config.get("enabled", True):
+                 return await call_next(request)
+
+            # Default to global settings
             limit = int(config.get("limit", 100))
             window = int(config.get("window", 60))
-            enabled = config.get("enabled", True)
             
-            if enabled:
-                client_ip = request.client.host
-                # Rate limit key: ratelimit:{service_name}:{client_ip}
-                key = f"ratelimit:{service_name}:{client_ip}"
+            # Check for route-specific overrides
+            routes = config.get("routes", [])
+            for route in routes:
+                # Check method
+                if route.get("method", "ALL") != "ALL" and route.get("method") != request.method:
+                    continue
                 
-                # Check current count using pipeline for atomicity
-                pipeline = redis_client.pipeline()
-                pipeline.incr(key)
-                pipeline.ttl(key)
-                result = pipeline.execute()
-                
-                current = result[0]
-                ttl = result[1]
-                
-                # Set expiry if key is new (ttl == -1)
-                if ttl == -1:
-                    redis_client.expire(key, window)
-                
-                if current > limit:
-                    logger.warning(f"Rate limit exceeded for {service_name} from {client_ip} ({current}/{limit})")
-                    return JSONResponse(
-                        status_code=429,
-                        content={
-                            "detail": "Rate limit exceeded",
-                            "limit": limit,
-                            "window_seconds": window,
-                            "retry_after": ttl if ttl > 0 else window
-                        }
-                    )
+                # Check path pattern
+                if match_route(route.get("path"), relative_path):
+                    limit = int(route.get("limit"))
+                    window = int(route.get("window"))
+                    break
+            
+            client_ip = request.client.host
+            # Rate limit key: ratelimit:{service_name}:{client_ip}:{route_hash_or_global}
+            # Simplification: use a single counter per service:ip for now? 
+            # No, if we have per-route limits, we need per-route counters.
+            # Use path pattern as part of key if matched?
+            # Or just use the limit key?
+            # Let's use: ratelimit:{service_name}:{client_ip} (Global)
+            # AND ratelimit:{service_name}:{client_ip}:{path_pattern} (Route specific)
+            
+            # Wait, if a route is matched, we should ONLY apply that rule?
+            # Yes, usually specific overrides general.
+            
+            if routes:
+                 # If we matched a route, make the key specific to that route pattern
+                 # We need to know WHICH route matched to use its pattern in the key
+                 matched_route = None
+                 for route in routes:
+                    if route.get("method", "ALL") != "ALL" and route.get("method") != request.method:
+                        continue
+                    if match_route(route.get("path"), relative_path):
+                        matched_route = route
+                        limit = int(route.get("limit"))
+                        window = int(route.get("window"))
+                        break
+                 
+                 if matched_route:
+                     # Use specific key
+                     key = f"ratelimit:{service_name}:{client_ip}:{matched_route['method']}:{matched_route['path']}"
+                 else:
+                     # Use global key
+                     key = f"ratelimit:{service_name}:{client_ip}:global"
+            else:
+                 key = f"ratelimit:{service_name}:{client_ip}:global"
+
+            # Check Limit
+            pipeline = redis_client.pipeline()
+            pipeline.incr(key)
+            pipeline.ttl(key)
+            result = pipeline.execute()
+            
+            current = result[0]
+            ttl = result[1]
+            
+            # Set expiry if key is new (ttl == -1)
+            if ttl == -1:
+                redis_client.expire(key, window)
+            
+            if current > limit:
+                logger.warning(f"Rate limit exceeded for {service_name} at {relative_path} from {client_ip} ({current}/{limit})")
+                return JSONResponse(
+                    status_code=429,
+                    content={
+                        "detail": "Rate limit exceeded",
+                        "limit": limit,
+                        "window_seconds": window,
+                        "retry_after": ttl if ttl > 0 else window
+                    }
+                )
     except Exception as e:
         logger.error(f"Rate limit middleware error: {e}")
         # Fail open
