@@ -1,0 +1,25 @@
+meta {
+  name: Access Service via Gateway
+  type: http
+  seq: 4
+}
+
+get {
+  url: http://localhost:30080/example-api
+  body: none
+  auth: none
+}
+
+docs {
+  Access the deployed service through the API gateway.
+  
+  This is the only way to reach internal ClusterIP services from outside the cluster.
+  
+  Expected Response:
+  {
+    "service": "example-microservice",
+    "status": "running",
+    "message": "Hello from the Secure Microservice Deployer!",
+    "timestamp": "2026-02-13T..."
+  }
+}

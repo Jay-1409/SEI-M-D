@@ -1,0 +1,1127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Microservice Deployer</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+        :root {
+            --bg-primary: #0a0e1a;
+            --bg-secondary: #111827;
+            --bg-card: #1a2234;
+            --bg-input: #0d1321;
+            --accent: #6366f1;
+            --accent-hover: #818cf8;
+            --accent-glow: rgba(99, 102, 241, 0.15);
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border: #1e293b;
+            --border-focus: #6366f1;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                radial-gradient(ellipse 600px 400px at 20% 20%, rgba(99, 102, 241, 0.06), transparent),
+                radial-gradient(ellipse 500px 300px at 80% 80%, rgba(16, 185, 129, 0.04), transparent);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Header */
+        header {
+            text-align: center;
+            margin-bottom: 48px;
+        }
+
+        header .logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        header .logo-icon {
+            width: 44px;
+            height: 44px;
+            background: linear-gradient(135deg, var(--accent), #a78bfa);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+        }
+
+        header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--text-primary), var(--accent-hover));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        header p {
+            color: var(--text-secondary);
+            font-size: 15px;
+            margin-top: 6px;
+        }
+
+        /* Cards */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            margin-bottom: 28px;
+            transition: border-color 0.3s;
+        }
+
+        .card:hover {
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+
+        .card h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card h2 .icon {
+            width: 32px;
+            height: 32px;
+            background: var(--accent-glow);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+        }
+
+        /* Form */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 700px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-family: 'Inter', sans-serif;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--border-focus);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .form-group input::placeholder {
+            color: var(--text-muted);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 12px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-top: 20px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #7c3aed);
+            color: #fff;
+            box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 24px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* Status box */
+        .status-box {
+            margin-top: 20px;
+            padding: 16px 20px;
+            border-radius: 10px;
+            font-size: 14px;
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .status-box.success {
+            display: block;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--success);
+        }
+
+        .status-box.error {
+            display: block;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--error);
+        }
+
+        .status-box .url {
+            display: inline-block;
+            margin-top: 8px;
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 6px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            color: var(--accent-hover);
+            word-break: break-all;
+        }
+
+        /* Services Table */
+        .services-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .services-table thead th {
+            text-align: left;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .services-table tbody tr {
+            transition: background 0.15s;
+        }
+
+        .services-table tbody tr:hover {
+            background: rgba(99, 102, 241, 0.04);
+        }
+
+        .services-table tbody td {
+            padding: 14px 16px;
+            font-size: 14px;
+            border-bottom: 1px solid rgba(30, 41, 59, 0.5);
+            color: var(--text-secondary);
+        }
+
+        .services-table tbody td:first-child {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .badge-deployed {
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--success);
+        }
+
+        .url-link {
+            color: var(--accent-hover);
+            text-decoration: none;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+        }
+
+        .url-link:hover {
+            text-decoration: underline;
+        }
+
+        .btn-delete {
+            padding: 6px 14px;
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--error);
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-delete:hover {
+            background: rgba(239, 68, 68, 0.2);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+
+        .empty-state .empty-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+            opacity: 0.4;
+        }
+
+        /* Spinner */
+        .spinner {
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* Drop zone */
+        .drop-zone {
+            width: 100%;
+            padding: 32px;
+            background: var(--bg-input);
+            border: 2px dashed var(--border);
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .drop-zone:hover,
+        .drop-zone.dragover {
+            border-color: var(--accent);
+            background: rgba(99, 102, 241, 0.05);
+        }
+
+        .drop-zone.has-file {
+            border-color: var(--success);
+            background: rgba(16, 185, 129, 0.05);
+        }
+
+        .drop-zone-content {
+            pointer-events: none;
+        }
+
+        .drop-zone-icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .drop-zone-text {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .drop-zone-file-name {
+            margin-top: 8px;
+            color: var(--success);
+            font-weight: 500;
+            font-size: 13px;
+        }
+
+        .file-input-hidden {
+            display: none;
+        }
+
+        /* Footer */
+        /* Scan button */
+        .scan-btn {
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 6px;
+            color: white;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .scan-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .scan-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Scan status badge */
+        .scan-status {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .scan-status.running {
+            background: rgba(59, 130, 246, 0.2);
+            color: #3b82f6;
+        }
+
+        .scan-status.completed {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+        }
+
+        .scan-status.failed {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+
+        /* Vulnerability badge */
+        .vuln-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 4px;
+        }
+
+        .vuln-badge.critical {
+            background: #dc2626;
+            color: white;
+        }
+
+        .vuln-badge.high {
+            background: #f59e0b;
+            color: white;
+        }
+
+        .vuln-badge.medium {
+            background: #eab308;
+            color: #000;
+        }
+
+        .vuln-badge.low {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .vuln-badge.info {
+            background: #6b7280;
+            color: white;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: var(--bg-card);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 800px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 28px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            line-height: 1;
+        }
+
+        .close-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .vuln-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .vuln-item {
+            background: var(--bg-input);
+            border-left: 4px solid;
+            padding: 16px;
+            margin-bottom: 12px;
+            border-radius: 8px;
+        }
+
+        .vuln-item.critical {
+            border-color: #dc2626;
+        }
+
+        .vuln-item.high {
+            border-color: #f59e0b;
+        }
+
+        .vuln-item.medium {
+            border-color: #eab308;
+        }
+
+        .vuln-item.low {
+            border-color: #3b82f6;
+        }
+
+        .vuln-item.info {
+            border-color: #6b7280;
+        }
+
+        .vuln-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .vuln-id {
+            font-weight: 600;
+            color: var(--accent);
+        }
+
+        .vuln-description {
+            color: var(--text-secondary);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        /* Loading spinner */
+        .spinner {
+            border: 4px solid rgba(99, 102, 241, 0.1);
+            border-top: 4px solid var(--accent);
+            border-radius: 50%;
+            width: 48px;
+            height: 48px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .scan-progress {
+            text-align: center;
+            padding: 48px 24px;
+        }
+
+        .scan-progress h3 {
+            margin-top: 24px;
+            color: var(--accent);
+        }
+
+        .scan-progress p {
+            color: var(--text-secondary);
+            margin-top: 8px;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 48px;
+            color: var(--text-muted);
+            font-size: 13px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-icon">🚀</div>
+                <h1>Secure Microservice Deployer</h1>
+            </div>
+            <p>Deploy containers into Kubernetes through a secure gateway</p>
+        </header>
+
+        <!-- Deploy Form -->
+        <div class="card">
+            <h2><span class="icon">📦</span> Deploy New Service</h2>
+            <form id="deployForm">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="serviceName">Service Name</label>
+                        <input type="text" id="serviceName" placeholder="e.g. payment"
+                            pattern="^[a-z][a-z0-9\-]{1,61}[a-z0-9]$" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Docker Image (.tar file)</label>
+                        <div class="drop-zone" id="dropZone">
+                            <div class="drop-zone-content">
+                                <div class="drop-zone-icon">📦</div>
+                                <div class="drop-zone-text">Drop .tar image here or click to browse</div>
+                                <div class="drop-zone-file-name" id="fileName"></div>
+                            </div>
+                        </div>
+                        <input type="file" id="imageFile" class="file-input-hidden" accept=".tar">
+                        <input type="hidden" id="dockerImage" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="containerPort">Container Port</label>
+                        <input type="number" id="containerPort" placeholder="e.g. 80" min="1" max="65535" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary" id="deployBtn">
+                    🚀 Deploy Service
+                </button>
+            </form>
+            <div id="statusBox" class="status-box"></div>
+        </div>
+
+        <!-- Services List -->
+        <div class="card">
+            <h2><span class="icon">📡</span> Deployed Services</h2>
+            <div id="servicesContainer">
+                <div class="empty-state">
+                    <div class="empty-icon">📭</div>
+                    <p>No services deployed yet</p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            Secure Microservice Deployer &bull; All traffic routed through API Gateway
+        </footer>
+    </div>
+
+    <!-- Scan Results Modal -->
+    <div id="scanModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>🔍 Vulnerability Scan Results</h2>
+                <button class="close-btn" onclick="closeScanModal()">&times;</button>
+            </div>
+            <div id="scanResults"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        let uploadedImageName = null;
+
+        // ---------- File upload / drag-drop ----------
+        const dropZone = document.getElementById('dropZone');
+        const fileInput = document.getElementById('imageFile');
+        const dockerImageInput = document.getElementById('dockerImage');
+        const fileNameDisplay = document.getElementById('fileName');
+
+        dropZone.addEventListener('click', () => fileInput.click());
+
+        fileInput.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (file) await handleFile(file);
+        });
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            const file = e.dataTransfer.files[0];
+            if (file) await handleFile(file);
+        });
+
+        async function handleFile(file) {
+            if (!file.name.endsWith('.tar')) {
+                alert('Please upload a .tar Docker image file');
+                return;
+            }
+
+            fileNameDisplay.textContent = `Uploading ${file.name}...`;
+            dropZone.classList.add('has-file');
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const resp = await fetch(`${API_BASE}/upload-image`, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                const data = await resp.json();
+
+                if (resp.ok) {
+                    uploadedImageName = data.image_name;
+                    dockerImageInput.value = data.image_name;
+
+                    // Auto-fill container port with detected port
+                    const containerPortInput = document.getElementById('containerPort');
+                    if (data.suggested_port) {
+                        containerPortInput.value = data.suggested_port;
+                        fileNameDisplay.textContent = `✓ ${data.image_name} (port ${data.suggested_port} detected)`;
+                    } else {
+                        fileNameDisplay.textContent = `✓ ${data.image_name}`;
+                    }
+                } else {
+                    fileNameDisplay.textContent = `✗ Upload failed`;
+                    dropZone.classList.remove('has-file');
+                    alert(`Upload failed: ${data.detail}`);
+                }
+            } catch (err) {
+                fileNameDisplay.textContent = `✗ Upload failed`;
+                dropZone.classList.remove('has-file');
+                alert(`Upload error: ${err.message}`);
+            }
+        }
+
+        // ---------- Deploy form ----------
+        document.getElementById('deployForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const btn = document.getElementById('deployBtn');
+            const statusBox = document.getElementById('statusBox');
+
+            if (!uploadedImageName) {
+                statusBox.className = 'status-box error';
+                statusBox.style.display = 'block';
+                statusBox.innerHTML = '❌ Please upload a Docker image .tar file first';
+                btn.disabled = false;
+                return;
+            }
+
+            const payload = {
+                service_name: document.getElementById('serviceName').value.trim(),
+                docker_image: uploadedImageName,
+                container_port: parseInt(document.getElementById('containerPort').value),
+            };
+
+            btn.disabled = true;
+            btn.innerHTML = '<div class="spinner"></div> Deploying...';
+            statusBox.className = 'status-box';
+
+            try {
+                const resp = await fetch(`${API_BASE}/deploy-service`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+
+                const data = await resp.json();
+
+                if (resp.ok) {
+                    statusBox.className = 'status-box success';
+                    statusBox.innerHTML = `
+                        ✅ ${data.message}<br>
+                        <span class="url">Public URL: <a href="${data.public_url}" target="_blank" style="color:inherit">${data.public_url}</a></span>
+                    `;
+                    document.getElementById('deployForm').reset();
+                    uploadedImageName = null;
+                    fileNameDisplay.textContent = '';
+                    dropZone.classList.remove('has-file');
+                    loadServices();
+                } else {
+                    statusBox.className = 'status-box error';
+                    statusBox.innerHTML = `❌ ${data.detail || 'Deployment failed'}`;
+                }
+            } catch (err) {
+                statusBox.className = 'status-box error';
+                statusBox.innerHTML = `❌ Network error: ${err.message}`;
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '🚀 Deploy Service';
+            }
+        });
+
+        // ---------- Load services ----------
+        async function loadServices() {
+            const container = document.getElementById('servicesContainer');
+            container.innerHTML = ''; // Clear previous content
+
+            try {
+                const resp = await fetch(`${API_BASE}/services`);
+                const services = await resp.json();
+
+                if (!services.length) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-icon">📭</div>
+                            <p>No services deployed yet</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                // Create table
+                const table = document.createElement('table');
+                table.className = 'services-table';
+
+                // Table header
+                const thead = table.createTHead();
+                const headerRow = thead.insertRow();
+                ['Service Name', 'Image', 'Port', 'Scan Status', 'Service Status', 'URL', ''].forEach(text => {
+                    const th = document.createElement('th');
+                    th.textContent = text;
+                    headerRow.appendChild(th);
+                });
+
+                // Table body
+                const tbody = table.createTBody();
+
+                services.forEach(s => {
+                    const row = tbody.insertRow();
+
+                    // Service name cell
+                    row.insertCell().textContent = s.service_name;
+
+                    // Docker image cell
+                    row.insertCell().textContent = s.docker_image;
+
+                    // Container port cell
+                    row.insertCell().textContent = s.container_port;
+
+                    // Scan status cell
+                    const scanCell = row.insertCell();
+                    if (s.scan_status) {
+                        const badge = document.createElement('span');
+                        badge.className = `scan-status ${s.scan_status}`;
+                        badge.textContent = s.scan_status;
+                        scanCell.appendChild(badge);
+
+                        if (s.vulnerability_count > 0) {
+                            const vulnBadge = document.createElement('span');
+                            vulnBadge.className = 'vuln-badge medium';
+                            vulnBadge.textContent = `${s.vulnerability_count} findings`;
+                            scanCell.appendChild(vulnBadge);
+                        }
+                    } else {
+                        scanCell.textContent = 'Not scanned';
+                    }
+
+                    // Service status cell
+                    const statusCell = row.insertCell();
+                    statusCell.innerHTML = s.status === 'deployed'
+                        ? '<span style="color: var(--success)">✓ deployed</span>'
+                        : s.status;
+
+                    // Public URL cell
+                    const urlCell = row.insertCell();
+                    const link = document.createElement('a');
+                    link.href = s.public_url;
+                    link.target = '_blank';
+                    link.textContent = s.public_url;
+                    link.style.color = 'var(--accent)';
+                    urlCell.appendChild(link);
+
+                    // Actions cell
+                    const actionsCell = row.insertCell();
+                    actionsCell.style.display = 'flex';
+                    actionsCell.style.gap = '8px';
+
+                    // Scan button
+                    const scanBtn = document.createElement('button');
+                    scanBtn.textContent = s.scan_status === 'completed' ? 'View Scan' : 'Scan';
+                    scanBtn.className = 'scan-btn';
+                    scanBtn.onclick = () => s.scan_status === 'completed' ? viewScanResults(s.service_name) : scanService(s.service_name);
+                    if (s.scan_status === 'running') {
+                        scanBtn.textContent = 'Scanning...';
+                        scanBtn.disabled = true;
+                    }
+                    actionsCell.appendChild(scanBtn);
+
+                    // Delete button
+                    const btn = document.createElement('button');
+                    btn.textContent = 'Delete';
+                    btn.className = 'btn-secondary';
+                    btn.onclick = () => deleteService(s.service_name);
+                    actionsCell.appendChild(btn);
+                });
+
+                container.appendChild(table);
+            } catch (err) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">⚠️</div>
+                        <p>Failed to load services</p>
+                    </div>
+                `;
+            }
+        }
+
+        // ---------- Delete service ----------
+        async function deleteService(name) {
+            if (!confirm(`Delete service "${name}"?`)) return;
+
+            try {
+                await fetch(`${API_BASE}/services/${name}`, { method: 'DELETE' });
+                loadServices();
+            } catch (err) {
+                alert(`Failed to delete service: ${err.message}`);
+            }
+        }
+
+        // ---------- Scan service ----------
+        async function scanService(serviceName) {
+            try {
+                // Show loading modal immediately
+                showScanProgress(serviceName);
+
+                const response = await fetch(`${API_BASE}/services/${serviceName}/scan`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    loadServices(); // Refresh to show scanning status
+                    // Poll for results
+                    pollScanResults(serviceName);
+                } else {
+                    const error = await response.json();
+                    closeScanModal();
+                    alert(`Scan failed: ${error.detail}`);
+                }
+            } catch (error) {
+                closeScanModal();
+                alert(`Scan error: ${error.message}`);
+            }
+        }
+
+        function showScanProgress(serviceName) {
+            const modal = document.getElementById('scanModal');
+            const resultsDiv = document.getElementById('scanResults');
+
+            resultsDiv.innerHTML = `
+                <div class="scan-progress">
+                    <div class="spinner"></div>
+                    <h3>Scanning ${serviceName}...</h3>
+                    <p>Running Nikto vulnerability scan. This may take 1-2 minutes.</p>
+                    <p style="margin-top: 16px; font-size: 13px; color: var(--text-muted);">Please wait while we analyze the service for security vulnerabilities.</p>
+                </div>
+            `;
+
+            modal.classList.add('active');
+        }
+
+        async function pollScanResults(serviceName, retries = 30) {
+            if (retries <= 0) {
+                await loadServices();
+                return;
+            }
+
+            await new Promise(resolve => setTimeout(resolve, 5000)); // Wait 5 seconds
+
+            try {
+                const response = await fetch(`${API_BASE}/services/${serviceName}/scan`);
+                if (response.ok) {
+                    const scan = await response.json();
+                    if (scan.scan_status === 'completed' || scan.scan_status === 'failed') {
+                        await loadServices();
+                        if (scan.scan_status === 'completed') {
+                            viewScanResults(serviceName);
+                        }
+                        return;
+                    }
+                }
+            } catch (e) {
+                // Scan not ready yet, continue polling
+            }
+
+            pollScanResults(serviceName, retries - 1);
+        }
+
+        async function viewScanResults(serviceName) {
+            try {
+                const response = await fetch(`${API_BASE}/services/${serviceName}/scan`);
+                if (!response.ok) {
+                    alert('No scan results found');
+                    return;
+                }
+
+                const scan = await response.json();
+                displayScanResults(scan);
+            } catch (error) {
+                alert(`Error fetching scan results: ${error.message}`);
+            }
+        }
+
+        function displayScanResults(scan) {
+            const modal = document.getElementById('scanModal');
+            const resultsDiv = document.getElementById('scanResults');
+
+            let html = `
+                <div style="margin-bottom: 24px;">
+                    <h3 style="margin-bottom: 8px;">${scan.service_name}</h3>
+                    <p style="color: var(--text-secondary); font-size: 14px;">
+                        Scanned: ${new Date(scan.started_at).toLocaleString()}<br>
+                        Duration: ${scan.scan_duration ? scan.scan_duration.toFixed(1) + 's' : 'N/A'}<br>
+                        Total Findings: ${scan.total_findings}
+                    </p>
+                </div>
+            `;
+
+            if (scan.vulnerabilities && scan.vulnerabilities.length > 0) {
+                html += '<ul class="vuln-list">';
+                scan.vulnerabilities.forEach(vuln => {
+                    html += `
+                        <li class="vuln-item ${vuln.severity}">
+                            <div class="vuln-header">
+                                <span class="vuln-id">${vuln.id}</span>
+                                <span class="vuln-badge ${vuln.severity}">${vuln.severity.toUpperCase()}</span>
+                            </div>
+                            <div class="vuln-description">${vuln.description}</div>
+                            ${vuln.url ? `<div style="margin-top: 8px; font-size: 12px; color: var(--text-muted);">URL: ${vuln.url}</div>` : ''}
+                        </li>
+                    `;
+                });
+                html += '</ul>';
+            } else {
+                html += '<p style="color: var(--success); text-align: center; padding: 32px;">✓ No vulnerabilities found!</p>';
+            }
+
+            resultsDiv.innerHTML = html;
+            modal.classList.add('active');
+        }
+
+        function closeScanModal() {
+            const modal = document.getElementById('scanModal');
+            modal.classList.remove('active');
+        }
+
+        // ---------- Initialize ----------
+        loadServices();
+        // Auto-refresh every 15 seconds
+        setInterval(loadServices, 15000);
+    </script>
+</body>
+
+</html>

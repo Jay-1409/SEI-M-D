@@ -1,0 +1,28 @@
+meta {
+  name: 7-Scan Service
+  type: http
+  seq: 7
+}
+
+post {
+  url: http://localhost:30000/api/services/vulnarable/scan
+  body: none
+  auth: none
+}
+
+docs {
+  # Scan Service for Vulnerabilities
+  
+  Triggers a Nikto vulnerability scan for the specified service.
+  
+  ## Usage
+  1. Make sure a service is deployed (e.g., "vulnarable")
+  2. Change the service name in the URL if needed
+  3. Send the request
+  4. Wait 1-2 minutes for scan to complete
+  5. Use "Get Scan Results" to view findings
+  
+  ## Response
+  - Returns scan status and initial scan info
+  - Scan runs asynchronously in the background
+}

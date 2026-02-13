@@ -1,0 +1,24 @@
+meta {
+  name: Service Info Endpoint
+  type: http
+  seq: 5
+}
+
+get {
+  url: http://localhost:30080/example-api/info
+  body: none
+  auth: none
+}
+
+docs {
+  Get detailed information about the deployed service.
+  
+  Expected Response:
+  {
+    "service": "example-microservice",
+    "version": "1.0.0",
+    "platform": "Linux",
+    "python_version": "3.11.x",
+    "hostname": "example-api-xxx-xxx"
+  }
+}

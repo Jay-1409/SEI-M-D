@@ -1,0 +1,26 @@
+meta {
+  name: List Services
+  type: http
+  seq: 3
+}
+
+get {
+  url: http://localhost:30000/api/services
+  body: none
+  auth: none
+}
+
+docs {
+  Get a list of all deployed services.
+  
+  Expected Response:
+  [
+    {
+      "service_name": "example-api",
+      "docker_image": "example-api:latest",
+      "container_port": 8000,
+      "public_url": "http://localhost:30080/example-api",
+      "status": "deployed"
+    }
+  ]
+}

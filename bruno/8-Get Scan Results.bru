@@ -1,0 +1,37 @@
+meta {
+  name: 8-Get Scan Results
+  type: http
+  seq: 8
+}
+
+get {
+  url: http://localhost:30000/api/services/vulnarable/scan
+  body: none
+  auth: none
+}
+
+docs {
+  # Get Vulnerability Scan Results
+  
+  Retrieves the vulnerability scan results for a service.
+  
+  ## Usage
+  1. First trigger a scan using "Scan Service" request
+  2. Wait for scan to complete (~1-2 minutes)
+  3. Change service name in URL if testing different service
+  4. Send request to get results
+  
+  ## Response Fields
+  - `service_name`: Name of scanned service
+  - `scan_status`: "running", "completed", or "failed"
+  - `started_at`: Scan start timestamp
+  - `completed_at`: Scan completion timestamp
+  - `vulnerabilities`: Array of findings with:
+    - `id`: Vulnerability ID
+    - `severity`: "critical", "high", "medium", "low", "info"
+    - `description`: Details about the vulnerability
+    - `url`: Affected endpoint
+    - `method`: HTTP method
+  - `total_findings`: Total number of vulnerabilities
+  - `scan_duration`: Time taken in seconds
+}

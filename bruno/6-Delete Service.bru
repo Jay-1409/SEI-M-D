@@ -1,0 +1,26 @@
+meta {
+  name: Delete Service
+  type: http
+  seq: 6
+}
+
+delete {
+  url: http://localhost:30000/api/services/example-api
+  body: none
+  auth: none
+}
+
+docs {
+  Delete a deployed service and all its Kubernetes resources.
+  
+  This will remove:
+  - Kubernetes Deployment
+  - ClusterIP Service
+  - Gateway route registration
+  
+  Expected Response:
+  {
+    "status": "deleted",
+    "service_name": "example-api"
+  }
+}
