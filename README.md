@@ -6,7 +6,7 @@ A web-based platform that deploys Docker images into Kubernetes as internal micr
 
 ## Architecture
 
-https://app.eraser.io/workspace/b4fxvSPkOI11WzyE5ahA?origin=share&diagram=E0K-wT6A2PrdB0ZXRkgY4
+![1771010329194](image/README/1771010329194.png)
 
 ### Security Model
 
