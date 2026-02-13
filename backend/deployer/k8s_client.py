@@ -40,6 +40,13 @@ def create_deployment(service_name: str, docker_image: str, container_port: int)
         replicas=1,
         selector=client.V1LabelSelector(match_labels={"app": service_name}),
         template=template,
+        strategy=client.V1DeploymentStrategy(
+            type="RollingUpdate",
+            rolling_update=client.V1RollingUpdateDeployment(
+                max_surge=1,
+                max_unavailable=0,
+            ),
+        ),
     )
 
     deployment = client.V1Deployment(

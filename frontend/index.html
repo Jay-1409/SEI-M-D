@@ -968,6 +968,17 @@
 
                 services.forEach(s => {
                     const scanStatus = s.scan_status === 'running' ? 'Scanning...' : (s.scan_status || 'Unscanned');
+
+                    // Status Badge Logic
+                    let statusBadge = '';
+                    if (s.status === 'deployed') {
+                        statusBadge = '<span class="badge deployed">Running</span>';
+                    } else if (s.status === 'stopped') {
+                        statusBadge = '<span class="badge" style="background:#FED7D7; color:#C53030;">Stopped</span>';
+                    } else {
+                        statusBadge = `<span class="badge" style="background:#EDF2F7; color:#4A5568;">${s.status}</span>`;
+                    }
+
                     html += `
                         <tr class="service-row" onclick="window.location.href='service-details.html?name=${s.service_name}'">
                             <td>
@@ -976,7 +987,7 @@
                             <td><span class="service-meta">${s.docker_image}</span></td>
                             <td><span style="font-weight:600; color:var(--text-muted);">:${s.container_port}</span></td>
                             <td>
-                                <span class="badge ${s.status === 'deployed' ? 'deployed' : ''}">${s.status}</span>
+                                ${statusBadge}
                             </td>
                             <td>
                                 <a href="${s.public_url}" target="_blank" class="external-link" onclick="event.stopPropagation()">link ↗</a>

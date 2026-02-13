@@ -44,6 +44,8 @@ if [[ $REPLY =~ ^[Yy]$ ]]; then
     docker rmi -f deployer-backend:latest 2>/dev/null || true
     docker rmi -f deployer-gateway:latest 2>/dev/null || true
     docker rmi -f deployer-frontend:latest 2>/dev/null || true
+    docker rmi -f image-service:latest 2>/dev/null || true
+    docker rmi -f nikto-service:latest 2>/dev/null || true
     docker rmi -f example-api:latest 2>/dev/null || true
     echo ""
     echo -e "${GREEN}✓${NC} Docker images removed"

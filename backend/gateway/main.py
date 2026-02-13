@@ -89,6 +89,7 @@ async def rate_limit_middleware(request: Request, call_next):
             
             # Check for route-specific overrides
             routes = config.get("routes", [])
+            matched_route = None
             for route in routes:
                 # Check method
                 if route.get("method", "ALL") != "ALL" and route.get("method") != request.method:
@@ -96,43 +97,19 @@ async def rate_limit_middleware(request: Request, call_next):
                 
                 # Check path pattern
                 if match_route(route.get("path"), relative_path):
+                    matched_route = route
                     limit = int(route.get("limit"))
                     window = int(route.get("window"))
                     break
             
             client_ip = request.client.host
-            # Rate limit key: ratelimit:{service_name}:{client_ip}:{route_hash_or_global}
-            # Simplification: use a single counter per service:ip for now? 
-            # No, if we have per-route limits, we need per-route counters.
-            # Use path pattern as part of key if matched?
-            # Or just use the limit key?
-            # Let's use: ratelimit:{service_name}:{client_ip} (Global)
-            # AND ratelimit:{service_name}:{client_ip}:{path_pattern} (Route specific)
             
-            # Wait, if a route is matched, we should ONLY apply that rule?
-            # Yes, usually specific overrides general.
-            
-            if routes:
-                 # If we matched a route, make the key specific to that route pattern
-                 # We need to know WHICH route matched to use its pattern in the key
-                 matched_route = None
-                 for route in routes:
-                    if route.get("method", "ALL") != "ALL" and route.get("method") != request.method:
-                        continue
-                    if match_route(route.get("path"), relative_path):
-                        matched_route = route
-                        limit = int(route.get("limit"))
-                        window = int(route.get("window"))
-                        break
-                 
-                 if matched_route:
-                     # Use specific key
-                     key = f"ratelimit:{service_name}:{client_ip}:{matched_route['method']}:{matched_route['path']}"
-                 else:
-                     # Use global key
-                     key = f"ratelimit:{service_name}:{client_ip}:global"
+            if matched_route:
+                # Use specific key for matched route
+                key = f"ratelimit:{service_name}:{client_ip}:{matched_route['method']}:{matched_route['path']}"
             else:
-                 key = f"ratelimit:{service_name}:{client_ip}:global"
+                # Use global key
+                key = f"ratelimit:{service_name}:{client_ip}:global"
 
             # Check Limit
             pipeline = redis_client.pipeline()
@@ -175,19 +152,72 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Service registry: service_name -> target base URL
+# ---- Service Registry: Dual-layer (in-memory + Redis) ----
+# In-memory dict is the primary source of truth for routing.
+# Redis is used for persistence across restarts.
 route_table: dict[str, str] = {}
 
 
-# ---------- Registration endpoints (called by backend) ----------
+def _get_redis():
+    """Lazy Redis connection with retry. Returns client or None."""
+    global redis_client
+    if redis_client:
+        try:
+            redis_client.ping()
+            return redis_client
+        except Exception:
+            redis_client = None
+
+    # Try to (re)connect
+    try:
+        redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
+        redis_client.ping()
+        logger.info(f"(Re)connected to Redis at {REDIS_HOST}")
+        return redis_client
+    except Exception as e:
+        logger.warning(f"Redis reconnect failed: {e}")
+        redis_client = None
+        return None
+
+
+@app.on_event("startup")
+async def startup_event():
+    """Load persisted routes from Redis into memory on boot."""
+    logger.info("Gateway service starting...")
+    r = _get_redis()
+    if r:
+        try:
+            keys = r.keys("routes:*")
+            for key in keys:
+                service = key.split(":", 1)[1]
+                target = r.get(key)
+                if target:
+                    route_table[service] = target
+            logger.info(f"Loaded {len(route_table)} routes from Redis into memory")
+        except Exception as e:
+            logger.error(f"Failed to load routes from Redis: {e}")
+    else:
+        logger.warning("Redis unavailable at startup — route table is empty")
+
 
 @app.post("/register")
 async def register_route(payload: dict):
     """Register a new service route."""
     service_name = payload["service_name"]
     target_url = payload["target_url"]
+
+    # Always save to in-memory (instant effect)
     route_table[service_name] = target_url
     logger.info(f"Registered route: /{service_name} -> {target_url}")
+
+    # Also persist to Redis (best-effort)
+    r = _get_redis()
+    if r:
+        try:
+            r.set(f"routes:{service_name}", target_url)
+        except Exception as e:
+            logger.warning(f"Redis persist failed for {service_name}: {e}")
+
     return {"status": "registered", "service_name": service_name}
 
 
@@ -197,6 +227,14 @@ async def deregister_route(service_name: str):
     if service_name in route_table:
         del route_table[service_name]
         logger.info(f"Deregistered route: /{service_name}")
+
+    r = _get_redis()
+    if r:
+        try:
+            r.delete(f"routes:{service_name}")
+        except Exception as e:
+            logger.warning(f"Redis delete failed for {service_name}: {e}")
+
     return {"status": "deregistered", "service_name": service_name}
 
 
@@ -221,10 +259,11 @@ async def proxy(service_name: str, path: str, request: Request):
     if service_name in ("register", "routes", "health", "docs", "openapi.json"):
         return  # avoid intercepting gateway's own routes
 
-    if service_name not in route_table:
+    target_base = route_table.get(service_name)
+    
+    if not target_base:
         raise HTTPException(status_code=404, detail=f"Service '{service_name}' is not registered")
 
-    target_base = route_table[service_name]
     target_url = f"{target_base}/{path}" if path else target_base
 
     logger.info(

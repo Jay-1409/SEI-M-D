@@ -728,8 +728,8 @@
                     <div>
                         <h1 id="serviceName">Loading...</h1>
                         <div style="margin-top: 8px;">
-                            <span class="status-pill">
-                                <span class="pulse"></span>
+                            <span class="status-pill" id="statusPill">
+                                <span class="pulse" id="statusPulse"></span>
                                 <span id="statusText">Active</span>
                             </span>
                         </div>
@@ -745,7 +745,11 @@
                             <line x1="10" y1="14" x2="21" y2="3" />
                         </svg>
                     </a>
-                    <button class="btn btn-danger" onclick="deleteService()">Delete</button>
+                    <button class="btn" id="stopStartBtn" style="background:#FED7D7; color:#C53030;"
+                        onclick="toggleService()">⏹ Stop</button>
+                    <button class="btn" style="background:var(--color-orange); color:#9C4221;"
+                        onclick="redeployService()">♻️ Redeploy</button>
+                    <button class="btn btn-danger" onclick="deleteService()">🗑 Delete</button>
                 </div>
             </div>
 
@@ -1050,7 +1054,9 @@
                 currentServiceInfo = service;
 
                 document.getElementById('serviceName').textContent = service.service_name;
-                document.getElementById('statusText').textContent = service.status;
+                currentServiceStatus = service.status;
+                updateStatusPill(service.status);
+                updateStopStartBtn();
                 document.getElementById('dockerImage').textContent = service.docker_image;
                 document.getElementById('containerPort').textContent = service.container_port;
 
@@ -1066,6 +1072,7 @@
                 document.getElementById('mainContent').style.display = 'block';
 
                 loadSwagger();
+                loadRateLimit(); // Ensure config is loaded for Grid
                 fetchScanResults();
             } catch (e) {
                 console.error(e);
@@ -1382,11 +1389,126 @@
             }
         }
 
+        let currentServiceStatus = 'deployed';
+
+        function updateStatusPill(status) {
+            const pill = document.getElementById('statusPill');
+            const pulse = document.getElementById('statusPulse');
+            const text = document.getElementById('statusText');
+            if (!pill || !text) return;
+
+            if (status === 'stopped') {
+                text.textContent = 'Stopped';
+                pill.style.color = '#C53030';
+                pill.style.background = '#FFF5F5';
+                pill.style.borderColor = '#FED7D7';
+                pulse.style.background = '#FC8181';
+                pulse.style.boxShadow = '0 0 0 0 rgba(252, 129, 129, 0.7)';
+            } else if (status === 'deploying') {
+                text.textContent = 'Deploying';
+                pill.style.color = '#C05621';
+                pill.style.background = '#FFFAF0';
+                pill.style.borderColor = '#FEEBC8';
+                pulse.style.background = '#ED8936';
+                pulse.style.boxShadow = '0 0 0 0 rgba(237, 137, 54, 0.7)';
+            } else {
+                text.textContent = 'Active';
+                pill.style.color = '#2F855A';
+                pill.style.background = '#F0FFF4';
+                pill.style.borderColor = '#C6F6D5';
+                pulse.style.background = '#48BB78';
+                pulse.style.boxShadow = '0 0 0 0 rgba(72, 187, 120, 0.7)';
+            }
+        }
+
+        function updateStopStartBtn() {
+            const btn = document.getElementById('stopStartBtn');
+            if (!btn) return;
+            if (currentServiceStatus === 'stopped') {
+                btn.style.background = '#C6F6D5';
+                btn.style.color = '#276749';
+                btn.textContent = '▶ Start';
+            } else {
+                btn.style.background = '#FED7D7';
+                btn.style.color = '#C53030';
+                btn.textContent = '⏹ Stop';
+            }
+        }
+
+        async function toggleService() {
+            const isStopped = currentServiceStatus === 'stopped';
+            const action = isStopped ? 'start' : 'stop';
+            const label = isStopped ? 'Start' : 'Stop';
+
+            if (!confirm(`${label} ${SERVICE_NAME}?`)) return;
+
+            try {
+                const resp = await fetch(`${API_BASE}/services/${SERVICE_NAME}/${action}`, { method: 'POST' });
+                if (resp.ok) {
+                    alert(`Service ${label.toLowerCase()}${isStopped ? 'e' : 'pe'}d successfully!`);
+                    location.reload();
+                } else {
+                    const err = await resp.json();
+                    alert(`Failed: ${err.detail}`);
+                }
+            } catch (e) {
+                alert(`Error: ${e.message}`);
+            }
+        }
+
         async function deleteService() {
             if (!confirm(`Are you sure you want to delete ${SERVICE_NAME}? This action cannot be undone.`)) return;
-            await fetch(`${API_BASE}/services/${SERVICE_NAME}`, { method: 'DELETE' });
-            window.location.href = 'index.html';
+
+            try {
+                const resp = await fetch(`${API_BASE}/services/${SERVICE_NAME}`, { method: 'DELETE' });
+                if (resp.ok) {
+                    window.location.href = 'index.html';
+                } else {
+                    const err = await resp.json();
+                    alert(`Failed to delete: ${err.detail}`);
+                }
+            } catch (e) {
+                alert(`Error: ${e.message}`);
+            }
         }
+
+        async function redeployService() {
+            if (!confirm(`Redeploy ${SERVICE_NAME}? This will restart the service.`)) return;
+
+            try {
+                // Fetch current details to get image/port
+                const resp = await fetch(`${API_BASE}/services`);
+                const services = await resp.json();
+                const service = services.find(s => s.service_name === SERVICE_NAME);
+
+                if (service) {
+                    const deployResp = await fetch(`${API_BASE}/services/${service.service_name}/redeploy`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            service_name: service.service_name,
+                            docker_image: service.docker_image,
+                            container_port: service.container_port
+                        })
+                    });
+
+                    if (deployResp.ok) {
+                        alert('Service redeployment triggered!');
+                        location.reload();
+                    } else {
+                        const err = await deployResp.json();
+                        alert(`Redeploy failed: ${err.detail}`);
+                    }
+                } else {
+                    alert("Cannot verify service details. Is it completely deleted?");
+                }
+
+            } catch (e) {
+                alert(`Error: ${e.message}`);
+            }
+        }
+
+        // Initialize (loadServiceDetails already called above via SERVICE_NAME check)
     </script>
 </body>
 
