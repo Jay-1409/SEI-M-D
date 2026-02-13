@@ -49,7 +49,9 @@ echo ""
 echo -e "${BLUE}Applying Kubernetes manifests...${NC}"
 echo ""
 
+# Create both namespaces
 kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/user-namespace.yaml
 kubectl apply -f k8s/rbac.yaml
 kubectl apply -f k8s/backend.yaml
 kubectl apply -f k8s/gateway.yaml
@@ -63,15 +65,16 @@ echo ""
 echo -e "${BLUE}Waiting for pods to be ready...${NC}"
 echo ""
 
-kubectl wait --for=condition=ready pod -l app=frontend -n deployer --timeout=60s || true
-kubectl wait --for=condition=ready pod -l app=backend -n deployer --timeout=60s || true
-kubectl wait --for=condition=ready pod -l app=gateway -n deployer --timeout=60s || true
+kubectl wait --for=condition=ready pod -l app=frontend -n deployer-system --timeout=60s || true
+kubectl wait --for=condition=ready pod -l app=backend -n deployer-system --timeout=60s || true
+kubectl wait --for=condition=ready pod -l app=gateway -n deployer-system --timeout=60s || true
 
 echo ""
 
 # Show pod status
 echo -e "${BLUE}Pod Status:${NC}"
-kubectl get pods -n deployer
+echo -e "  ${YELLOW}Platform Services (deployer-system):${NC}"
+kubectl get pods -n deployer-system
 echo ""
 
 # Determine access URLs
@@ -105,9 +108,9 @@ echo "  2. Deploy a test service (e.g., nginx:latest on port 80)"
 echo "  3. Access it via the Gateway URL"
 echo ""
 echo "To view logs:"
-echo "  kubectl logs -n deployer -l app=backend -f"
-echo "  kubectl logs -n deployer -l app=gateway -f"
+echo "  kubectl logs -n deployer-system -l app=backend -f"
+echo "  kubectl logs -n deployer-system -l app=gateway -f"
 echo ""
 echo "To tear down:"
-echo "  kubectl delete namespace deployer"
+echo "  kubectl delete namespace deployer-system user-services"
 echo ""

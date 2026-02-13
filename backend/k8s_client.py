@@ -6,7 +6,7 @@ for user-submitted microservices.
 from kubernetes import client, config
 import os
 
-NAMESPACE = os.getenv("K8S_NAMESPACE", "deployer")
+NAMESPACE = os.getenv("K8S_NAMESPACE", "user-services")
 
 
 def _load_config():

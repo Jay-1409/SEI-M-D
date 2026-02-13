@@ -24,10 +24,10 @@ if [[ ! $REPLY =~ ^[Yy]$ ]]; then
 fi
 
 echo ""
-echo -e "${YELLOW}Deleting all resources in the 'deployer' namespace...${NC}"
+echo -e "${YELLOW}Deleting all resources in the 'deployer-system' and 'user-services' namespaces...${NC}"
 echo ""
 
-kubectl delete namespace deployer
+kubectl delete namespace deployer-system user-services
 
 echo ""
 echo -e "${GREEN}✓${NC} All deployments and services deleted"

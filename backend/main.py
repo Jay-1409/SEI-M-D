@@ -20,6 +20,7 @@ import tempfile
 import subprocess
 import json
 from datetime import datetime
+from kubernetes import client, config
 
 from models import DeployRequest, DeployResponse, ServiceInfo, ScanResult, Vulnerability
 from k8s_client import create_deployment, create_service, delete_deployment, delete_service
@@ -169,11 +170,13 @@ async def deploy_service(req: DeployRequest):
     # 3. Register route in gateway
     try:
         async with httpx.AsyncClient() as client:
+            # Use FQDN for cross-namespace service communication
+            service_fqdn = f"http://{req.service_name}-service.user-services.svc.cluster.local:{req.container_port}"
             resp = await client.post(
                 f"{GATEWAY_REGISTER_URL}/register",
                 json={
                     "service_name": req.service_name,
-                    "target_url": f"http://{req.service_name}-service:{req.container_port}",
+                    "target_url": service_fqdn,
                 },
             )
             resp.raise_for_status()
@@ -204,42 +207,126 @@ async def deploy_service(req: DeployRequest):
 
 @app.get("/services", response_model=list[ServiceInfo])
 async def list_services():
-    """Return all deployed services."""
-    return list(deployed_services.values())
+    """List all deployed user services from user-services namespace."""
+    try:
+        config.load_incluster_config()
+    except config.ConfigException:
+        config.load_kube_config()
+
+    apps_v1 = client.AppsV1Api()
+    core_v1 = client.CoreV1Api()
+
+    # Query user-services namespace
+    deployments = apps_v1.list_namespaced_deployment(namespace="user-services")
+    services_list = core_v1.list_namespaced_service(namespace="user-services")
+
+    result = []
+    for dep in deployments.items:
+        name = dep.metadata.name
+        container = dep.spec.template.spec.containers[0]
+        image = container.image
+        port = container.ports[0].container_port if container.ports else 0
+
+        # Get service info
+        svc_name = f"{name}-service"
+        service_info_k8s = next((s for s in services_list.items if s.metadata.name == svc_name), None)
+        
+        public_url = f"http://{GATEWAY_HOST}:{GATEWAY_PORT}/{name}"
+        
+        # Check if service is in our in-memory registry to get scan status and other details
+        # If not, default to deployed status
+        if name in deployed_services:
+            info = deployed_services[name]
+            info.status = "deployed" # Assume deployed if found in k8s
+            info.public_url = public_url # Ensure public_url is up-to-date
+        else:
+            info = ServiceInfo(
+                service_name=name,
+                docker_image=image,
+                container_port=port,
+                public_url=public_url,
+                status="deployed",
+                scan_status="unknown",
+                last_scan=None,
+                vulnerability_count=0
+            )
+        result.append(info)
+    return result
 
 
 @app.delete("/services/{service_name}")
-async def remove_service(service_name: str):
-    """Tear down a deployed microservice."""
+async def delete_service_endpoint(service_name: str):
+    """Delete a deployed service from user-services namespace."""
     if service_name not in deployed_services:
         raise HTTPException(status_code=404, detail=f"Service '{service_name}' not found")
 
-    try:
-        delete_deployment(service_name)
-    except Exception as e:
-        logger.error(f"Failed to delete deployment: {e}")
-
-    try:
-        delete_service(service_name)
-    except Exception as e:
-        logger.error(f"Failed to delete service: {e}")
-
-    # Deregister from gateway
+    # 1. Deregister from gateway
     try:
         async with httpx.AsyncClient() as client:
             await client.delete(f"{GATEWAY_REGISTER_URL}/register/{service_name}")
+            logger.info(f"Deregistered route from gateway for {service_name}")
     except Exception as e:
         logger.warning(f"Gateway deregistration failed: {e}")
+    
+    # 2. Delete Kubernetes deployment
+    try:
+        delete_deployment(service_name)
+        logger.info(f"Deleted deployment for {service_name}")
+    except Exception as e:
+        logger.error(f"Failed to delete deployment: {e}")
 
+    # 3. Delete Kubernetes service
+    try:
+        delete_service(service_name)
+        logger.info(f"Deleted service for {service_name}")
+    except Exception as e:
+        logger.error(f"Failed to delete service: {e}")
+
+    # 4. Remove from in-memory registry
     del deployed_services[service_name]
-    return {"status": "deleted", "service_name": service_name}
+    
+    # 5. Remove scan results if any
+    if service_name in scan_results:
+        del scan_results[service_name]
+    
+    logger.info(f"Service '{service_name}' deleted successfully")
+    return {"message": f"Service '{service_name}' deleted successfully"}
 
 
 @app.post("/services/{service_name}/scan")
 async def scan_service(service_name: str):
     """Trigger a Nikto vulnerability scan for a deployed service."""
+    # Query Kubernetes to get service info
+    try:
+        config.load_incluster_config()
+    except config.ConfigException:
+        config.load_kube_config()
+    
+    apps_v1 = client.AppsV1Api()
+    core_v1 = client.CoreV1Api()
+    
+    # Check if deployment exists in user-services namespace
+    try:
+        deployment = apps_v1.read_namespaced_deployment(name=service_name, namespace="user-services")
+        container = deployment.spec.template.spec.containers[0]
+        container_port = container.ports[0].container_port if container.ports else 8000
+    except client.exceptions.ApiException as e:
+        if e.status == 404:
+            raise HTTPException(status_code=404, detail=f"Service '{service_name}' not found")
+        raise HTTPException(status_code=500, detail=f"Error querying service: {str(e)}")
+    
+    # Get or create service info in deployed_services
     if service_name not in deployed_services:
-        raise HTTPException(status_code=404, detail=f"Service '{service_name}' not found")
+        deployed_services[service_name] = ServiceInfo(
+            service_name=service_name,
+            docker_image=container.image,
+            container_port=container_port,
+            public_url=f"http://{GATEWAY_HOST}:{GATEWAY_PORT}/{service_name}",
+            status="deployed",
+            scan_status="not_scanned",
+            last_scan=None,
+            vulnerability_count=0
+        )
     
     service_info = deployed_services[service_name]
     
@@ -261,8 +348,8 @@ async def scan_service(service_name: str):
     service_info.scan_status = "running"
     service_info.last_scan = scan_result.started_at
     
-    # Build internal service URL
-    target_url = f"http://{service_name}-service:{service_info.container_port}"
+    # Build FQDN target URL for cross-namespace scanning
+    target_url = f"http://{service_name}-service.user-services.svc.cluster.local:{service_info.container_port}"
     
     try:
         # Run Nikto scan
@@ -373,10 +460,35 @@ async def scan_service(service_name: str):
 @app.get("/services/{service_name}/scan", response_model=ScanResult)
 async def get_scan_results(service_name: str):
     """Get scan results for a service."""
-    if service_name not in scan_results:
-        raise HTTPException(status_code=404, detail=f"No scan results found for '{service_name}'")
+    # Check if service exists in Kubernetes first
+    try:
+        config.load_incluster_config()
+    except config.ConfigException:
+        config.load_kube_config()
     
-    return scan_results[service_name]
+    apps_v1 = client.AppsV1Api()
+    
+    try:
+        apps_v1.read_namespaced_deployment(name=service_name, namespace="user-services")
+    except client.exceptions.ApiException as e:
+        if e.status == 404:
+            raise HTTPException(status_code=404, detail=f"Service '{service_name}' not found")
+    
+    # Return scan results if available
+    if service_name in scan_results:
+        return scan_results[service_name]
+    
+    # Return default not scanned result
+    return ScanResult(
+        service_name=service_name,
+        scan_status="not_scanned",
+        started_at=None,
+        completed_at=None,
+        vulnerabilities=[],
+        total_findings=0,
+        scan_duration=0,
+        error=None
+    )
 
 
 def _map_nikto_severity(osvdb: str) -> str:
