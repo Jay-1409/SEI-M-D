@@ -392,6 +392,11 @@
             color: #7B341E;
         }
 
+        .tab-btn[data-tab="firewall"].active {
+            background: #FFF5F5;
+            color: #9B2C2C;
+        }
+
         /* Dark Mode Active Colors */
         [data-theme="dark"] .tab-btn[data-tab="api"].active {
             background: rgba(255, 249, 219, 0.1);
@@ -406,6 +411,11 @@
         [data-theme="dark"] .tab-btn[data-tab="settings"].active {
             background: rgba(255, 237, 223, 0.1);
             color: #FFEDDF;
+        }
+
+        [data-theme="dark"] .tab-btn[data-tab="firewall"].active {
+            background: rgba(255, 245, 245, 0.1);
+            color: #FED7D7;
         }
 
         .tab-content {
@@ -765,6 +775,9 @@
                     <button class="tab-btn" data-tab="security" onclick="switchTab('security')">
                         <span>🛡️</span> Security
                     </button>
+                    <button class="tab-btn" data-tab="firewall" onclick="switchTab('firewall')">
+                        <span>🔥</span> Firewall
+                    </button>
                     <button class="tab-btn" data-tab="settings" onclick="switchTab('settings')">
                         <span>⚙️</span> Settings
                     </button>
@@ -931,7 +944,75 @@
                 </div>
             </div>
 
-            <!-- TAB 4: SETTINGS (Orange Theme) -->
+            <!-- TAB 4: FIREWALL (WAF) -->
+            <div id="tab-firewall" class="tab-content">
+                <div class="card security-theme">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 2px solid rgba(0,0,0,0.05); padding-bottom: 20px;">
+                        <div>
+                            <h2 style="margin: 0; padding: 0;">🔥 Web Application Firewall</h2>
+                            <p style="margin-top:4px; font-size:14px; opacity:0.7;">SQL Injection & XSS detection on all gateway traffic to this service</p>
+                        </div>
+                    </div>
+
+                    <!-- WAF Toggles -->
+                    <div style="display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;">
+                        <!-- SQLi Toggle -->
+                        <div style="flex:1; min-width: 200px; background: rgba(255,255,255,0.7); padding: 20px 24px; border-radius: 16px; display:flex; align-items:center; justify-content:space-between;">
+                            <div>
+                                <div style="font-size: 11px; text-transform: uppercase; font-weight: 800; color: #742A2A; margin-bottom: 4px; letter-spacing:1px;">SQL Injection</div>
+                                <div id="sqliStatusLabel" style="font-weight: 800; text-transform: uppercase; font-size: 16px; color: #C53030;">OFF</div>
+                            </div>
+                            <label style="position: relative; display: inline-block; width: 60px; height: 32px; cursor: pointer;">
+                                <input type="checkbox" id="sqliToggle" onchange="toggleWafType('sqli')" style="opacity: 0; width: 0; height: 0;">
+                                <span id="sqliToggleSlider" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #CBD5E0; border-radius: 32px; transition: 0.3s;"></span>
+                                <span id="sqliToggleKnob" style="position: absolute; height: 26px; width: 26px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></span>
+                            </label>
+                        </div>
+                        <!-- XSS Toggle -->
+                        <div style="flex:1; min-width: 200px; background: rgba(255,255,255,0.7); padding: 20px 24px; border-radius: 16px; display:flex; align-items:center; justify-content:space-between;">
+                            <div>
+                                <div style="font-size: 11px; text-transform: uppercase; font-weight: 800; color: #9C4221; margin-bottom: 4px; letter-spacing:1px;">XSS Protection</div>
+                                <div id="xssStatusLabel" style="font-weight: 800; text-transform: uppercase; font-size: 16px; color: #C53030;">OFF</div>
+                            </div>
+                            <label style="position: relative; display: inline-block; width: 60px; height: 32px; cursor: pointer;">
+                                <input type="checkbox" id="xssToggle" onchange="toggleWafType('xss')" style="opacity: 0; width: 0; height: 0;">
+                                <span id="xssToggleSlider" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #CBD5E0; border-radius: 32px; transition: 0.3s;"></span>
+                                <span id="xssToggleKnob" style="position: absolute; height: 26px; width: 26px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- WAF Stats -->
+                    <div id="wafStatsRow" style="display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;">
+                        <div style="flex:1; min-width: 120px; padding: 16px; background: rgba(255,255,255,0.5); border-radius: 12px; text-align: center; border: 1px solid rgba(0,0,0,0.05);">
+                            <div style="font-size: 28px; font-weight: 800; color: #E53E3E;" id="wafTotalBlocks">0</div>
+                            <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Total Blocked</div>
+                        </div>
+                        <div style="flex:1; min-width: 120px; padding: 16px; background: rgba(255,255,255,0.5); border-radius: 12px; text-align: center; border: 1px solid rgba(0,0,0,0.05);">
+                            <div style="font-size: 28px; font-weight: 800; color: #C53030;" id="wafSqliBlocks">0</div>
+                            <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">SQLi Blocked</div>
+                        </div>
+                        <div style="flex:1; min-width: 120px; padding: 16px; background: rgba(255,255,255,0.5); border-radius: 12px; text-align: center; border: 1px solid rgba(0,0,0,0.05);">
+                            <div style="font-size: 28px; font-weight: 800; color: #DD6B20;" id="wafXssBlocks">0</div>
+                            <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">XSS Blocked</div>
+                        </div>
+                    </div>
+
+                    <!-- Recent WAF Events -->
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h3 style="font-size: 15px; font-weight: 700;">Recent Blocked Attacks</h3>
+                        <button onclick="clearServiceWafEvents()" style="font-size: 12px; padding: 6px 14px; background: transparent; border: 1px solid rgba(0,0,0,0.1); color: var(--text-secondary); border-radius: 8px; cursor: pointer;">Clear Logs</button>
+                    </div>
+                    <div id="wafEventsContainer" style="max-height: 400px; overflow-y: auto;">
+                        <div style="text-align:center; padding:40px; color:var(--text-muted);">
+                            <div style="font-size: 36px; margin-bottom: 12px; opacity: 0.3;">✅</div>
+                            <p>No blocked attacks yet. Enable the firewall and it will monitor traffic.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 5: SETTINGS (Orange Theme) -->
             <div id="tab-settings" class="tab-content">
                 <div class="card settings-theme">
                     <h2>Rate Limiting Configuration</h2>
@@ -1038,6 +1119,7 @@
 
             if (tabId === 'settings') loadRateLimit();
             if (tabId === 'security') fetchScanResults();
+            if (tabId === 'firewall') { loadWafConfig(); loadWafStats(); loadWafEvents(); }
         }
 
         async function loadServiceDetails() {
@@ -1505,6 +1587,148 @@
 
             } catch (e) {
                 alert(`Error: ${e.message}`);
+            }
+        }
+
+        // ═══════════════════════════════════════════════════════
+        //  WAF / Firewall Tab Logic
+        // ═══════════════════════════════════════════════════════
+
+        let wafEnabled = false;
+
+        let wafConfig = { sqli: false, xss: false };
+
+        function updateToggleUI(type, enabled) {
+            const toggle = document.getElementById(`${type}Toggle`);
+            const slider = document.getElementById(`${type}ToggleSlider`);
+            const knob = document.getElementById(`${type}ToggleKnob`);
+            const label = document.getElementById(`${type}StatusLabel`);
+
+            toggle.checked = enabled;
+            if (enabled) {
+                slider.style.backgroundColor = '#48BB78';
+                knob.style.transform = 'translateX(28px)';
+                label.textContent = 'ON';
+                label.style.color = '#2F855A';
+            } else {
+                slider.style.backgroundColor = '#CBD5E0';
+                knob.style.transform = 'translateX(0)';
+                label.textContent = 'OFF';
+                label.style.color = '#C53030';
+            }
+        }
+
+        function updateAllWafToggles() {
+            updateToggleUI('sqli', wafConfig.sqli);
+            updateToggleUI('xss', wafConfig.xss);
+            wafEnabled = wafConfig.sqli || wafConfig.xss;
+        }
+
+        async function loadWafConfig() {
+            try {
+                const resp = await fetch(`${API_BASE}/services/${SERVICE_NAME}/waf/config`);
+                const data = await resp.json();
+                // Support both legacy single-toggle and new granular config
+                if ('sqli' in data || 'xss' in data) {
+                    wafConfig.sqli = data.sqli || false;
+                    wafConfig.xss = data.xss || false;
+                } else {
+                    wafConfig.sqli = data.enabled || false;
+                    wafConfig.xss = data.enabled || false;
+                }
+                updateAllWafToggles();
+            } catch (e) {
+                console.error('WAF config load error:', e);
+            }
+        }
+
+        async function toggleWafType(type) {
+            const newState = document.getElementById(`${type}Toggle`).checked;
+            wafConfig[type] = newState;
+            try {
+                await fetch(`${API_BASE}/services/${SERVICE_NAME}/waf/config`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ enabled: wafConfig.sqli || wafConfig.xss, sqli: wafConfig.sqli, xss: wafConfig.xss })
+                });
+                updateAllWafToggles();
+            } catch (e) {
+                console.error('WAF toggle error:', e);
+                wafConfig[type] = !newState;
+                updateAllWafToggles();
+            }
+        }
+
+        async function loadWafStats() {
+            try {
+                const resp = await fetch(`${API_BASE}/services/${SERVICE_NAME}/waf/stats`);
+                if (!resp.ok) return;
+                const data = await resp.json();
+                document.getElementById('wafTotalBlocks').textContent = data.total_blocks || 0;
+                document.getElementById('wafSqliBlocks').textContent = data.by_type?.sqli || 0;
+                document.getElementById('wafXssBlocks').textContent = data.by_type?.xss || 0;
+            } catch (e) {
+                console.error('WAF stats error:', e);
+            }
+        }
+
+        async function loadWafEvents() {
+            const container = document.getElementById('wafEventsContainer');
+            try {
+                const resp = await fetch(`${API_BASE}/services/${SERVICE_NAME}/waf/events?limit=20`);
+                if (!resp.ok) return;
+                const data = await resp.json();
+
+                if (!data.events || data.events.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align:center; padding:40px; color:var(--text-muted);">
+                            <div style="font-size: 36px; margin-bottom: 12px; opacity: 0.3;">✅</div>
+                            <p>No blocked attacks yet. Enable the firewall and it will monitor traffic.</p>
+                        </div>`;
+                    return;
+                }
+
+                let html = '<div style="display: flex; flex-direction: column; gap: 8px;">';
+                data.events.forEach(ev => {
+                    const time = new Date(ev.timestamp).toLocaleString();
+                    const typeColor = ev.attack_type === 'sqli' ? '#E53E3E' : '#DD6B20';
+                    const typeLabel = ev.attack_type === 'sqli' ? 'SQL Injection' : ev.attack_type === 'xss' ? 'XSS' : ev.attack_type.toUpperCase();
+                    const snippet = ev.payload_snippet
+                        ? ev.payload_snippet.substring(0, 80).replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                        : '';
+
+                    html += `
+                        <div style="padding: 14px 16px; background: rgba(255,255,255,0.5); border-radius: 12px; border: 1px solid rgba(0,0,0,0.05); border-left: 3px solid ${typeColor};">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="background: ${typeColor}15; color: ${typeColor}; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; text-transform: uppercase;">${typeLabel}</span>
+                                    <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted);">${ev.method} ${ev.path}</span>
+                                </div>
+                                <span style="font-size: 11px; color: var(--text-muted);">${time}</span>
+                            </div>
+                            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">
+                                <strong>Pattern:</strong> ${ev.description} &nbsp;•&nbsp; <strong>Field:</strong> ${ev.field}
+                            </div>
+                            <div style="font-size: 12px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">
+                                <strong>From:</strong> ${ev.client_ip}
+                                ${snippet ? ` &nbsp;•&nbsp; <strong>Payload:</strong> <code style="background: rgba(229,62,62,0.08); padding: 2px 6px; border-radius: 4px; color: ${typeColor};">${snippet}</code>` : ''}
+                            </div>
+                        </div>`;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            } catch (e) {
+                console.error('WAF events error:', e);
+            }
+        }
+
+        async function clearServiceWafEvents() {
+            try {
+                await fetch(`${API_BASE}/services/${SERVICE_NAME}/waf/events`, { method: 'DELETE' });
+                loadWafStats();
+                loadWafEvents();
+            } catch (e) {
+                console.error('WAF clear error:', e);
             }
         }
 
