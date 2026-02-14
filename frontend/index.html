@@ -10,106 +10,96 @@
         @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
 
         :root {
-            /* Classy Pastel - Light Theme (Default) */
-            --bg-primary: #FFFEF9;
-            /* Cream/Ivory */
+            /* Soft Pastel Crayon Theme */
+            --bg-primary: #FDF6EE;
 
-            --text-primary: #1A202C;
-            /* Very Dark Gray */
-            --text-secondary: #4A5568;
-            /* Slate */
-            --text-muted: #718096;
+            --text-primary: #4A4453;
+            --text-secondary: #7B7484;
+            --text-muted: #A9A2B2;
 
-            --border: #E2E8F0;
-            --border-focus: #F57799;
+            --border: #EDE4DA;
+            --border-focus: #C9A0D0;
 
-            /* The Palette */
-            --color-yellow: #FFF7CD;
-            --color-orange: #FDC3A1;
-            --color-red: #FB9B8F;
-            --color-pink: #F57799;
+            /* Pastel Crayon Palette */
+            --color-yellow: #FFF3D6;
+            --color-orange: #FFE0CC;
+            --color-red: #FFD4DE;
+            --color-pink: #E4D4F4;
 
-            --accent: #F57799;
-            --accent-hover: #FB9B8F;
-            --accent-glow: rgba(245, 119, 153, 0.25);
+            --accent: #C9A0D0;
+            --accent-hover: #B88BC2;
+            --accent-glow: rgba(201, 160, 208, 0.25);
 
-            --success: #10B981;
-            --error: #E53E3E;
+            --success: #8CC8A8;
+            --error: #E0908F;
 
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.03);
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.05);
+            --shadow-xl: 0 16px 50px rgba(0, 0, 0, 0.06);
 
-            --radius-md: 12px;
-            --radius-lg: 16px;
-            --radius-xl: 24px;
+            --radius-md: 16px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
 
-            --theme-toggle-bg: #EDF2F7;
-            --theme-toggle-icon: #F6E05E;
-            /* Sun yellow */
+            --theme-toggle-bg: #F5EDE4;
+            --theme-toggle-icon: #E8C96A;
 
-            --card-bg: rgba(255, 255, 255, 0.7);
-            --card-border: rgba(255, 255, 255, 0.5);
+            --card-bg: rgba(255, 255, 255, 0.55);
+            --card-border: rgba(255, 255, 255, 0.7);
 
-            --input-bg: white;
-            --input-border: transparent;
-            --input-text: #1A202C;
-            --input-placeholder: #CBD5E0;
+            --input-bg: rgba(255, 255, 255, 0.8);
+            --input-border: #EDE4DA;
+            --input-text: #4A4453;
+            --input-placeholder: #C4BCC9;
 
-            --dropzone-bg: white;
-            --dropzone-border: #CBD5E0;
-            --dropzone-text: #4A5568;
-            --dropzone-hover-bg: #FFF5F7;
+            --dropzone-bg: rgba(255, 255, 255, 0.6);
+            --dropzone-border: #D8CFC5;
+            --dropzone-text: #7B7484;
+            --dropzone-hover-bg: rgba(228, 212, 244, 0.2);
 
-            --table-row-hover: white;
+            --table-row-hover: rgba(255, 255, 255, 0.8);
             --table-row-shadow: var(--shadow-sm);
         }
 
         [data-theme="dark"] {
-            /* Midnight Classy - Dark Theme */
-            --bg-primary: #171923;
-            /* Deep Navy/Black */
+            /* Midnight Pastel - Dark Theme */
+            --bg-primary: #1E1A24;
 
-            --text-primary: #F7FAFC;
-            /* Off-white */
-            --text-secondary: #A0AEC0;
-            /* Light Slate */
-            --text-muted: #718096;
+            --text-primary: #F0EBF4;
+            --text-secondary: #A8A0B4;
+            --text-muted: #7A7288;
 
-            --border: #2D3748;
-            --border-focus: #F57799;
-            /* Keep accent same */
+            --border: #302A38;
+            --border-focus: #C9A0D0;
 
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+            --shadow: 0 4px 20px rgba(0, 0, 0, 0.35);
+            --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.4);
+            --shadow-xl: 0 16px 50px rgba(0, 0, 0, 0.5);
 
-            --theme-toggle-bg: #2D3748;
-            --theme-toggle-icon: #FAF089;
-            /* Moon white/yellow */
+            --theme-toggle-bg: #302A38;
+            --theme-toggle-icon: #E8C96A;
 
-            /* Adjust gradients for dark mode visibility */
-            --color-yellow: rgba(255, 247, 205, 0.15);
-            --color-orange: rgba(253, 195, 161, 0.15);
-            --color-red: rgba(251, 155, 143, 0.15);
-            --color-pink: rgba(245, 119, 153, 0.15);
+            --color-yellow: rgba(255, 243, 214, 0.1);
+            --color-orange: rgba(255, 224, 204, 0.1);
+            --color-red: rgba(255, 212, 222, 0.1);
+            --color-pink: rgba(228, 212, 244, 0.1);
 
-            --card-bg: rgba(26, 32, 44, 0.7);
-            --card-border: rgba(255, 255, 255, 0.08);
+            --card-bg: rgba(30, 26, 36, 0.7);
+            --card-border: rgba(255, 255, 255, 0.06);
 
-            --input-bg: #2D3748;
-            --input-border: transparent;
-            --input-text: #F7FAFC;
-            --input-placeholder: #718096;
+            --input-bg: #2A2432;
+            --input-border: #3A3444;
+            --input-text: #F0EBF4;
+            --input-placeholder: #7A7288;
 
-            --dropzone-bg: #2D3748;
-            --dropzone-border: #4A5568;
-            --dropzone-text: #A0AEC0;
-            --dropzone-hover-bg: rgba(245, 119, 153, 0.1);
+            --dropzone-bg: #2A2432;
+            --dropzone-border: #4A4454;
+            --dropzone-text: #A8A0B4;
+            --dropzone-hover-bg: rgba(201, 160, 208, 0.1);
 
-            --table-row-hover: rgba(45, 55, 72, 0.8);
+            --table-row-hover: rgba(42, 36, 50, 0.8);
             --table-row-shadow: var(--shadow);
         }
 
@@ -147,21 +137,44 @@
                 /* Salmon */
                 radial-gradient(circle at 10% 90%, var(--color-pink) 0%, transparent 50%);
             /* Pink */
-            filter: blur(40px);
+            filter: blur(70px);
             pointer-events: none;
             z-index: -1;
             transition: opacity 0.5s ease;
         }
 
         [data-theme="dark"] body::before {
-            opacity: 0.6;
+            opacity: 0.5;
         }
 
         .container {
-            max-width: 1000px;
+            max-width: 1440px;
             margin: 0 auto;
-            padding: 60px 24px;
+            padding: 48px 48px;
             position: relative;
+        }
+
+        /* Landscape Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 1.8fr;
+            gap: 32px;
+            align-items: start;
+        }
+
+        .dashboard-grid .card.deploy-theme {
+            padding: 32px;
+            position: sticky;
+            top: 48px;
+        }
+
+        @media (max-width: 1100px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            .dashboard-grid .card.deploy-theme {
+                position: static;
+            }
         }
 
         /* Theme Toggle Button */
@@ -191,7 +204,7 @@
         /* Header */
         header {
             text-align: center;
-            margin-bottom: 64px;
+            margin-bottom: 48px;
             animation: fadeInDown 0.8s ease-out;
         }
 
@@ -212,7 +225,7 @@
             align-items: center;
             justify-content: center;
             font-size: 32px;
-            box-shadow: 0 12px 30px rgba(245, 119, 153, 0.4);
+            box-shadow: 0 12px 30px rgba(201, 160, 208, 0.35);
             color: white;
             z-index: 2;
         }
@@ -229,18 +242,18 @@
         }
 
         header h1 {
-            font-size: 42px;
+            font-size: 38px;
             font-weight: 800;
             letter-spacing: -1px;
-            color: #1A202C;
-            background: linear-gradient(135deg, #1A202C 0%, #4A5568 100%);
+            color: #4A4453;
+            background: linear-gradient(135deg, #5A4E66 0%, #8B7FA0 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 8px;
         }
 
         [data-theme="dark"] header h1 {
-            background: linear-gradient(135deg, #F7FAFC 0%, #CBD5E0 100%);
+            background: linear-gradient(135deg, #F0EBF4 0%, #C4BCC9 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -282,27 +295,31 @@
             color: var(--text-primary);
         }
 
-        /* Themes - Light Mode Overrides */
+        /* Pastel Crayon Themes */
         .card.deploy-theme {
-            background: linear-gradient(145deg, rgba(255, 251, 240, 0.9) 0%, rgba(255, 245, 235, 0.9) 100%);
-            box-shadow: var(--shadow-lg), 0 0 0 1px rgba(253, 195, 161, 0.2);
+            background: linear-gradient(145deg, rgba(255, 243, 214, 0.45) 0%, rgba(255, 224, 204, 0.3) 100%);
+            box-shadow: var(--shadow-lg);
+            border: 2px solid rgba(255, 224, 204, 0.4);
         }
 
         .card.list-theme {
-            background: linear-gradient(145deg, rgba(255, 255, 240, 0.9) 0%, rgba(254, 252, 191, 0.2) 100%);
-            box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255, 247, 205, 0.3);
+            background: linear-gradient(145deg, rgba(228, 212, 244, 0.2) 0%, rgba(255, 212, 222, 0.15) 100%);
+            box-shadow: var(--shadow-lg);
+            border: 2px solid rgba(228, 212, 244, 0.3);
             min-height: 300px;
         }
 
         /* Dark Mode Theme Overrides */
         [data-theme="dark"] .card.deploy-theme {
-            background: linear-gradient(145deg, rgba(35, 25, 20, 0.8) 0%, rgba(20, 20, 30, 0.8) 100%);
-            box-shadow: var(--shadow-lg), 0 0 0 1px rgba(253, 195, 161, 0.1);
+            background: linear-gradient(145deg, rgba(40, 30, 24, 0.8) 0%, rgba(30, 26, 36, 0.8) 100%);
+            box-shadow: var(--shadow-lg);
+            border-color: rgba(255, 224, 204, 0.08);
         }
 
         [data-theme="dark"] .card.list-theme {
-            background: linear-gradient(145deg, rgba(30, 30, 20, 0.8) 0%, rgba(20, 20, 30, 0.8) 100%);
-            box-shadow: var(--shadow-lg), 0 0 0 1px rgba(255, 247, 205, 0.1);
+            background: linear-gradient(145deg, rgba(34, 28, 42, 0.8) 0%, rgba(30, 26, 36, 0.8) 100%);
+            box-shadow: var(--shadow-lg);
+            border-color: rgba(228, 212, 244, 0.08);
         }
 
         .icon-box {
@@ -316,30 +333,30 @@
         }
 
         .deploy-theme .icon-box {
-            background: rgba(253, 195, 161, 0.3);
-            color: #9C4221;
+            background: rgba(255, 224, 204, 0.5);
+            color: #8B7060;
         }
 
         .list-theme .icon-box {
-            background: rgba(255, 247, 205, 0.6);
-            color: #744210;
+            background: rgba(228, 212, 244, 0.5);
+            color: #6B5A7A;
         }
 
         [data-theme="dark"] .deploy-theme .icon-box {
-            background: rgba(253, 195, 161, 0.2);
-            color: #FDC3A1;
+            background: rgba(255, 224, 204, 0.15);
+            color: #FFD8BE;
         }
 
         [data-theme="dark"] .list-theme .icon-box {
-            background: rgba(255, 247, 205, 0.15);
-            color: #FFF7CD;
+            background: rgba(228, 212, 244, 0.15);
+            color: #E4D4F4;
         }
 
         /* FORM STYLES */
         .form-grid {
             display: grid;
-            grid-template-columns: 1.2fr 1.5fr 0.8fr;
-            gap: 32px;
+            grid-template-columns: 1fr;
+            gap: 20px;
             align-items: start;
         }
 
@@ -463,9 +480,9 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--color-pink), #ED64A6);
+            background: linear-gradient(135deg, #C9A0D0, #D4A0B9);
             color: white;
-            box-shadow: 0 10px 20px -5px rgba(245, 119, 153, 0.5);
+            box-shadow: 0 8px 20px -4px rgba(201, 160, 208, 0.4);
         }
 
         .btn-primary:active {
@@ -474,7 +491,7 @@
 
         .btn-primary:hover {
             transform: translateY(-2px);
-            box-shadow: 0 15px 30px -5px rgba(245, 119, 153, 0.6);
+            box-shadow: 0 12px 28px -4px rgba(201, 160, 208, 0.5);
         }
 
         /* TABLE STYLES */
@@ -558,21 +575,21 @@
         }
 
         .badge.running {
-            background: rgba(49, 151, 149, 0.2);
-            color: #319795;
+            background: rgba(140, 200, 168, 0.2);
+            color: #5A9A7A;
         }
 
         .badge.deployed {
-            background: rgba(47, 133, 90, 0.2);
-            color: #2F855A;
+            background: rgba(140, 200, 168, 0.25);
+            color: #5A9A7A;
         }
 
         [data-theme="dark"] .badge.running {
-            color: #81E6D9;
+            color: #8CC8A8;
         }
 
         [data-theme="dark"] .badge.deployed {
-            color: #68D391;
+            color: #8CC8A8;
         }
 
         a.external-link {
@@ -590,7 +607,7 @@
         }
 
         .action-btn {
-            background: rgba(245, 119, 153, 0.1);
+            background: rgba(201, 160, 208, 0.12);
             color: var(--accent);
             padding: 8px 16px;
             border-radius: 10px;
@@ -617,32 +634,32 @@
         }
 
         .status-box.success {
-            background: rgba(16, 185, 129, 0.1);
-            color: #22543D;
-            border-left: 5px solid #48BB78;
+            background: rgba(140, 200, 168, 0.15);
+            color: #3A6B50;
+            border-left: 5px solid #8CC8A8;
         }
 
         .status-box.error {
-            background: rgba(229, 62, 62, 0.1);
-            color: #742A2A;
-            border-left: 5px solid #F56565;
+            background: rgba(224, 144, 143, 0.15);
+            color: #7A4040;
+            border-left: 5px solid #E0908F;
         }
 
         [data-theme="dark"] .status-box.success {
-            color: #9AE6B4;
+            color: #8CC8A8;
         }
 
         [data-theme="dark"] .status-box.error {
-            color: #FEB2B2;
+            color: #E0908F;
         }
 
         footer {
             text-align: center;
-            margin-top: 80px;
+            margin-top: 60px;
             color: var(--text-muted);
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
-            opacity: 0.6;
+            opacity: 0.5;
         }
 
         /* ANIMATIONS */
@@ -688,15 +705,15 @@
         @media (max-width: 800px) {
             .form-grid {
                 grid-template-columns: 1fr;
-                gap: 24px;
+                gap: 20px;
             }
 
             .container {
-                padding: 40px 20px;
+                padding: 32px 20px;
             }
 
             header h1 {
-                font-size: 32px;
+                font-size: 28px;
             }
         }
     </style>
@@ -718,7 +735,8 @@
             <p>Orchestrate your containers with enterprise-grade security and reliability.</p>
         </header>
 
-        <!-- Deploy Form (Orange Theme) -->
+        <div class="dashboard-grid">
+        <!-- Deploy Form -->
         <div class="card deploy-theme">
             <h2>
                 <div class="icon-box">📦</div> Deploy New Service
@@ -779,9 +797,10 @@
                 </div>
             </div>
         </div>
+        </div>
 
         <footer>
-            Built with ❤️ for Cyber • Scalable • Secure • 2026
+            crafted with care · secure · scalable · 2026
         </footer>
     </div>
 
@@ -1016,6 +1035,88 @@
 
         loadServices();
         setInterval(loadServices, 10000);
+
+        // ═══════════════════════════════════════════════════════
+        //  WAF Dashboard Logic
+        // ═══════════════════════════════════════════════════════
+
+        async function loadWafStats() {
+            try {
+                const resp = await fetch(`${API_BASE}/waf/stats`);
+                if (!resp.ok) return;
+                const data = await resp.json();
+                document.getElementById('wafTotalBlocks').textContent = data.total_blocks || 0;
+                document.getElementById('wafSqliBlocks').textContent = data.by_type?.sqli || 0;
+                document.getElementById('wafXssBlocks').textContent = data.by_type?.xss || 0;
+            } catch (e) {
+                console.error('WAF stats error:', e);
+            }
+        }
+
+        async function loadWafEvents() {
+            const container = document.getElementById('wafEventsContainer');
+            try {
+                const resp = await fetch(`${API_BASE}/waf/events?limit=20`);
+                if (!resp.ok) return;
+                const data = await resp.json();
+
+                if (!data.events || data.events.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align:center; padding:40px; color:var(--text-muted);">
+                            <div style="font-size: 36px; margin-bottom: 12px; opacity: 0.3;">✅</div>
+                            <p>No blocked attacks yet. Gateway is monitoring.</p>
+                        </div>`;
+                    return;
+                }
+
+                let html = '<div style="display: flex; flex-direction: column; gap: 8px;">';
+                data.events.forEach(ev => {
+                    const time = new Date(ev.timestamp).toLocaleString();
+                    const typeColor = ev.attack_type === 'sqli' ? '#B07070' : '#C0906A';
+                    const typeLabel = ev.attack_type === 'sqli' ? 'SQL Injection' : ev.attack_type.toUpperCase();
+                    const snippet = ev.payload_snippet
+                        ? ev.payload_snippet.substring(0, 80).replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                        : '';
+
+                    html += `
+                        <div style="padding: 14px 16px; background: var(--card-bg); border-radius: var(--radius-md); border: 1px solid var(--card-border); border-left: 3px solid ${typeColor};">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span style="background: ${typeColor}15; color: ${typeColor}; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 6px; text-transform: uppercase;">${typeLabel}</span>
+                                    <span style="font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text-muted);">${ev.method} ${ev.path}</span>
+                                </div>
+                                <span style="font-size: 11px; color: var(--text-muted);">${time}</span>
+                            </div>
+                            <div style="font-size: 13px; color: var(--text-secondary); margin-bottom: 4px;">
+                                <strong>Pattern:</strong> ${ev.description} &nbsp;•&nbsp; <strong>Field:</strong> ${ev.field}
+                            </div>
+                            <div style="font-size: 12px; color: var(--text-muted); font-family: 'JetBrains Mono', monospace;">
+                                <strong>From:</strong> ${ev.client_ip}
+                                ${snippet ? ` &nbsp;•&nbsp; <strong>Payload:</strong> <code style="background: rgba(229,62,62,0.08); padding: 2px 6px; border-radius: 4px; color: ${typeColor};">${snippet}</code>` : ''}
+                            </div>
+                        </div>`;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+            } catch (e) {
+                console.error('WAF events error:', e);
+            }
+        }
+
+        async function clearWafEvents() {
+            try {
+                await fetch(`${API_BASE}/waf/events`, { method: 'DELETE' });
+                loadWafStats();
+                loadWafEvents();
+            } catch (e) {
+                console.error('WAF clear error:', e);
+            }
+        }
+
+        // Initial load + auto-refresh
+        loadWafStats();
+        loadWafEvents();
+        setInterval(() => { loadWafStats(); loadWafEvents(); }, 10000);
     </script>
 </body>
 

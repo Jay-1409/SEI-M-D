@@ -9,6 +9,7 @@ Only this gateway is exposed externally (NodePort 30080).
 Includes WAF capabilities:
   - SQL Injection detection on query params, body, path, and headers
   - XSS (Cross-Site Scripting) detection and blocking
+  - Header sanitization (strip dangerous headers, enforce Content-Type)
 """
 
 from fastapi import FastAPI, Request, HTTPException
@@ -342,7 +343,123 @@ def match_route(pattern: str, path: str) -> bool:
 
 
 # ═══════════════════════════════════════════════════════════════
-#  WAF Middleware — SQLi + XSS Detection (runs before rate limiting)
+#  WAF — Header Sanitization
+# ═══════════════════════════════════════════════════════════════
+
+# Headers that should be stripped from inbound requests before proxying.
+# These are either dangerous, used for internal routing only, or
+# can be exploited for cache-poisoning / SSRF / host-header attacks.
+DANGEROUS_HEADERS: set[str] = {
+    # Hop-by-hop / proxy headers
+    "x-forwarded-host",
+    "x-forwarded-server",
+    "x-original-url",
+    "x-rewrite-url",
+    "x-host",
+    "x-forwarded-port",
+    "x-forwarded-scheme",
+
+    # Cache-poisoning vectors
+    "x-original-host",
+    "x-http-method-override",
+    "x-http-method",
+    "x-method-override",
+
+    # Server-Side Request Forgery (SSRF) vectors
+    "proxy",
+    "x-proxy-url",
+    "request-uri",
+    "x-original-url",
+
+    # Debug / internal headers
+    "x-debug",
+    "x-debug-token",
+    "x-debug-token-link",
+    "x-custom-ip-authorization",
+    "x-cluster-client-ip",
+
+    # Server identification (strip before forwarding)
+    "server",
+    "x-powered-by",
+    "x-aspnet-version",
+    "x-aspnetmvc-version",
+    "x-runtime",
+}
+
+# Allowed Content-Type values for requests with a body.
+# Anything else is rejected when header enforcement is on.
+ALLOWED_CONTENT_TYPES: set[str] = {
+    "application/json",
+    "application/x-www-form-urlencoded",
+    "multipart/form-data",
+    "text/plain",
+    "application/xml",
+    "text/xml",
+    "application/octet-stream",
+}
+
+
+def check_headers(headers, method: str) -> tuple[bool, str, str, list[str]]:
+    """
+    Inspect request headers.
+    Returns (should_block, reason, description, list_of_stripped_headers).
+    should_block is True only if Content-Type enforcement fails.
+    """
+    stripped: list[str] = []
+
+    # Collect dangerous headers that are present
+    for h in headers:
+        if h.lower() in DANGEROUS_HEADERS:
+            stripped.append(h)
+
+    # Enforce Content-Type on body-carrying methods
+    if method in ("POST", "PUT", "PATCH"):
+        ct = headers.get("content-type", "")
+        if ct:
+            # Extract the media type (before ; params like charset)
+            media_type = ct.split(";")[0].strip().lower()
+            if media_type and media_type not in ALLOWED_CONTENT_TYPES:
+                return True, f"Disallowed Content-Type: {media_type}", "Content-Type enforcement", stripped
+
+    return False, "", "", stripped
+
+
+async def log_header_event(redis_cl, request: Request, stripped_headers: list[str],
+                           blocked: bool, reason: str, service_name: str):
+    """Log header sanitization events to Redis."""
+    event = {
+        "timestamp": datetime.now(timezone.utc).isoformat(),
+        "attack_type": "headers",
+        "client_ip": request.client.host if request.client else "unknown",
+        "method": request.method,
+        "path": str(request.url.path),
+        "service_name": service_name,
+        "field": "headers",
+        "description": reason if blocked else f"Stripped: {', '.join(stripped_headers)}",
+        "payload_snippet": ", ".join(stripped_headers)[:200] if stripped_headers else reason[:200],
+        "action": "blocked" if blocked else "sanitized",
+    }
+    event_json = json.dumps(event)
+
+    if redis_cl:
+        try:
+            # Global
+            redis_cl.lpush("waf:events", event_json)
+            redis_cl.ltrim("waf:events", 0, 999)
+            # Per-service
+            redis_cl.lpush(f"waf:events:{service_name}", event_json)
+            redis_cl.ltrim(f"waf:events:{service_name}", 0, 499)
+            # Counters
+            redis_cl.incr("waf:blocks:total")
+            redis_cl.incr("waf:blocks:headers")
+            redis_cl.incr(f"waf:blocks:{service_name}:total")
+            redis_cl.incr(f"waf:blocks:{service_name}:headers")
+        except Exception as e:
+            logger.error(f"Failed to log header event to Redis: {e}")
+
+
+# ═══════════════════════════════════════════════════════════════
+#  WAF Middleware — SQLi + XSS + Header Sanitization
 # ═══════════════════════════════════════════════════════════════
 
 def _run_checks(value: str, sqli_on: bool, xss_on: bool) -> tuple[bool, str, str]:
@@ -394,17 +511,19 @@ async def waf_middleware(request: Request, call_next):
     # Load per-service WAF config
     sqli_on = False
     xss_on = False
+    headers_on = False
     if r and service_name:
         try:
             waf_config_raw = r.get(f"config:waf:{service_name}")
             if waf_config_raw:
                 waf_config = json.loads(waf_config_raw)
-                # Support legacy "enabled" field (turns on both) and granular fields
-                if "sqli" in waf_config or "xss" in waf_config:
+                # Support legacy "enabled" field (turns on all) and granular fields
+                if "sqli" in waf_config or "xss" in waf_config or "headers" in waf_config:
                     sqli_on = waf_config.get("sqli", False)
                     xss_on = waf_config.get("xss", False)
+                    headers_on = waf_config.get("headers", False)
                 else:
-                    # Legacy: single "enabled" toggle turns on both
+                    # Legacy: single "enabled" toggle turns on sqli+xss
                     both = waf_config.get("enabled", False)
                     sqli_on = both
                     xss_on = both
@@ -412,8 +531,30 @@ async def waf_middleware(request: Request, call_next):
             logger.error(f"WAF config check failed for {service_name}: {e}")
 
     # If nothing is enabled, skip
-    if not sqli_on and not xss_on:
+    if not sqli_on and not xss_on and not headers_on:
         return await call_next(request)
+
+    # ── Header Sanitization ──
+    if headers_on:
+        should_block, reason, desc, stripped = check_headers(request.headers, request.method)
+        if should_block:
+            await log_header_event(r, request, stripped, True, reason, service_name)
+            return JSONResponse(status_code=403, content={
+                "detail": "Request blocked by WAF",
+                "reason": reason,
+                "attack_type": "headers",
+                "pattern": desc,
+            })
+        if stripped:
+            await log_header_event(r, request, stripped, False, "", service_name)
+            # We can't mutate request.headers directly (immutable),
+            # but the proxy handler already filters headers.
+            # We store the stripped names so the proxy can skip them.
+            request.state.waf_stripped_headers = {h.lower() for h in stripped}
+        else:
+            request.state.waf_stripped_headers = set()
+    else:
+        request.state.waf_stripped_headers = set()
 
     attack_labels = {"sqli": "SQL injection", "xss": "Cross-Site Scripting (XSS)"}
 
@@ -735,9 +876,10 @@ async def set_waf_config(service_name: str, payload: dict):
             "enabled": payload.get("enabled", False),
             "sqli": payload.get("sqli", payload.get("enabled", False)),
             "xss": payload.get("xss", payload.get("enabled", False)),
+            "headers": payload.get("headers", False),
         }
         r.set(f"config:waf:{service_name}", json.dumps(config))
-        logger.info(f"WAF config updated for {service_name}: sqli={config['sqli']}, xss={config['xss']}")
+        logger.info(f"WAF config updated for {service_name}: sqli={config['sqli']}, xss={config['xss']}, headers={config['headers']}")
         return {"status": "saved", "service_name": service_name, **config}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to save WAF config: {e}")
@@ -773,15 +915,18 @@ async def waf_stats(service: str = None):
             total = int(r.get(f"waf:blocks:{service}:total") or 0)
             sqli_count = int(r.get(f"waf:blocks:{service}:sqli") or 0)
             xss_count = int(r.get(f"waf:blocks:{service}:xss") or 0)
+            headers_count = int(r.get(f"waf:blocks:{service}:headers") or 0)
         else:
             total = int(r.get("waf:blocks:total") or 0)
             sqli_count = int(r.get("waf:blocks:sqli") or 0)
             xss_count = int(r.get("waf:blocks:xss") or 0)
+            headers_count = int(r.get("waf:blocks:headers") or 0)
         return {
             "total_blocks": total,
             "by_type": {
                 "sqli": sqli_count,
                 "xss": xss_count,
+                "headers": headers_count,
             },
         }
     except Exception as e:
@@ -801,9 +946,10 @@ async def clear_waf_events(service: str = None):
                 f"waf:blocks:{service}:total",
                 f"waf:blocks:{service}:sqli",
                 f"waf:blocks:{service}:xss",
+                f"waf:blocks:{service}:headers",
             )
         else:
-            r.delete("waf:events", "waf:blocks:total", "waf:blocks:sqli", "waf:blocks:xss")
+            r.delete("waf:events", "waf:blocks:total", "waf:blocks:sqli", "waf:blocks:xss", "waf:blocks:headers")
         return {"status": "cleared"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to clear WAF events: {e}")
@@ -836,7 +982,8 @@ async def proxy(service_name: str, path: str, request: Request):
                 method=request.method,
                 url=target_url,
                 headers={k: v for k, v in request.headers.items()
-                         if k.lower() not in ("host", "content-length")},
+                         if k.lower() not in ("host", "content-length")
+                         and k.lower() not in getattr(request.state, 'waf_stripped_headers', set())},
                 content=body,
                 params=dict(request.query_params),
             )

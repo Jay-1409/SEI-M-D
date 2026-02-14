@@ -1,0 +1,43 @@
+meta {
+  name: Test Dangerous Headers
+  type: http
+  seq: 13
+}
+
+get {
+  url: http://localhost:30080/example-api/
+  body: none
+  auth: none
+}
+
+headers {
+  X-Forwarded-Host: evil.com
+  X-Original-URL: /admin
+  X-HTTP-Method-Override: DELETE
+  X-Debug: true
+}
+
+docs {
+  # Test Header Sanitization (WAF)
+
+  Sends a request with dangerous headers that should be stripped by the WAF.
+  When Header Sanitization is enabled, the gateway will:
+  - **Strip** dangerous headers (X-Forwarded-Host, X-Original-URL, etc.) before proxying
+  - **Log** the sanitization event in the WAF event log
+
+  ## Prerequisites
+  1. Deploy a service (e.g., "example-api")
+  2. Go to the service's **Firewall** tab in the UI
+  3. Turn ON the **Header Sanitization** toggle
+
+  ## Expected Behavior
+  - The request **passes through** (200 OK) but dangerous headers are stripped
+  - A "Headers" event appears in the WAF event log showing which headers were removed
+  - The downstream service never sees the dangerous headers
+
+  ## Dangerous headers being sent
+  - `X-Forwarded-Host: evil.com` — Host header injection / cache poisoning
+  - `X-Original-URL: /admin` — URL rewrite / SSRF attack
+  - `X-HTTP-Method-Override: DELETE` — Method override attack
+  - `X-Debug: true` — Debug header leak
+}

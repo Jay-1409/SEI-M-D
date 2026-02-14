@@ -426,6 +426,149 @@ async def start_service(service_name: str):
     return {"status": "success", "message": f"Service '{service_name}' started"}
 
 
+@app.post("/services/{service_name}/rename")
+async def rename_service(service_name: str, payload: dict):
+    """
+    Rename a deployed service:
+      1. Create new K8s deployment + service with the new name
+      2. Register new name in gateway
+      3. Deregister old name from gateway
+      4. Delete old K8s deployment + service
+      5. Migrate Redis data (WAF config, rate limit, scan results)
+      6. Update in-memory registry
+    """
+    new_name = payload.get("new_name", "").strip()
+    if not new_name:
+        raise HTTPException(status_code=400, detail="new_name is required")
+
+    import re as _re
+    if not _re.match(r'^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$', new_name):
+        raise HTTPException(status_code=400, detail="Name must be lowercase alphanumeric with hyphens only")
+
+    if new_name == service_name:
+        raise HTTPException(status_code=400, detail="New name is same as current name")
+
+    # Load K8s config
+    try:
+        config.load_incluster_config()
+    except config.ConfigException:
+        config.load_kube_config()
+
+    apps_v1 = client.AppsV1Api()
+    core_v1 = client.CoreV1Api()
+
+    # Check old service exists
+    try:
+        old_dep = apps_v1.read_namespaced_deployment(name=service_name, namespace="user-services")
+    except client.exceptions.ApiException as e:
+        if e.status == 404:
+            raise HTTPException(status_code=404, detail=f"Service '{service_name}' not found")
+        raise
+
+    # Check new name doesn't already exist
+    try:
+        apps_v1.read_namespaced_deployment(name=new_name, namespace="user-services")
+        raise HTTPException(status_code=409, detail=f"Service '{new_name}' already exists")
+    except client.exceptions.ApiException as e:
+        if e.status != 404:
+            raise
+
+    # Get the container info from old deployment
+    container = old_dep.spec.template.spec.containers[0]
+    docker_image = container.image
+    container_port = container.ports[0].container_port if container.ports else 8000
+
+    # 1. Create new K8s deployment + service
+    try:
+        create_deployment(new_name, docker_image, container_port)
+        logger.info(f"Created new deployment: {new_name}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to create new deployment: {e}")
+
+    try:
+        create_service(new_name, container_port)
+        logger.info(f"Created new service: {new_name}")
+    except Exception as e:
+        # Rollback: delete the new deployment
+        try:
+            delete_deployment(new_name)
+        except Exception:
+            pass
+        raise HTTPException(status_code=500, detail=f"Failed to create new service: {e}")
+
+    # 2. Register new name in gateway
+    try:
+        target_url = f"http://{new_name}-service.user-services.svc.cluster.local:{container_port}"
+        async with httpx.AsyncClient() as http_client:
+            await http_client.post(
+                f"{GATEWAY_REGISTER_URL}/register",
+                json={"service_name": new_name, "target_url": target_url},
+            )
+        logger.info(f"Registered new gateway route: {new_name}")
+    except Exception as e:
+        logger.warning(f"Gateway registration for new name failed: {e}")
+
+    # 3. Deregister old name from gateway
+    try:
+        async with httpx.AsyncClient() as http_client:
+            await http_client.delete(f"{GATEWAY_REGISTER_URL}/register/{service_name}")
+        logger.info(f"Deregistered old gateway route: {service_name}")
+    except Exception as e:
+        logger.warning(f"Gateway deregistration for old name failed: {e}")
+
+    # 4. Delete old K8s resources
+    try:
+        delete_deployment(service_name)
+        delete_service(service_name)
+        logger.info(f"Deleted old K8s resources: {service_name}")
+    except Exception as e:
+        logger.warning(f"Failed to delete old K8s resources: {e}")
+
+    # 5. Migrate Redis data
+    if redis_client:
+        try:
+            keys_to_migrate = [
+                f"config:waf:{service_name}",
+                f"config:ratelimit:{service_name}",
+                f"waf:events:{service_name}",
+                f"waf:blocks:{service_name}:total",
+                f"waf:blocks:{service_name}:sqli",
+                f"waf:blocks:{service_name}:xss",
+                f"waf:blocks:{service_name}:headers",
+                f"routes:{service_name}",
+                f"service_scan:{service_name}",
+            ]
+            for old_key in keys_to_migrate:
+                if redis_client.exists(old_key):
+                    new_key = old_key.replace(service_name, new_name, 1)
+                    redis_client.rename(old_key, new_key)
+
+            logger.info(f"Migrated Redis data from {service_name} to {new_name}")
+        except Exception as e:
+            logger.warning(f"Redis migration partial failure: {e}")
+
+    # 6. Update in-memory registry
+    if service_name in deployed_services:
+        del deployed_services[service_name]
+
+    public_url = f"http://{GATEWAY_HOST}:{GATEWAY_PORT}/{new_name}"
+    deployed_services[new_name] = ServiceInfo(
+        service_name=new_name,
+        docker_image=docker_image,
+        container_port=container_port,
+        public_url=public_url,
+        status="deployed",
+    )
+
+    logger.info(f"Service renamed: {service_name} -> {new_name}")
+    return {
+        "status": "success",
+        "old_name": service_name,
+        "new_name": new_name,
+        "public_url": public_url,
+        "message": f"Service renamed from '{service_name}' to '{new_name}'"
+    }
+
 
 @app.get("/services", response_model=list[ServiceInfo])
 async def list_services():

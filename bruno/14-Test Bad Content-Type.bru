@@ -1,0 +1,49 @@
+meta {
+  name: Test Bad Content-Type
+  type: http
+  seq: 14
+}
+
+post {
+  url: http://localhost:30080/example-api/data
+  body: text
+  auth: none
+}
+
+headers {
+  Content-Type: application/x-evil-payload
+}
+
+body:text {
+  {"test": "data"}
+}
+
+docs {
+  # Test Content-Type Enforcement (WAF)
+
+  Sends a POST request with a disallowed Content-Type header.
+  The WAF should **block** this with a **403 Forbidden** response.
+
+  ## Prerequisites
+  1. Deploy a service (e.g., "example-api")
+  2. Go to the service's **Firewall** tab in the UI
+  3. Turn ON the **Header Sanitization** toggle
+
+  ## Expected Response (WAF enabled)
+  ```json
+  {
+    "detail": "Request blocked by WAF",
+    "reason": "Disallowed Content-Type: application/x-evil-payload",
+    "attack_type": "headers",
+    "pattern": "Content-Type enforcement"
+  }
+  ```
+
+  ## Allowed Content-Types
+  - application/json
+  - application/x-www-form-urlencoded
+  - multipart/form-data
+  - text/plain
+  - application/xml / text/xml
+  - application/octet-stream
+}
