@@ -749,6 +749,118 @@ async def get_service_apis(service_name: str):
     return found_data
 
 
+# ═══════════════════════════════════════════════════════════════
+#  WAF Proxy Endpoints (forward to gateway's WAF endpoints)
+# ═══════════════════════════════════════════════════════════════
+
+@app.get("/services/{service_name}/waf/config")
+async def get_service_waf_config(service_name: str):
+    """Get WAF config for a specific service."""
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as http_client:
+            resp = await http_client.get(f"{GATEWAY_REGISTER_URL}/waf/config/{service_name}")
+            return resp.json()
+    except Exception as e:
+        logger.error(f"Failed to fetch WAF config: {e}")
+        raise HTTPException(status_code=502, detail=f"Gateway unreachable: {e}")
+
+
+@app.post("/services/{service_name}/waf/config")
+async def set_service_waf_config(service_name: str, payload: dict):
+    """Set WAF config for a specific service."""
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as http_client:
+            resp = await http_client.post(
+                f"{GATEWAY_REGISTER_URL}/waf/config/{service_name}",
+                json=payload
+            )
+            return resp.json()
+    except Exception as e:
+        logger.error(f"Failed to set WAF config: {e}")
+        raise HTTPException(status_code=502, detail=f"Gateway unreachable: {e}")
+
+
+@app.get("/services/{service_name}/waf/events")
+async def get_service_waf_events(service_name: str, limit: int = 50):
+    """Get WAF events for a specific service."""
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as http_client:
+            resp = await http_client.get(
+                f"{GATEWAY_REGISTER_URL}/waf/events",
+                params={"limit": limit, "service": service_name}
+            )
+            return resp.json()
+    except Exception as e:
+        logger.error(f"Failed to fetch WAF events: {e}")
+        raise HTTPException(status_code=502, detail=f"Gateway unreachable: {e}")
+
+
+@app.get("/services/{service_name}/waf/stats")
+async def get_service_waf_stats(service_name: str):
+    """Get WAF stats for a specific service."""
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as http_client:
+            resp = await http_client.get(
+                f"{GATEWAY_REGISTER_URL}/waf/stats",
+                params={"service": service_name}
+            )
+            return resp.json()
+    except Exception as e:
+        logger.error(f"Failed to fetch WAF stats: {e}")
+        raise HTTPException(status_code=502, detail=f"Gateway unreachable: {e}")
+
+
+@app.delete("/services/{service_name}/waf/events")
+async def clear_service_waf_events(service_name: str):
+    """Clear WAF events for a specific service."""
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as http_client:
+            resp = await http_client.delete(
+                f"{GATEWAY_REGISTER_URL}/waf/events",
+                params={"service": service_name}
+            )
+            return resp.json()
+    except Exception as e:
+        logger.error(f"Failed to clear WAF events: {e}")
+        raise HTTPException(status_code=502, detail=f"Gateway unreachable: {e}")
+
+
+@app.get("/waf/events")
+async def get_waf_events(limit: int = 50):
+    """Proxy global WAF events from the gateway."""
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as http_client:
+            resp = await http_client.get(f"{GATEWAY_REGISTER_URL}/waf/events", params={"limit": limit})
+            return resp.json()
+    except Exception as e:
+        logger.error(f"Failed to fetch WAF events: {e}")
+        raise HTTPException(status_code=502, detail=f"Gateway unreachable: {e}")
+
+
+@app.get("/waf/stats")
+async def get_waf_stats():
+    """Proxy global WAF stats from the gateway."""
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as http_client:
+            resp = await http_client.get(f"{GATEWAY_REGISTER_URL}/waf/stats")
+            return resp.json()
+    except Exception as e:
+        logger.error(f"Failed to fetch WAF stats: {e}")
+        raise HTTPException(status_code=502, detail=f"Gateway unreachable: {e}")
+
+
+@app.delete("/waf/events")
+async def clear_waf_events():
+    """Proxy global WAF clear from the gateway."""
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as http_client:
+            resp = await http_client.delete(f"{GATEWAY_REGISTER_URL}/waf/events")
+            return resp.json()
+    except Exception as e:
+        logger.error(f"Failed to clear WAF events: {e}")
+        raise HTTPException(status_code=502, detail=f"Gateway unreachable: {e}")
+
+
 @app.get("/health")
 async def health():
     return {"status": "healthy"}
