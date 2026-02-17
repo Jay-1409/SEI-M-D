@@ -696,6 +696,228 @@
                 transform: rotate(360deg);
             }
         }
+
+        /* ── SECURITY TAB STYLES ────────────────────────── */
+        .scan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 28px;
+        }
+        .scan-header-title h2 {
+            margin: 0; padding: 0; font-size: 22px;
+        }
+        .scan-header-title p {
+            margin: 6px 0 0; font-size: 13px; color: var(--text-muted);
+        }
+        .scan-btn {
+            display: inline-flex; align-items: center; gap: 8px;
+            padding: 10px 20px; border: none; border-radius: 12px;
+            font-size: 14px; font-weight: 700; cursor: pointer;
+            background: linear-gradient(135deg, #E8707E, #D4606E);
+            color: white; box-shadow: 0 4px 14px rgba(212, 96, 110, 0.3);
+            transition: all 0.25s;
+        }
+        .scan-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(212, 96, 110, 0.45);
+        }
+        .scan-btn:disabled {
+            opacity: 0.6; cursor: not-allowed; transform: none;
+            box-shadow: 0 4px 14px rgba(212, 96, 110, 0.15);
+        }
+        .scan-btn svg { flex-shrink: 0; }
+
+        /* Summary strip */
+        .scan-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .scan-stat {
+            background: var(--info-item-bg);
+            border: 1px solid var(--info-item-border);
+            border-radius: 14px;
+            padding: 16px 18px;
+            text-align: center;
+        }
+        .scan-stat-value {
+            font-size: 26px; font-weight: 800;
+            color: var(--text-primary);
+            line-height: 1.1;
+        }
+        .scan-stat-label {
+            font-size: 11px; text-transform: uppercase; font-weight: 700;
+            letter-spacing: 0.8px; color: var(--text-muted); margin-top: 6px;
+        }
+
+        /* Progress bar */
+        .scan-progress {
+            background: var(--info-item-bg);
+            border: 1px solid var(--info-item-border);
+            border-radius: 14px;
+            padding: 20px 22px;
+            margin-bottom: 24px;
+            display: none;
+        }
+        .scan-progress.active { display: block; }
+        .scan-progress-header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 12px;
+        }
+        .scan-progress-label {
+            font-size: 13px; font-weight: 700; color: var(--text-primary);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .scan-progress-time {
+            font-size: 12px; color: var(--text-muted);
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .scan-progress-bar {
+            height: 6px; border-radius: 3px;
+            background: rgba(0,0,0,0.06); overflow: hidden;
+        }
+        [data-theme="dark"] .scan-progress-bar {
+            background: rgba(255,255,255,0.08);
+        }
+        .scan-progress-fill {
+            height: 100%; border-radius: 3px;
+            background: linear-gradient(90deg, #E8707E, #D4606E);
+            animation: progressPulse 2s ease-in-out infinite;
+            width: 60%;
+        }
+        @keyframes progressPulse {
+            0%,100% { opacity: 0.7; width: 40%; }
+            50% { opacity: 1; width: 75%; }
+        }
+
+        /* Severity badges */
+        .sev-badge {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 3px 10px; border-radius: 20px;
+            font-size: 11px; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .sev-badge.critical { background: #FDE2E2; color: #9B2C2C; }
+        .sev-badge.high     { background: #FDE2E2; color: #9B2C2C; }
+        .sev-badge.medium   { background: #FEFCBF; color: #975A16; }
+        .sev-badge.low      { background: #E6F6EE; color: #276749; }
+        .sev-badge.info     { background: #E0ECFF; color: #2B4B7E; }
+        [data-theme="dark"] .sev-badge.critical { background: rgba(254,178,178,0.15); color: #FEB2B2; }
+        [data-theme="dark"] .sev-badge.high     { background: rgba(254,178,178,0.15); color: #FEB2B2; }
+        [data-theme="dark"] .sev-badge.medium   { background: rgba(246,224,94,0.12); color: #F6E05E; }
+        [data-theme="dark"] .sev-badge.low      { background: rgba(154,230,180,0.12); color: #9AE6B4; }
+        [data-theme="dark"] .sev-badge.info     { background: rgba(144,205,244,0.12); color: #90CDF4; }
+
+        /* Severity group */
+        .sev-group { margin-bottom: 20px; }
+        .sev-group-header {
+            display: flex; align-items: center; gap: 10px;
+            margin-bottom: 10px; padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+        .sev-group-count {
+            font-size: 12px; color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        /* Vulnerability card */
+        .vuln-card {
+            background: var(--vuln-item-bg);
+            border: 1px solid var(--info-item-border);
+            border-radius: 12px;
+            padding: 16px 18px;
+            margin-bottom: 10px;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        .vuln-card:hover {
+            box-shadow: 0 4px 12px var(--vuln-item-shadow);
+            transform: translateY(-1px);
+        }
+        .vuln-card-top {
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .vuln-card-id {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px; font-weight: 600;
+            color: var(--text-muted);
+        }
+        .vuln-card-chevron {
+            color: var(--text-muted); transition: transform 0.2s;
+        }
+        .vuln-card.open .vuln-card-chevron { transform: rotate(180deg); }
+        .vuln-card-desc {
+            margin-top: 8px; font-size: 14px;
+            color: var(--text-secondary); line-height: 1.6;
+        }
+        .vuln-card-details {
+            display: none; margin-top: 12px;
+            padding-top: 12px; border-top: 1px dashed var(--border);
+        }
+        .vuln-card.open .vuln-card-details { display: block; }
+        .vuln-detail-row {
+            display: flex; gap: 8px; align-items: baseline;
+            font-size: 13px; margin-bottom: 4px;
+        }
+        .vuln-detail-label {
+            font-weight: 700; color: var(--text-muted);
+            min-width: 60px; text-transform: uppercase; font-size: 11px;
+        }
+        .vuln-detail-value {
+            color: var(--text-secondary);
+            font-family: 'JetBrains Mono', monospace; font-size: 12px;
+            word-break: break-all;
+        }
+        .vuln-detail-value a {
+            color: var(--accent); text-decoration: none;
+        }
+        .vuln-detail-value a:hover { text-decoration: underline; }
+
+        /* Empty / clean state */
+        .scan-empty {
+            padding: 48px 30px; text-align: center;
+            background: var(--info-item-bg);
+            border: 2px dashed var(--border);
+            border-radius: 16px;
+        }
+        .scan-empty-icon { font-size: 40px; margin-bottom: 12px; }
+        .scan-empty-title {
+            font-size: 16px; font-weight: 700;
+            color: var(--text-primary); margin-bottom: 6px;
+        }
+        .scan-empty-sub {
+            font-size: 13px; color: var(--text-muted);
+        }
+        .scan-clean {
+            padding: 48px 30px; text-align: center;
+            background: linear-gradient(135deg, rgba(140,200,168,0.1), rgba(140,200,168,0.05));
+            border: 2px solid rgba(140,200,168,0.3);
+            border-radius: 16px;
+        }
+        .scan-clean-icon { font-size: 40px; margin-bottom: 12px; }
+        .scan-clean-title {
+            font-size: 16px; font-weight: 700; color: #38A169;
+        }
+        [data-theme="dark"] .scan-clean-title { color: #9AE6B4; }
+        .scan-clean-sub {
+            font-size: 13px; color: var(--text-muted); margin-top: 4px;
+        }
+
+        /* Scan meta footer */
+        .scan-meta {
+            display: flex; flex-wrap: wrap; gap: 20px;
+            margin-top: 20px; padding-top: 16px;
+            border-top: 1px solid var(--border);
+        }
+        .scan-meta-item {
+            font-size: 12px; color: var(--text-muted);
+            display: flex; align-items: center; gap: 5px;
+        }
+        .scan-meta-item strong {
+            color: var(--text-secondary); font-weight: 600;
+        }
     </style>
 </head>
 
@@ -927,36 +1149,68 @@
             <!-- TAB 3: SECURITY (Red Theme) -->
             <div id="tab-security" class="tab-content">
                 <div class="card security-theme">
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 2px solid rgba(0,0,0,0.05); padding-bottom: 20px;">
-                        <div>
-                            <h2 style="margin: 0; padding: 0;">Vulnerability Scanner</h2>
-                            <p style="margin-top:4px; font-size:14px; opacity:0.7;">Powered by Nikto</p>
+                    <!-- Header -->
+                    <div class="scan-header">
+                        <div class="scan-header-title">
+                            <h2>🛡️ Vulnerability Scanner</h2>
+                            <p>Nikto-powered security analysis of your running service</p>
                         </div>
-                        <button class="btn"
-                            style="background: rgba(255,255,255,0.7); color: #7A5060; box-shadow: 0 4px 6px rgba(0,0,0,0.03);"
-                            onclick="triggerScan()">
-                            🔄 Start New Scan
+                        <button class="scan-btn" id="scanTriggerBtn" onclick="triggerScan()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/>
+                            </svg>
+                            Run Scan
                         </button>
                     </div>
 
-                    <div id="scanStatus"
-                        style="background: rgba(255,255,255,0.5); padding: 24px; border-radius: 16px; margin-bottom: 24px; display:flex; align-items:center; gap:16px;">
-                        <div style="flex:1;">
-                            <div
-                                style="font-size: 11px; text-transform: uppercase; font-weight: 800; color: #7A5060; margin-bottom: 4px; letter-spacing:1px;">
-                                Scan Status</div>
-                            <div id="scanBadge"
-                                style="font-weight: 800; text-transform: uppercase; font-size: 18px; color: var(--text-primary);">
-                                READY</div>
+                    <!-- Progress (shown during scan) -->
+                    <div class="scan-progress" id="scanProgress">
+                        <div class="scan-progress-header">
+                            <div class="scan-progress-label">
+                                <span class="spinner" style="width:16px;height:16px;border-width:2px;color:#E8707E;"></span>
+                                Scanning in progress…
+                            </div>
+                            <div class="scan-progress-time" id="scanElapsed">0:00</div>
+                        </div>
+                        <div class="scan-progress-bar">
+                            <div class="scan-progress-fill"></div>
                         </div>
                     </div>
 
-                    <div id="vulnList">
-                        <div
-                            style="padding: 30px; background: rgba(255,255,255,0.5); border-radius: 12px; text-align:center; color: #7A5060; opacity: 0.8;">
-                            No recent findings. Run a scan to check for vulnerabilities.
+                    <!-- Summary stats -->
+                    <div class="scan-summary" id="scanSummary" style="display:none;">
+                        <div class="scan-stat">
+                            <div class="scan-stat-value" id="statTotal">0</div>
+                            <div class="scan-stat-label">Findings</div>
                         </div>
+                        <div class="scan-stat">
+                            <div class="scan-stat-value" id="statCritical" style="color:#C53030;">0</div>
+                            <div class="scan-stat-label">Critical / High</div>
+                        </div>
+                        <div class="scan-stat">
+                            <div class="scan-stat-value" id="statMedium" style="color:#B7791F;">0</div>
+                            <div class="scan-stat-label">Medium</div>
+                        </div>
+                        <div class="scan-stat">
+                            <div class="scan-stat-value" id="statLow" style="color:#276749;">0</div>
+                            <div class="scan-stat-label">Low / Info</div>
+                        </div>
+                    </div>
+
+                    <!-- Vulnerability list -->
+                    <div id="vulnList">
+                        <div class="scan-empty">
+                            <div class="scan-empty-icon">🔍</div>
+                            <div class="scan-empty-title">No scan results yet</div>
+                            <div class="scan-empty-sub">Click "Run Scan" to start a vulnerability assessment</div>
+                        </div>
+                    </div>
+
+                    <!-- Scan metadata footer -->
+                    <div class="scan-meta" id="scanMeta" style="display:none;">
+                        <div class="scan-meta-item">🕐 Duration: <strong id="metaDuration">—</strong></div>
+                        <div class="scan-meta-item">📅 Completed: <strong id="metaCompleted">—</strong></div>
+                        <div class="scan-meta-item">🎯 Target: <strong id="metaTarget">—</strong></div>
                     </div>
                 </div>
             </div>
@@ -1471,24 +1725,46 @@
         // SWAGGER UPDATE
         // ... (existing loadSwagger needs to set currentSpec and call renderEndpointGrid)
 
-        // Scan Utils
-        async function triggerScan() {
-            if (!confirm('Start a new vulnerability scan? This may take a few minutes.')) return;
+        // ── SCAN UTILS ──────────────────────────────────────
+        let _scanTimer = null;
+        let _scanStart = null;
 
-            switchTab('security');
-            document.getElementById('scanBadge').textContent = 'STARTING...';
+        async function triggerScan() {
+            const btn = document.getElementById('scanTriggerBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner" style="width:14px;height:14px;border-width:2px;color:white;"></span> Scanning…`;
+
+            // Show progress bar
+            document.getElementById('scanProgress').classList.add('active');
+            _scanStart = Date.now();
+            _scanTimer = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - _scanStart) / 1000);
+                const m = Math.floor(elapsed / 60);
+                const s = String(elapsed % 60).padStart(2, '0');
+                document.getElementById('scanElapsed').textContent = `${m}:${s}`;
+            }, 1000);
 
             try {
                 await fetch(`${API_BASE}/services/${SERVICE_NAME}/scan`, { method: 'POST' });
                 pollScan();
             } catch (e) {
-                alert('Failed to start scan');
+                _stopScanUI();
+                alert('Failed to start scan. Is the service running?');
             }
+        }
+
+        function _stopScanUI() {
+            clearInterval(_scanTimer);
+            const btn = document.getElementById('scanTriggerBtn');
+            btn.disabled = false;
+            btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg> Run Scan`;
+            document.getElementById('scanProgress').classList.remove('active');
         }
 
         async function fetchScanResults() {
             try {
                 const resp = await fetch(`${API_BASE}/services/${SERVICE_NAME}/scan`);
+                if (!resp.ok) return;
                 const result = await resp.json();
                 renderScanResults(result);
             } catch (e) {
@@ -1498,34 +1774,119 @@
 
         function pollScan() {
             const interval = setInterval(async () => {
-                const resp = await fetch(`${API_BASE}/services/${SERVICE_NAME}/scan`);
-                const result = await resp.json();
-                renderScanResults(result);
-                if (result.scan_status !== 'running') clearInterval(interval);
+                try {
+                    const resp = await fetch(`${API_BASE}/services/${SERVICE_NAME}/scan`);
+                    const result = await resp.json();
+                    renderScanResults(result);
+                    if (result.scan_status !== 'running') {
+                        clearInterval(interval);
+                        _stopScanUI();
+                    }
+                } catch(e) {
+                    clearInterval(interval);
+                    _stopScanUI();
+                }
             }, 3000);
         }
 
-        function renderScanResults(result) {
-            const badge = document.getElementById('scanBadge');
-            badge.textContent = result.scan_status;
+        function _sevOrder(s) {
+            return {critical:0,high:1,medium:2,low:3,info:4}[s] ?? 5;
+        }
+        function _sevIcon(s) {
+            return {critical:'🔴',high:'🟠',medium:'🟡',low:'🔵',info:'⚪'}[s] ?? '⚪';
+        }
 
+        function _extractLinks(text) {
+            return text.replace(/(https?:\/\/[^\s,)]+)/g, '<a href="$1" target="_blank" rel="noopener">$1</a>');
+        }
+
+        function renderScanResults(result) {
+            const list = document.getElementById('vulnList');
+            const summary = document.getElementById('scanSummary');
+            const meta = document.getElementById('scanMeta');
+
+            // Still running
             if (result.scan_status === 'running') {
-                badge.style.color = '#DD6B20';
-                badge.innerHTML += ' <span class="spinner" style="width:16px; height:16px; border-width:2px; color:inherit; vertical-align:middle;"></span>';
-            } else {
-                badge.style.color = 'var(--text-primary)';
+                document.getElementById('scanProgress').classList.add('active');
+                return;
             }
 
-            const list = document.getElementById('vulnList');
-            if (result.vulnerabilities && result.vulnerabilities.length > 0) {
-                list.innerHTML = result.vulnerabilities.map(v => `
-                    <div style="background: var(--vuln-item-bg); padding: 20px; margin-bottom: 16px; border-radius: 12px; border-left: 5px solid #D0908F; box-shadow: 0 4px 6px var(--vuln-item-shadow);">
-                        <div style="font-weight:700; color:#B07070; margin-bottom:4px;">${v.id}</div> 
-                        <div style="color:var(--text-secondary); line-height:1.5;">${v.description}</div>
-                    </div>
-                `).join('');
-            } else if (result.scan_status === 'completed') {
-                list.innerHTML = '<div style="padding: 30px; background: var(--vuln-item-bg); border-radius: 12px; color: #5A9A7A; border: 2px dashed rgba(140,200,168,0.4); text-align:center; font-weight:600;">✓ Clean scan. No issues found.</div>';
+            // Completed or failed
+            const vulns = result.vulnerabilities || [];
+
+            if (vulns.length === 0 && result.scan_status === 'completed') {
+                summary.style.display = 'none';
+                list.innerHTML = `
+                    <div class="scan-clean">
+                        <div class="scan-clean-icon">✅</div>
+                        <div class="scan-clean-title">All Clear — No Vulnerabilities Found</div>
+                        <div class="scan-clean-sub">Nikto found no issues in this scan run.</div>
+                    </div>`;
+            } else if (vulns.length > 0) {
+                // Count by severity
+                const counts = {critical:0,high:0,medium:0,low:0,info:0};
+                vulns.forEach(v => { counts[v.severity] = (counts[v.severity]||0) + 1; });
+
+                // Update summary stats
+                summary.style.display = 'grid';
+                document.getElementById('statTotal').textContent = vulns.length;
+                document.getElementById('statCritical').textContent = counts.critical + counts.high;
+                document.getElementById('statMedium').textContent = counts.medium;
+                document.getElementById('statLow').textContent = counts.low + counts.info;
+
+                // Group by severity
+                const grouped = {};
+                vulns.forEach(v => {
+                    if (!grouped[v.severity]) grouped[v.severity] = [];
+                    grouped[v.severity].push(v);
+                });
+                const orderedKeys = Object.keys(grouped).sort((a,b) => _sevOrder(a) - _sevOrder(b));
+
+                let html = '';
+                orderedKeys.forEach(sev => {
+                    const items = grouped[sev];
+                    html += `<div class="sev-group">`;
+                    html += `<div class="sev-group-header">
+                        <span class="sev-badge ${sev}">${_sevIcon(sev)} ${sev}</span>
+                        <span class="sev-group-count">${items.length} finding${items.length>1?'s':''}</span>
+                    </div>`;
+                    items.forEach((v, i) => {
+                        const uid = `vuln-${sev}-${i}`;
+                        const descHtml = _extractLinks(v.description || '');
+                        html += `<div class="vuln-card" id="${uid}" onclick="this.classList.toggle('open')">
+                            <div class="vuln-card-top">
+                                <div>
+                                    <span class="vuln-card-id">${v.id || 'N/A'}</span>
+                                </div>
+                                <svg class="vuln-card-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                            </div>
+                            <div class="vuln-card-desc">${descHtml}</div>
+                            <div class="vuln-card-details">
+                                ${v.url ? `<div class="vuln-detail-row"><span class="vuln-detail-label">URL</span><span class="vuln-detail-value">${v.url}</span></div>` : ''}
+                                ${v.method ? `<div class="vuln-detail-row"><span class="vuln-detail-label">Method</span><span class="vuln-detail-value">${v.method}</span></div>` : ''}
+                            </div>
+                        </div>`;
+                    });
+                    html += `</div>`;
+                });
+                list.innerHTML = html;
+            }
+
+            // Metadata footer
+            if (result.scan_status === 'completed' || result.scan_status === 'failed') {
+                meta.style.display = 'flex';
+                const dur = result.scan_duration;
+                document.getElementById('metaDuration').textContent = dur >= 60
+                    ? `${Math.floor(dur/60)}m ${Math.round(dur%60)}s`
+                    : `${Math.round(dur)}s`;
+                if (result.completed_at) {
+                    const d = new Date(result.completed_at + 'Z');
+                    document.getElementById('metaCompleted').textContent = d.toLocaleString();
+                }
+                if (result.vulnerabilities?.[0]?.url) {
+                    const u = result.vulnerabilities[0].url;
+                    document.getElementById('metaTarget').textContent = u.length > 50 ? u.substring(0,47)+'…' : u;
+                }
             }
         }
 

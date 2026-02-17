@@ -115,8 +115,51 @@ import httpx
 
 # ... (existing Redis helpers)
 
-# ── Endpoints ──────────────────────────────────────────────────
+def generate_api_paths():
+    # Use a set to automatically handle uniqueness
+    paths = set()
 
+    prefixes = [
+        "", "/api", "/v1", "/v2", "/v3", "/api/v1", "/api/v2", "/api/v3",
+        "/docs", "/swagger", "/swagger-ui", "/rest", "/v1/docs", "/v2/docs",
+        "/static", "/public", "/assets", "/api-docs", "/apis", "/dev", "/test"
+    ]
+
+    names = [
+        "openapi", "swagger", "api-docs", "v1-docs", "v2-docs", "definition",
+        "spec", "specification", "contract", "endpoints", "schema", "explore",
+        "api", "api-spec", "swagger-config", "doc", "swagger-ui"
+    ]
+
+    extensions = [".json", ".yaml", ".yml", ".txt", ".json.bak", ""]
+
+    # Combinatorial Generation
+    for p in prefixes:
+        for n in names:
+            for e in extensions:
+                # Ensure we don't have double slashes
+                path = f"{p}/{n}{e}".replace("//", "/")
+                # Ensure it starts with a slash
+                if not path.startswith("/"):
+                    path = "/" + path
+                paths.add(path)
+
+    # Specific Framework-Specific patterns
+    framework_paths = [
+        "/v2/api-docs", "/v3/api-docs", "/swagger-resources", 
+        "/actuator/openapi", "/actuator/swagger-ui",
+        "/api/swagger-ui.html", "/swagger/index.html",
+        "/api/docs/", "/swagger.php", "/swagger.aspx"
+    ]
+    
+    paths.update(framework_paths)
+    
+    return sorted(list(paths))
+
+all_paths = generate_api_paths()
+print(f"Generated {len(all_paths)} unique paths.")
+
+# ── Endpoints ──────────────────────────────────────────────────
 @app.post("/discover")
 async def discover_api(payload: dict):
     """Detect if the service exposes an OpenAPI/Swagger specification."""
@@ -125,14 +168,7 @@ async def discover_api(payload: dict):
         raise HTTPException(status_code=400, detail="Missing target_url")
 
     # Common locations for OpenAPI specs
-    paths = [
-        "/openapi.json", 
-        "/swagger.json", 
-        "/api/openapi.json", 
-        "/v1/openapi.json",
-        "/docs/openapi.json"
-    ]
-    
+    paths = generate_api_paths()
     async with httpx.AsyncClient(timeout=3.0, verify=False) as client:
         for path in paths:
             try:
@@ -173,14 +209,24 @@ def run_nikto_scan(scan_id: str, target_url: str):
 
     try:
         # Run Nikto scan
-        result = subprocess.run([
+        nikto_cmd = [
             'nikto',
             '-h', target_url,
-            '-Tuning', '123456789abc',  # All scan types
-            '-maxtime', '60',  # 1 minute max
-            '-nointeractive'  # No prompts
-        ], capture_output=True, text=True, timeout=90)
-        
+            '-Tuning', '123456789abc',       # All scan types
+            '-maxtime', '120',               # 2 minute max per scan
+            '-useragent', 'Nikto-Audit',
+            '-nointeractive',
+        ]
+
+        # Only use SSL if the target is HTTPS
+        if target_url.startswith("https://"):
+            nikto_cmd.append('-ssl')
+        else:
+            nikto_cmd.append('-nossl')
+
+        logger.info(f"Running nikto command: {' '.join(nikto_cmd)}")
+        result = subprocess.run(nikto_cmd, capture_output=True, text=True, timeout=240)
+        print("Nikto output:", result.stdout)
         logger.info(f"Nikto exit code: {result.returncode}")
         
         # Parse Nikto text output
