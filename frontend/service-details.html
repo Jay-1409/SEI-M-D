@@ -992,6 +992,9 @@
                     <button class="tab-btn" data-tab="security" onclick="switchTab('security')">
                         <span>🛡️</span> Security
                     </button>
+                    <button class="tab-btn" data-tab="auth" onclick="switchTab('auth')">
+                        <span>🔑</span> Auth
+                    </button>
                     <button class="tab-btn" data-tab="firewall" onclick="switchTab('firewall')">
                         <span>🔥</span> Firewall
                     </button>
@@ -1215,6 +1218,89 @@
                 </div>
             </div>
 
+            <!-- TAB: AUTH (API Key Management) -->
+            <div id="tab-auth" class="tab-content">
+                <div class="card security-theme">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; border-bottom:2px solid rgba(0,0,0,0.05); padding-bottom:20px;">
+                        <div>
+                            <h2 style="margin:0; padding:0;">🔑 API Key Authentication</h2>
+                            <p style="margin-top:4px; font-size:14px; opacity:0.7;">
+                                Require an <code style="background:rgba(0,0,0,0.06); padding:2px 6px; border-radius:4px; font-size:12px;">X-API-Key</code> header for protected routes
+                            </p>
+                        </div>
+                        <!-- Global toggle -->
+                        <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
+                            <span style="font-size:13px; font-weight:600;" id="authStatusLabel">Disabled</span>
+                            <div style="position:relative; width:44px; height:24px;">
+                                <input type="checkbox" id="authEnabled" onchange="onAuthToggle()" style="opacity:0; width:0; height:0; position:absolute;">
+                                <span id="authToggleTrack" style="position:absolute; inset:0; background:rgba(0,0,0,0.15); border-radius:12px; transition:all 0.2s; cursor:pointer;"></span>
+                                <span id="authToggleThumb" style="position:absolute; top:2px; left:2px; width:20px; height:20px; background:white; border-radius:50%; box-shadow:0 1px 3px rgba(0,0,0,0.2); transition:all 0.2s; pointer-events:none;"></span>
+                            </div>
+                        </label>
+                    </div>
+
+                    <!-- API Keys Section -->
+                    <div style="margin-bottom:28px;">
+                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+                            <h3 style="margin:0; font-size:15px; text-transform:uppercase; letter-spacing:1px; opacity:0.8;">API Keys</h3>
+                            <button onclick="addNewApiKey()" class="btn-primary" style="background:var(--accent); color:white; font-size:12px; padding:8px 16px; display:flex; align-items:center; gap:6px;">
+                                ➕ Generate New Key
+                            </button>
+                        </div>
+
+                        <!-- Empty state -->
+                        <div id="authKeysEmpty" style="padding:32px; text-align:center; background:var(--info-item-bg); border:1px dashed var(--info-item-border); border-radius:12px;">
+                            <div style="font-size:28px; margin-bottom:8px;">🔐</div>
+                            <div style="font-weight:600; margin-bottom:4px;">No API keys yet</div>
+                            <div style="font-size:13px; color:var(--text-muted);">Generate a key to start protecting your routes</div>
+                        </div>
+
+                        <!-- Keys list -->
+                        <div id="authKeysList"></div>
+                    </div>
+
+                    <!-- Protected Routes Section -->
+                    <div>
+                        <h3 style="margin:0 0 14px 0; font-size:15px; text-transform:uppercase; letter-spacing:1px; opacity:0.8;">Protected Routes</h3>
+                        <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">
+                            Select which routes require an API key. Unselected routes remain publicly accessible.
+                        </p>
+                        <div id="authRoutesList" style="margin-bottom:16px;"></div>
+                        <div style="display:flex; justify-content:flex-end;">
+                            <button onclick="saveAuthConfig()" class="btn-primary" style="background:var(--accent); color:white; font-size:13px; padding:10px 24px;">
+                                💾 Save Auth Config
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Usage Guide -->
+                    <div style="margin-top:8px; padding:20px; background:var(--info-item-bg); border:1px solid var(--info-item-border); border-radius:12px;">
+                        <h3 style="margin:0 0 12px 0; font-size:14px; text-transform:uppercase; letter-spacing:1px; opacity:0.8;">📖 Usage Guide</h3>
+                        <p style="font-size:13px; color:var(--text-muted); margin-bottom:12px; line-height:1.6;">
+                            Protected routes require an <code style="background:rgba(0,0,0,0.06); padding:2px 6px; border-radius:4px; font-size:12px;">X-API-Key</code> header. Requests without a valid key will receive a <strong>401 Unauthorized</strong> response.
+                        </p>
+                        <div style="background:rgba(0,0,0,0.04); border-radius:8px; padding:14px 16px; font-family:'JetBrains Mono',monospace; font-size:12px; line-height:1.8; overflow-x:auto;">
+                            <div style="color:var(--text-muted); margin-bottom:4px;"># ❌ Without key — returns 401</div>
+                            <div>curl http://localhost:30080/<strong id="authGuideService">SERVICE</strong>/endpoint</div>
+                            <br>
+                            <div style="color:var(--text-muted); margin-bottom:4px;"># ✅ With key — request goes through</div>
+                            <div>curl -H "X-API-Key: <span id="authGuideKey" style="color:var(--accent);">your-api-key</span>" \</div>
+                            <div style="padding-left:24px;">http://localhost:30080/<strong id="authGuideService2">SERVICE</strong>/endpoint</div>
+                            <br>
+                            <div style="color:var(--text-muted); margin-bottom:4px;"># Python requests</div>
+                            <div>requests.get(</div>
+                            <div style="padding-left:24px;">"http://localhost:30080/<strong id="authGuideService3">SERVICE</strong>/endpoint",</div>
+                            <div style="padding-left:24px;">headers={"X-API-Key": "<span id="authGuideKey2" style="color:var(--accent);">your-api-key</span>"})</div>
+                            <br>
+                            <div style="color:var(--text-muted); margin-bottom:4px;"># JavaScript fetch</div>
+                            <div>fetch("http://localhost:30080/<strong id="authGuideService4">SERVICE</strong>/endpoint", {</div>
+                            <div style="padding-left:24px;">headers: { "X-API-Key": "<span id="authGuideKey3" style="color:var(--accent);">your-api-key</span>" }</div>
+                            <div>})</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <!-- TAB 4: FIREWALL (WAF) -->
             <div id="tab-firewall" class="tab-content">
                 <div class="card security-theme">
@@ -1407,6 +1493,7 @@
             document.getElementById(`tab-${tabId}`).classList.add('active');
 
             if (tabId === 'api') loadRateLimit();
+            if (tabId === 'auth') loadApiKeyConfig();
             if (tabId === 'settings') { document.getElementById('currentServiceName').textContent = SERVICE_NAME; }
             if (tabId === 'security') fetchScanResults();
             if (tabId === 'firewall') { loadWafConfig(); loadWafStats(); loadWafEvents(); }
@@ -1495,6 +1582,7 @@
         }
 
         let currentRateLimitConfig = { enabled: true, limit: 100, window: 60, routes: [] };
+        let currentApiKeyConfig = { enabled: false, keys: [], routes: [] };
         let currentSpec = null;
         let selectedEndpoint = null; // { method, path }
 
@@ -1550,10 +1638,16 @@
                         get: '#7AAED0', post: '#8CC8A8', put: '#D0A880', delete: '#D0908F'
                     }[method.toLowerCase()] || '#A0AEC0';
 
+                    // Check if this route is API-key protected
+                    const isProtected = currentApiKeyConfig.enabled && currentApiKeyConfig.routes?.some(
+                        r => r.path === path && (r.method === 'ALL' || r.method === method.toUpperCase())
+                    );
+
                     card.innerHTML = `
                         <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
                             <span style="background:${methodColor}; color:white; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:700; text-transform:uppercase;">${method}</span>
                             <span style="font-family:'JetBrains Mono'; font-size:13px; word-break:break-all;">${path}</span>
+                            ${isProtected ? '<span style="background:rgba(201,160,208,0.2); color:var(--accent); padding:2px 8px; border-radius:10px; font-size:10px; font-weight:700; margin-left:auto;">🔒 AUTH</span>' : ''}
                         </div>
                         <div style="font-size:12px; color:var(--text-secondary); margin-bottom:12px;">
                             ${details.summary || 'No description'}
@@ -1567,14 +1661,195 @@
                                 Configure
                             </button>
                         </div>
-                        <!-- Stub for Auth (Requested by user) -->
-                         <div style="margin-top:8px; padding-top:8px; border-top:1px solid rgba(0,0,0,0.05); display:flex; justify-content:flex-end;">
-                            <button onclick="alert('Authorization config coming soon!')" style="background:none; border:none; color:var(--text-secondary); cursor:pointer; font-size:11px;">🔒 Auth</button>
-                        </div>
                     `;
                     grid.appendChild(card);
                 }
             }
+        }
+
+        // ── API Key Auth Functions ──────────────────────────
+
+        function _genId() {
+            return Math.random().toString(36).substring(2, 10);
+        }
+
+        function _genKey() {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+            let key = 'sk-';
+            for (let i = 0; i < 32; i++) key += chars.charAt(Math.floor(Math.random() * chars.length));
+            return key;
+        }
+
+        async function loadApiKeyConfig() {
+            try {
+                const resp = await fetch(`${API_BASE}/services/${SERVICE_NAME}/apikey`);
+                if (resp.ok) {
+                    currentApiKeyConfig = await resp.json();
+                    // Migrate old single-key format
+                    if (currentApiKeyConfig.api_key && !currentApiKeyConfig.keys) {
+                        currentApiKeyConfig.keys = currentApiKeyConfig.api_key
+                            ? [{ id: _genId(), name: 'Default', key: currentApiKeyConfig.api_key, created: '' }]
+                            : [];
+                        delete currentApiKeyConfig.api_key;
+                    }
+                    if (!currentApiKeyConfig.keys) currentApiKeyConfig.keys = [];
+                    if (!currentApiKeyConfig.routes) currentApiKeyConfig.routes = [];
+                } else {
+                    currentApiKeyConfig = { enabled: false, keys: [], routes: [] };
+                }
+                renderAuthTab();
+            } catch (e) {
+                console.error('Failed to load API key config', e);
+            }
+        }
+
+        function onAuthToggle() {
+            const checked = document.getElementById('authEnabled').checked;
+            const track = document.getElementById('authToggleTrack');
+            const thumb = document.getElementById('authToggleThumb');
+            const label = document.getElementById('authStatusLabel');
+            track.style.background = checked ? 'var(--accent)' : 'rgba(0,0,0,0.15)';
+            thumb.style.left = checked ? '22px' : '2px';
+            label.textContent = checked ? 'Enabled' : 'Disabled';
+            label.style.color = checked ? 'var(--accent)' : '';
+        }
+
+        function addNewApiKey() {
+            const name = prompt('Enter a label for this API key (e.g. "Frontend App", "CI/CD"):', `Key ${(currentApiKeyConfig.keys?.length || 0) + 1}`);
+            if (!name) return;
+
+            const newKey = { id: _genId(), name, key: _genKey(), created: new Date().toISOString().split('T')[0] };
+            if (!currentApiKeyConfig.keys) currentApiKeyConfig.keys = [];
+            currentApiKeyConfig.keys.push(newKey);
+            renderKeysList();
+            showToast('Key generated — save to apply', 'info');
+        }
+
+        function removeApiKey(id) {
+            if (!confirm('Delete this API key? Clients using it will lose access.')) return;
+            currentApiKeyConfig.keys = currentApiKeyConfig.keys.filter(k => k.id !== id);
+            renderKeysList();
+            showToast('Key removed — save to apply', 'info');
+        }
+
+        function copyApiKey(key) {
+            navigator.clipboard.writeText(key).then(() => showToast('Copied to clipboard', 'success'));
+        }
+
+        function renderKeysList() {
+            const list = document.getElementById('authKeysList');
+            const empty = document.getElementById('authKeysEmpty');
+            const keys = currentApiKeyConfig.keys || [];
+
+            if (keys.length === 0) {
+                empty.style.display = 'block';
+                list.innerHTML = '';
+                return;
+            }
+            empty.style.display = 'none';
+
+            list.innerHTML = keys.map(k => `
+                <div style="display:flex; align-items:center; gap:12px; padding:12px 16px; background:var(--info-item-bg); border:1px solid var(--info-item-border); border-radius:10px; margin-bottom:8px;">
+                    <div style="flex:1; min-width:0;">
+                        <div style="font-weight:700; font-size:13px; margin-bottom:4px;">${k.name}</div>
+                        <div style="font-family:'JetBrains Mono',monospace; font-size:11px; color:var(--text-muted); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                            ${k.key.substring(0, 8)}${'•'.repeat(20)}${k.key.substring(k.key.length - 4)}
+                        </div>
+                        ${k.created ? `<div style="font-size:10px; color:var(--text-muted); margin-top:2px;">Created: ${k.created}</div>` : ''}
+                    </div>
+                    <button onclick="copyApiKey('${k.key}')" class="btn-secondary" style="font-size:11px; padding:4px 10px; height:auto;" title="Copy full key">
+                        📋 Copy
+                    </button>
+                    <button onclick="removeApiKey('${k.id}')" class="btn-secondary" style="font-size:11px; padding:4px 10px; height:auto; color:#D0908F; border-color:#D0908F;" title="Delete key">
+                        🗑️
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function renderAuthRoutes() {
+            const list = document.getElementById('authRoutesList');
+            if (!currentSpec) {
+                list.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:20px; font-size:13px; background:var(--info-item-bg); border-radius:10px;">No API spec detected yet. Deploy a service with an OpenAPI spec first.</div>';
+                return;
+            }
+            let html = '';
+            for (const [path, methods] of Object.entries(currentSpec.paths)) {
+                for (const [method] of Object.entries(methods)) {
+                    const isChecked = currentApiKeyConfig.routes?.some(
+                        r => r.path === path && r.method === method.toUpperCase()
+                    );
+                    const methodColor = {
+                        get: '#7AAED0', post: '#8CC8A8', put: '#D0A880', delete: '#D0908F'
+                    }[method.toLowerCase()] || '#A0AEC0';
+                    html += `
+                        <label style="display:flex; align-items:center; gap:10px; padding:8px 12px; border-radius:8px; cursor:pointer; margin-bottom:4px; transition:background 0.15s; border:1px solid transparent;"
+                            onmouseover="this.style.background='var(--info-item-bg)'; this.style.borderColor='var(--info-item-border)'"
+                            onmouseout="this.style.background='transparent'; this.style.borderColor='transparent'">
+                            <input type="checkbox" ${isChecked ? 'checked' : ''} data-method="${method.toUpperCase()}" data-path="${path}" class="auth-route-checkbox" style="width:16px; height:16px; accent-color:var(--accent); cursor:pointer;">
+                            <span style="background:${methodColor}; color:white; padding:1px 5px; border-radius:3px; font-size:10px; font-weight:700; text-transform:uppercase; min-width:48px; text-align:center;">${method.toUpperCase()}</span>
+                            <span style="font-family:'JetBrains Mono',monospace; font-size:12px; word-break:break-all;">${path}</span>
+                        </label>`;
+                }
+            }
+            list.innerHTML = html;
+        }
+
+        function renderAuthTab() {
+            // Update toggle
+            document.getElementById('authEnabled').checked = currentApiKeyConfig.enabled;
+            onAuthToggle();
+            renderKeysList();
+            renderAuthRoutes();
+            // Update usage guide
+            const svcEls = ['authGuideService','authGuideService2','authGuideService3','authGuideService4'];
+            svcEls.forEach(id => { const el = document.getElementById(id); if(el) el.textContent = SERVICE_NAME; });
+            const firstKey = (currentApiKeyConfig.keys && currentApiKeyConfig.keys.length > 0) ? currentApiKeyConfig.keys[0].key : 'your-api-key';
+            const keyEls = ['authGuideKey','authGuideKey2','authGuideKey3'];
+            keyEls.forEach(id => { const el = document.getElementById(id); if(el) el.textContent = firstKey; });
+            // Also refresh endpoint grid auth badges
+            if (currentSpec) renderEndpointGrid();
+        }
+
+        async function saveAuthConfig() {
+            const enabled = document.getElementById('authEnabled').checked;
+            const keys = currentApiKeyConfig.keys || [];
+
+            if (enabled && keys.length === 0) {
+                showToast('Generate at least one API key first', 'error');
+                return;
+            }
+
+            const checkboxes = document.querySelectorAll('.auth-route-checkbox:checked');
+            const routes = Array.from(checkboxes).map(cb => ({
+                path: cb.dataset.path,
+                method: cb.dataset.method
+            }));
+
+            try {
+                const resp = await fetch(`${API_BASE}/services/${SERVICE_NAME}/apikey`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ enabled, keys, routes })
+                });
+                if (!resp.ok) throw new Error('Save failed');
+                currentApiKeyConfig = { enabled, keys, routes };
+                renderEndpointGrid();
+                showToast('API key auth config saved', 'success');
+            } catch (e) {
+                console.error('Failed to save auth config', e);
+                showToast('Failed to save auth config', 'error');
+            }
+        }
+
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            const bg = type === 'success' ? '#8CC8A8' : type === 'error' ? '#D0908F' : '#7AAED0';
+            toast.style.cssText = `position:fixed; bottom:24px; right:24px; background:${bg}; color:white; padding:12px 20px; border-radius:10px; font-size:13px; font-weight:600; box-shadow:0 4px 12px rgba(0,0,0,0.15); z-index:9999; pointer-events:none; transition:opacity 0.3s;`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.style.opacity = '0', 2000);
+            setTimeout(() => toast.remove(), 2500);
         }
 
         // Modal Functions
