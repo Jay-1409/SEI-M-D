@@ -502,7 +502,7 @@ async def waf_middleware(request: Request, call_next):
     # Skip gateway's own management endpoints
     parts = path.strip("/").split("/")
     first_segment = parts[0] if parts else ""
-    if first_segment in ("register", "routes", "health", "docs", "openapi.json", "waf"):
+    if first_segment in ("register", "routes", "health", "docs", "openapi.json", "waf", "apikey"):
         return await call_next(request)
 
     service_name = first_segment
@@ -654,7 +654,7 @@ async def rate_limit_middleware(request: Request, call_next):
     service_name = parts[0]
     
     # Skip gateway's own routes
-    if service_name in ("register", "routes", "health", "docs", "openapi.json"):
+    if service_name in ("register", "routes", "health", "docs", "openapi.json", "apikey"):
         return await call_next(request)
 
     # Calculate relative path for matching (e.g., /api/v1/users)
@@ -955,18 +955,138 @@ async def clear_waf_events(service: str = None):
         raise HTTPException(status_code=500, detail=f"Failed to clear WAF events: {e}")
 
 
+# ═════════════════════════════════════════════════════════════
+#  API Key Authentication — config endpoints
+# ═════════════════════════════════════════════════════════════
+
+@app.get("/apikey/config/{service_name}")
+async def get_apikey_config(service_name: str):
+    """Get API key auth configuration for a service."""
+    r = _get_redis()
+    if not r:
+        return {"service_name": service_name, "enabled": False, "keys": [], "routes": []}
+    try:
+        raw = r.get(f"config:apikey:{service_name}")
+        if raw:
+            config = json.loads(raw)
+            # Migrate old single-key format
+            if "api_key" in config and "keys" not in config:
+                old_key = config.pop("api_key", "")
+                config["keys"] = [{"id": "migrated", "name": "Default", "key": old_key, "created": ""}] if old_key else []
+            config["service_name"] = service_name
+            return config
+        return {"service_name": service_name, "enabled": False, "keys": [], "routes": []}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to fetch API key config: {e}")
+
+
+@app.post("/apikey/config/{service_name}")
+async def set_apikey_config(service_name: str, payload: dict):
+    """Set API key auth configuration for a service."""
+    r = _get_redis()
+    if not r:
+        raise HTTPException(status_code=503, detail="Redis unavailable")
+    try:
+        config = {
+            "enabled": payload.get("enabled", False),
+            "keys": payload.get("keys", []),       # [{id, name, key, created}]
+            "routes": payload.get("routes", []),     # [{path, method}]
+        }
+        r.set(f"config:apikey:{service_name}", json.dumps(config))
+        logger.info(f"API key config updated for {service_name}: enabled={config['enabled']}, keys={len(config['keys'])}, routes={len(config['routes'])}")
+        return {"status": "saved", "service_name": service_name, **config}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to save API key config: {e}")
+
+
+# ═════════════════════════════════════════════════════════════
+#  API Key Authentication — checked inside the proxy handler
+# ═════════════════════════════════════════════════════════════
+
+def _check_api_key(service_name: str, method: str, relative_path: str,
+                   request: Request, r) -> JSONResponse | None:
+    """
+    If API-key auth is enabled for this service and the current route
+    matches a protected route, verify the X-API-Key header.
+    Returns a 401 JSONResponse if invalid, or None if OK.
+    """
+    if not r:
+        return None
+    try:
+        raw = r.get(f"config:apikey:{service_name}")
+        if not raw:
+            return None
+        config = json.loads(raw)
+        if not config.get("enabled", False):
+            return None
+
+        # Support multi-key format (list of key objects)
+        keys_list = config.get("keys", [])
+        if not keys_list:
+            # Fallback: old format with single api_key
+            old_key = config.get("api_key", "")
+            if old_key:
+                keys_list = [{"key": old_key}]
+            else:
+                return None
+
+        valid_keys = {k.get("key") for k in keys_list if k.get("key")}
+        if not valid_keys:
+            return None
+
+        protected_routes = config.get("routes", [])
+        if not protected_routes:
+            return None  # no routes protected
+
+        # Check if current request matches any protected route
+        matched = False
+        for route in protected_routes:
+            route_method = route.get("method", "ALL")
+            route_path = route.get("path", "")
+            if route_method != "ALL" and route_method.upper() != method.upper():
+                continue
+            if match_route(route_path, relative_path):
+                matched = True
+                break
+
+        if not matched:
+            return None  # this route is not protected
+
+        # Route is protected — check the key against all valid keys
+        provided_key = request.headers.get("x-api-key", "")
+        if not provided_key or provided_key not in valid_keys:
+            logger.warning(
+                f"🔑 API key rejected for {service_name} "
+                f"{method} {relative_path} from {request.client.host if request.client else 'unknown'}"
+            )
+            return JSONResponse(status_code=401, content={
+                "detail": "Unauthorized — valid API key required",
+                "error": "invalid_api_key",
+            })
+    except Exception as e:
+        logger.error(f"API key check error: {e}")
+    return None
+
+
 # ---------- Reverse proxy ----------
 
 @app.api_route("/{service_name}/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH"])
 async def proxy(service_name: str, path: str, request: Request):
     """Forward request to the internal microservice."""
-    if service_name in ("register", "routes", "health", "docs", "openapi.json"):
+    if service_name in ("register", "routes", "health", "docs", "openapi.json", "apikey"):
         return  # avoid intercepting gateway's own routes
 
     target_base = route_table.get(service_name)
     
     if not target_base:
         raise HTTPException(status_code=404, detail=f"Service '{service_name}' is not registered")
+
+    # --- API key auth check ---
+    relative_path = "/" + path if path else "/"
+    r = _get_redis()
+    api_key_response = _check_api_key(service_name, request.method, relative_path, request, r)
+    if api_key_response:
+        return api_key_response
 
     target_url = f"{target_base}/{path}" if path else target_base
 

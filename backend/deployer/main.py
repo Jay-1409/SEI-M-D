@@ -530,6 +530,7 @@ async def rename_service(service_name: str, payload: dict):
             keys_to_migrate = [
                 f"config:waf:{service_name}",
                 f"config:ratelimit:{service_name}",
+                f"config:apikey:{service_name}",
                 f"waf:events:{service_name}",
                 f"waf:blocks:{service_name}:total",
                 f"waf:blocks:{service_name}:sqli",
@@ -825,6 +826,38 @@ async def get_rate_limit(service_name: str):
     except Exception as e:
         logger.error(f"Failed to get rate limit: {e}")
         return RateLimitConfig()
+
+
+# ── API Key Auth Config (proxied to Gateway) ──────────────────
+
+@app.get("/services/{service_name}/apikey")
+async def get_apikey_config(service_name: str):
+    """Get API key auth config — proxied from gateway."""
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as http_client:
+            resp = await http_client.get(f"{GATEWAY_REGISTER_URL}/apikey/config/{service_name}")
+            return resp.json()
+    except Exception as e:
+        logger.error(f"Failed to get API key config: {e}")
+        return {"enabled": False, "keys": [], "routes": []}
+
+
+@app.post("/services/{service_name}/apikey")
+async def set_apikey_config(service_name: str, payload: dict):
+    """Set API key auth config — proxied to gateway."""
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as http_client:
+            resp = await http_client.post(
+                f"{GATEWAY_REGISTER_URL}/apikey/config/{service_name}",
+                json=payload
+            )
+            resp.raise_for_status()
+            return resp.json()
+    except httpx.HTTPStatusError as e:
+        raise HTTPException(status_code=e.response.status_code, detail=str(e))
+    except Exception as e:
+        logger.error(f"Failed to set API key config: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.get("/services/{service_name}/apis")
