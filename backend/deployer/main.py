@@ -64,8 +64,113 @@ try:
 except Exception as e:
     logger.warning(f"Redis connection failed: {e}")
     redis_client = None
+@app.post("/start-all")
+async def start_all_services():
+    """Start all services in the user-services namespace by scaling deployments to 1 replica."""
+    try:
+        config.load_incluster_config()
+    except:
+        try:
+            config.load_kube_config()
+        except:
+            logger.warning("Could not load K8s config, skipping start_all_services.")
+            return
 
+    apps_v1 = client.AppsV1Api()
 
+    try:
+        deployments = apps_v1.list_namespaced_deployment(namespace="user-services")
+    except Exception as e:
+        logger.error(f"Failed to list deployments for start_all_services: {e}")
+        return
+
+    async with httpx.AsyncClient() as http_client:
+        for dep in deployments.items:
+            name = dep.metadata.name
+            current_replicas = dep.spec.replicas if dep.spec.replicas is not None else 0
+
+            # Only start services that are scaled to 0 (stopped)
+            if current_replicas == 0:
+                try:
+                    patch = {"spec": {"replicas": 1}}
+                    apps_v1.patch_namespaced_deployment(
+                        name=name, namespace="user-services", body=patch
+                    )
+                    logger.info(f"start_all_services: scaled {name} to 1 replica")
+                except Exception as e:
+                    logger.error(f"start_all_services: failed to scale {name}: {e}")
+                    continue
+
+            # Re-register every service with the gateway
+            try:
+                container = dep.spec.template.spec.containers[0]
+                port = container.ports[0].container_port if container.ports else 80
+                service_fqdn = f"http://{name}-service.user-services.svc.cluster.local:{port}"
+
+                await http_client.post(
+                    f"{GATEWAY_REGISTER_URL}/register",
+                    json={"service_name": name, "target_url": service_fqdn},
+                )
+                logger.info(f"start_all_services: registered {name} with gateway")
+            except Exception as e:
+                logger.warning(f"start_all_services: gateway registration failed for {name}: {e}")
+
+            # Update in-memory registry
+            public_url = f"http://{GATEWAY_HOST}:{GATEWAY_PORT}/{name}"
+            container = dep.spec.template.spec.containers[0]
+            port = container.ports[0].container_port if container.ports else 80
+            deployed_services[name] = ServiceInfo(
+                service_name=name,
+                docker_image=container.image,
+                container_port=port,
+                public_url=public_url,
+                status="deployed",
+            )
+
+    logger.info("start_all_services: all services started.")
+@app.post("/gracefull-stop")
+def gracefully_stop_all_services():
+    """Stop all services in the user-services namespace by scaling deployments to 0 replicas."""
+    try:
+        config.load_incluster_config()
+    except:
+        try:
+            config.load_kube_config()
+        except:
+            logger.warning("Could not load K8s config, skipping gracefully_stop_all_services.")
+            return
+
+    apps_v1 = client.AppsV1Api()
+
+    try:
+        deployments = apps_v1.list_namespaced_deployment(namespace="user-services")
+    except Exception as e:
+        logger.error(f"Failed to list deployments for gracefully_stop_all_services: {e}")
+        return
+
+    for dep in deployments.items:
+        name = dep.metadata.name
+        current_replicas = dep.spec.replicas if dep.spec.replicas is not None else 0
+
+        # Only stop services that are scaled to 1 (running)
+        if current_replicas == 1:
+            try:
+                patch = {"spec": {"replicas": 0}}
+                apps_v1.patch_namespaced_deployment(
+                    name=name, namespace="user-services", body=patch
+                )
+                logger.info(f"gracefully_stop_all_services: scaled {name} to 0 replicas")
+            except Exception as e:
+                logger.error(f"gracefully_stop_all_services: failed to scale {name}: {e}")
+                continue
+
+            # Remove from in-memory registry
+            if name in deployed_services:
+                del deployed_services[name]
+                logger.info(f"gracefully_stop_all_services: removed {name} from registry")
+
+    logger.info("gracefully_stop_all_services: all services stopped.")
+    
 @app.on_event("startup")
 async def startup_event():
     """Sync in-memory state with actual Kubernetes state on startup."""
@@ -85,7 +190,6 @@ async def startup_event():
         # List items in user-services namespace
         namespace = "user-services"
         deployments = apps_v1.list_namespaced_deployment(namespace=namespace)
-        
         async with httpx.AsyncClient() as http_client:
             for dep in deployments.items:
                 name = dep.metadata.name

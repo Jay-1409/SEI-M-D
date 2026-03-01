@@ -1035,22 +1035,23 @@ def _check_api_key(service_name: str, method: str, relative_path: str,
             return None
 
         protected_routes = config.get("routes", [])
-        if not protected_routes:
-            return None  # no routes protected
 
-        # Check if current request matches any protected route
-        matched = False
-        for route in protected_routes:
-            route_method = route.get("method", "ALL")
-            route_path = route.get("path", "")
-            if route_method != "ALL" and route_method.upper() != method.upper():
-                continue
-            if match_route(route_path, relative_path):
-                matched = True
-                break
+        # If specific routes are listed, only protect those routes
+        if protected_routes:
+            matched = False
+            for route in protected_routes:
+                route_method = route.get("method", "ALL")
+                route_path = route.get("path", "")
+                if route_method != "ALL" and route_method.upper() != method.upper():
+                    continue
+                if match_route(route_path, relative_path):
+                    matched = True
+                    break
 
-        if not matched:
-            return None  # this route is not protected
+            if not matched:
+                return None  # this route is not protected
+
+        # If routes list is empty, ALL routes are protected
 
         # Route is protected — check the key against all valid keys
         provided_key = request.headers.get("x-api-key", "")
