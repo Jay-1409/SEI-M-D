@@ -5,9 +5,10 @@ A web-based platform that deploys Docker images into Kubernetes as internal micr
 ---
 
 ## Architecture
-
+<img width="876" height="301" alt="image" src="https://github.com/user-attachments/assets/6039eb3b-3b2b-4996-ade0-335bfd45fc10" />
+<--
 ![1771010394095](image/README/1771010394095.png)
-
+-->
 ### Security Model
 
 | Component       | Service Type | External Access |
