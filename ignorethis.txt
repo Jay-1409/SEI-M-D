@@ -1,0 +1,1 @@
+1) ngrok wrapper over the existing urls to generate a new url which we will then url shortern to a new url which will be the proxy url for the application 

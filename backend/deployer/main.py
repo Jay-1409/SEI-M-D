@@ -42,7 +42,8 @@ app.add_middleware(
 deployed_services: dict[str, ServiceInfo] = {}
 
 # Nikto service URL for scan proxying
-NIKTO_SERVICE_URL = "http://nikto-service.deployer-system.svc.cluster.local:8002"
+NIKTO_SERVICE_URL = os.getenv("NIKTO_SERVICE_URL", "http://nikto-service.deployer-system.svc.cluster.local:8002")
+IMAGE_SERVICE_URL = os.getenv("IMAGE_SERVICE_URL", "http://image-service.deployer-system.svc.cluster.local:8001")
 
 GATEWAY_HOST = os.getenv("GATEWAY_HOST", "localhost")
 GATEWAY_PORT = os.getenv("GATEWAY_PORT", "30080")
@@ -254,7 +255,7 @@ async def upload_image(file: UploadFile = File(...)):
         
         async with httpx.AsyncClient(timeout=120.0) as http_client:
             response = await http_client.post(
-                "http://image-service.deployer-system.svc.cluster.local:8001/upload",
+                f"{IMAGE_SERVICE_URL}/upload",
                 files=files
             )
             response.raise_for_status()
@@ -828,7 +829,7 @@ async def scan_service(service_name: str):
     try:
         async with httpx.AsyncClient(timeout=180.0) as http_client:
             response = await http_client.post(
-                "http://nikto-service.deployer-system.svc.cluster.local:8002/scan",
+                f"{NIKTO_SERVICE_URL}/scan",
                 json={
                     "target_url": target_url,
                     "service_name": service_name
@@ -867,7 +868,7 @@ async def get_scan_results(service_name: str):
     # Call nikto-service to get scan results
     try:
         async with httpx.AsyncClient(timeout=5.0) as http_client:
-            resp = await http_client.get(f"http://nikto-service.deployer-system.svc.cluster.local:8002/scan/service/{service_name}")
+            resp = await http_client.get(f"{NIKTO_SERVICE_URL}/scan/service/{service_name}")
             
             if resp.status_code == 404:
                 return ScanResult(
