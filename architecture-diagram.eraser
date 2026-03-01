@@ -1,0 +1,55 @@
+// Cyber Security Platform - Architecture Diagram
+// Compatible with: https://app.eraser.io (Cloud Architecture Diagram)
+
+direction right
+
+// ─── External Layer ───────────────────────────────────────────────────────────
+User [icon: user, label: "Developer / Admin"]
+Browser [icon: monitor, label: "Web Browser"]
+
+// ─── Kubernetes Cluster ───────────────────────────────────────────────────────
+K8sCluster [icon: kubernetes, label: "Kubernetes Cluster", color: gray] {
+
+  // ── Application Microservices ── deployer-system namespace ──────────────────
+  DeployerSystem [label: "deployer-system namespace", color: blue] {
+    Frontend [icon: nginx, label: "Frontend\n(Nginx)\nNodePort :30000"]
+    Backend [icon: server, label: "Deployer Backend\n(FastAPI)\nClusterIP :8000"]
+    ImageService [icon: docker, label: "Image Service\n(FastAPI)\nClusterIP :8001"]
+    NiktoScanner [icon: shield, label: "Nikto Scanner\n(FastAPI)\nClusterIP :8002"]
+    Redis [icon: redis, label: "Redis Cache\n(Rate Limiting)\nClusterIP :6379\nPVC: 1Gi"]
+  }
+
+  // ── API Gateway ─────────────────────────────────────────────────────────────
+  Gateway [icon: shield, label: "API Gateway (WAF)\n(FastAPI)\nNodePort :30080\nSQL/XSS Protection\nRate Limiting", color: green]
+
+  // ── User Microservices ── user-services namespace ────────────────────────────
+  UserServicesNS [label: "user-services namespace", color: orange] {
+    UserServiceA [icon: server, label: "User Service A\n(ClusterIP)"]
+    UserServiceB [icon: server, label: "User Service B\n(ClusterIP)"]
+    UserServiceN [icon: server, label: "User Service N\n(ClusterIP)"]
+  }
+
+}
+
+// ─── Connections ──────────────────────────────────────────────────────────────
+
+// External traffic
+User > Browser
+Browser > Frontend: "HTTP :30000"
+Browser > Gateway: "HTTP :30080"
+
+// Frontend to backend
+Frontend > Backend: "API Calls :8000"
+
+// Gateway routing
+Gateway > Backend: "Proxy :8000"
+Gateway > Redis: "Rate Limiting :6379"
+Gateway > UserServicesNS: "Route Traffic (/{service}/...)"
+
+// Backend internal calls
+Backend > ImageService: "Image Build/Load :8001"
+Backend > NiktoScanner: "Vulnerability Scan :8002"
+Backend > UserServicesNS: "Deploy & Manage (RBAC)"
+
+// Gateway registers routes via backend
+Backend > Gateway: "Register Routes"
