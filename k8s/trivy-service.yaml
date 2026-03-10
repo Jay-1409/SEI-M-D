@@ -1,0 +1,60 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trivy-service
+  namespace: deployer-system
+  labels:
+    app: trivy-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: trivy-service
+  template:
+    metadata:
+      labels:
+        app: trivy-service
+    spec:
+      containers:
+        - name: trivy-service
+          image: trivy-service:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8003
+          # Mount docker socket so trivy can access images available on the host daemon if needed
+          volumeMounts:
+            - name: docker-socket
+              mountPath: /var/run/docker.sock
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8003
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8003
+            initialDelaySeconds: 15
+            periodSeconds: 30
+      volumes:
+        - name: docker-socket
+          hostPath:
+            path: /var/run/docker.sock
+            type: Socket
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: trivy-service
+  namespace: deployer-system
+spec:
+  type: ClusterIP
+  selector:
+    app: trivy-service
+  ports:
+    - port: 8003
+      targetPort: 8003
+      protocol: TCP
