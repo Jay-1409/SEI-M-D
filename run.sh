@@ -59,9 +59,14 @@ cleanup() {
 
 trap cleanup SIGINT SIGTERM
 
-# ── Handle --stop flag ──
+
+# ── Handle --stop and -b flags ──
+BUILD_IMAGES=0
 if [[ "$1" == "--stop" ]]; then
     cleanup
+fi
+if [[ "$1" == "-b" ]]; then
+    BUILD_IMAGES=1
 fi
 
 # ── Preflight checks ──
@@ -92,33 +97,42 @@ fi
 echo -e "${GREEN}✓${NC} Kubernetes cluster ready"
 echo ""
 
-# ── Step 1: Build Docker images ──
-echo -e "${BLUE}[1/3] Building Docker images...${NC}"
-
 docker build -t deployer-backend:latest   ./backend/deployer -q &
-PID1=$!
-docker build -t deployer-gateway:latest   ./backend/gateway   -q &
-PID2=$!
-docker build -t image-service:latest      ./backend/image     -q &
-PID3=$!
-docker build -t nikto-service:latest      ./backend/nikto     -q &
-PID4=$!
-docker build -t deployer-frontend:latest  ./frontend           -q &
-PID5=$!
-
-# Wait for all builds (parallel)
-FAILED=0
-for pid in $PID1 $PID2 $PID3 $PID4 $PID5; do
-    wait $pid || FAILED=1
-done
-
-if [ $FAILED -eq 1 ]; then
-    echo -e "${RED}✗ Image build failed${NC}"
-    exit 1
-fi
-
 echo -e "${GREEN}✓${NC} All images built"
 echo ""
+
+# ── Step 1: Build Docker images (if -b flag) ──
+if [[ $BUILD_IMAGES -eq 1 ]]; then
+    echo -e "${BLUE}[1/3] Building Docker images...${NC}"
+    docker build -t deployer-backend:latest   ./backend/deployer -q &
+    PID1=$!
+    docker build -t deployer-gateway:latest   ./backend/gateway   -q &
+    PID2=$!
+    docker build -t image-service:latest      ./backend/image     -q &
+    PID3=$!
+    docker build -t nikto-service:latest      ./backend/nikto     -q &
+    PID4=$!
+    docker build -t deployer-frontend:latest  ./frontend           -q &
+    PID5=$!
+    docker build -t trivy-service:latest      ./backend/trivy     -q &
+    PID6=$!
+
+    # Wait for all builds (parallel)
+    FAILED=0
+    for pid in $PID1 $PID2 $PID3 $PID4 $PID5 $PID6; do
+        wait $pid || FAILED=1
+    done
+
+    if [ $FAILED -eq 1 ]; then
+        echo -e "${RED}✗ Image build failed${NC}"
+        exit 1
+    fi
+
+    echo -e "${GREEN}✓${NC} All images built"
+    echo ""
+else
+    echo -e "${BLUE}[1/3] Skipping image build (no -b flag)...${NC}"
+fi
 
 # ── Step 2: Apply K8s manifests ──
 echo -e "${BLUE}[2/3] Applying Kubernetes manifests...${NC}"
@@ -130,6 +144,7 @@ kubectl apply -f k8s/redis.yaml         -o name 2>&1 | sed 's/^/  /'
 kubectl apply -f k8s/backend.yaml       -o name 2>&1 | sed 's/^/  /'
 kubectl apply -f k8s/image-service.yaml -o name 2>&1 | sed 's/^/  /'
 kubectl apply -f k8s/nikto-service.yaml -o name 2>&1 | sed 's/^/  /'
+kubectl apply -f k8s/trivy-service.yaml -o name 2>&1 | sed 's/^/  /'
 kubectl apply -f k8s/gateway.yaml       -o name 2>&1 | sed 's/^/  /'
 kubectl apply -f k8s/frontend.yaml      -o name 2>&1 | sed 's/^/  /'
 
@@ -144,7 +159,7 @@ echo ""
 echo -e "${BLUE}[3/3] Waiting for pods to be ready...${NC}"
 echo ""
 
-DEPLOYMENTS=(redis backend image-service nikto-service gateway frontend)
+DEPLOYMENTS=(redis backend image-service nikto-service trivy-service gateway frontend)
 for dep in "${DEPLOYMENTS[@]}"; do
     echo -ne "  ${DIM}Waiting: ${dep}...${NC}"
     if kubectl rollout status deployment/$dep -n $NAMESPACE --timeout=90s >/dev/null 2>&1; then
@@ -194,6 +209,8 @@ LOG_PIDS+=($!)
 stream_logs image-service "image  " "${MAGENTA}" &
 LOG_PIDS+=($!)
 stream_logs nikto-service "nikto  " "${YELLOW}"  &
+LOG_PIDS+=($!)
+stream_logs trivy-service "trivy  " "${CYAN}"    &
 LOG_PIDS+=($!)
 
 # Wait forever (until Ctrl+C triggers cleanup)

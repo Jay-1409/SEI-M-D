@@ -44,6 +44,7 @@ deployed_services: dict[str, ServiceInfo] = {}
 # Nikto service URL for scan proxying
 NIKTO_SERVICE_URL = os.getenv("NIKTO_SERVICE_URL", "http://nikto-service.deployer-system.svc.cluster.local:8002")
 IMAGE_SERVICE_URL = os.getenv("IMAGE_SERVICE_URL", "http://image-service.deployer-system.svc.cluster.local:8001")
+TRIVY_SERVICE_URL = os.getenv("TRIVY_SERVICE_URL", "http://trivy-service.deployer-system.svc.cluster.local:8003")
 
 GATEWAY_HOST = os.getenv("GATEWAY_HOST", "localhost")
 GATEWAY_PORT = os.getenv("GATEWAY_PORT", "30080")
@@ -281,6 +282,89 @@ async def upload_image(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=f"Failed to upload image: {str(e)}")
 
 
+@app.post("/scan-image")
+async def scan_image(req: dict):
+    """Trigger a Trivy vulnerability scan for a docker image."""
+    image_name = req.get("image_name")
+    if not image_name:
+        raise HTTPException(status_code=400, detail="Missing image_name")
+        
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as http_client:
+            resp = await http_client.post(
+                f"{TRIVY_SERVICE_URL}/scan",
+                json={"image_name": image_name}
+            )
+            resp.raise_for_status()
+            return resp.json()
+    except httpx.HTTPError as e:
+        logger.error(f"Failed to trigger Trivy scan: {e}")
+        raise HTTPException(status_code=503, detail="Trivy scan service unavailable")
+
+
+@app.get("/scan-image/{image_name:path}")
+async def get_image_scan(image_name: str):
+    """Get the latest Trivy scan result for an image."""
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as http_client:
+            resp = await http_client.get(f"{TRIVY_SERVICE_URL}/scan/image/{image_name}")
+            if resp.status_code == 404:
+                raise HTTPException(status_code=404, detail="Scan not found")
+            resp.raise_for_status()
+            return resp.json()
+    except httpx.HTTPError as e:
+        logger.error(f"Failed to get Trivy scan: {e}")
+        raise HTTPException(status_code=503, detail="Trivy scan service unavailable")
+
+# -------------------------------------------------------------
+# TRIVY SCANNING FOR DEPLOYED SERVICES
+# -------------------------------------------------------------
+
+@app.post("/services/{service_name}/trivy-scan")
+async def trigger_service_trivy_scan(service_name: str):
+    """Trigger a Trivy vulnerability scan for an already deployed service's image."""
+    service = deployed_services.get(service_name)
+    if not service:
+        raise HTTPException(status_code=404, detail=f"Service {service_name} not found in registry")
+        
+    image_name = service.docker_image
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as http_client:
+            resp = await http_client.post(
+                f"{TRIVY_SERVICE_URL}/scan",
+                json={"image_name": image_name}
+            )
+            resp.raise_for_status()
+            return resp.json()
+    except httpx.HTTPError as e:
+        logger.error(f"Trivy scan service error: {e}")
+        raise HTTPException(status_code=500, detail=f"Trivy scan failed: {str(e)}")
+
+@app.get("/services/{service_name}/trivy-scan")
+async def get_service_trivy_scan(service_name: str):
+    """Get the latest Trivy scan results for a deployed service's image."""
+    service = deployed_services.get(service_name)
+    if not service:
+        raise HTTPException(status_code=404, detail=f"Service {service_name} not found in registry")
+        
+    image_name = service.docker_image
+    try:
+        async with httpx.AsyncClient(timeout=10.0) as http_client:
+            resp = await http_client.get(f"{TRIVY_SERVICE_URL}/scan/image/{image_name}")
+            resp.raise_for_status()
+            return resp.json()
+    except httpx.HTTPError as e:
+        logger.error(f"Failed to get Trivy scan result: {e}")
+        return {
+            "image_name": image_name,
+            "scan_status": "unscanned",
+            "vulnerabilities": [],
+            "total_findings": 0,
+            "critical_findings": 0,
+            "high_findings": 0
+        }
+
+# -------------------------------------------------------------
 
 @app.post("/deploy-service", response_model=DeployResponse)
 async def deploy_service(req: DeployRequest):

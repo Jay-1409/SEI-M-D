@@ -172,6 +172,7 @@
             .dashboard-grid {
                 grid-template-columns: 1fr;
             }
+
             .dashboard-grid .card.deploy-theme {
                 position: static;
             }
@@ -363,13 +364,27 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
         }
 
         @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.7; }
+
+            0%,
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+
+            50% {
+                transform: scale(1.1);
+                opacity: 0.7;
+            }
         }
 
         /* Header */
@@ -897,7 +912,8 @@
             <button class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode" title="Toggle Dark Mode">
                 ☀️
             </button>
-            <button class="power-off-btn" id="powerOffBtn" aria-label="Shutdown All Services" title="Shutdown All Services">
+            <button class="power-off-btn" id="powerOffBtn" aria-label="Shutdown All Services"
+                title="Shutdown All Services">
                 ⏻
             </button>
         </div>
@@ -907,7 +923,8 @@
             <div class="shutdown-modal">
                 <div class="modal-icon">⚠️</div>
                 <h3>Shutdown All Services?</h3>
-                <p>This will gracefully stop all deployed microservices and shut down the platform. You'll need to restart manually.</p>
+                <p>This will gracefully stop all deployed microservices and shut down the platform. You'll need to
+                    restart manually.</p>
                 <div class="modal-actions">
                     <button class="btn-cancel" id="shutdownCancel">Cancel</button>
                     <button class="btn-shutdown" id="shutdownConfirm">Shutdown</button>
@@ -933,67 +950,71 @@
         </header>
 
         <div class="dashboard-grid">
-        <!-- Deploy Form -->
-        <div class="card deploy-theme">
-            <h2>
-                <div class="icon-box">📦</div> Deploy New Service
-            </h2>
-            <form id="deployForm">
-                <div class="form-grid">
-                    <div class="form-group">
-                        <label for="serviceName">Service Name</label>
-                        <input type="text" id="serviceName" class="form-input" placeholder="e.g. payment-service"
-                            pattern="^[a-z][a-z0-9\-]{1,61}[a-z0-9]$" required>
-                    </div>
+            <!-- Deploy Form -->
+            <div class="card deploy-theme">
+                <h2>
+                    <div class="icon-box">📦</div> Deploy New Service
+                </h2>
+                <form id="deployForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="serviceName">Service Name</label>
+                            <input type="text" id="serviceName" class="form-input" placeholder="e.g. payment-service"
+                                pattern="^[a-z][a-z0-9\-]{1,61}[a-z0-9]$" required>
+                        </div>
 
-                    <div class="form-group">
-                        <label>Docker Image</label>
-                        <div class="drop-zone" id="dropZone">
-                            <div class="drop-zone-content">
-                                <div class="drop-zone-icon">☁️</div>
-                                <div class="drop-zone-text">Click or drop .tar file</div>
-                                <div class="drop-zone-file-name" id="fileName"></div>
+                        <div class="form-group">
+                            <label>Docker Image</label>
+                            <div class="drop-zone" id="dropZone">
+                                <div class="drop-zone-content">
+                                    <div class="drop-zone-icon">☁️</div>
+                                    <div class="drop-zone-text">Click or drop .tar file</div>
+                                    <div class="drop-zone-file-name" id="fileName"></div>
+                                </div>
+                            </div>
+                            <input type="file" id="imageFile" class="file-input-hidden" accept=".tar">
+                            <input type="hidden" id="dockerImage" required>
+                            <div id="trivyScanContainer"
+                                style="display: none; margin-top: 15px; padding: 12px; border-radius: 8px; font-size: 0.9em; background: rgba(0,0,0,0.1);">
+                                <!-- Dynamic content populated by JS -->
                             </div>
                         </div>
-                        <input type="file" id="imageFile" class="file-input-hidden" accept=".tar">
-                        <input type="hidden" id="dockerImage" required>
+
+                        <div class="form-group">
+                            <label for="containerPort">Port</label>
+                            <input type="number" id="containerPort" class="form-input" placeholder="8080" min="1"
+                                max="65535" required>
+                        </div>
                     </div>
 
-                    <div class="form-group">
-                        <label for="containerPort">Port</label>
-                        <input type="number" id="containerPort" class="form-input" placeholder="8080" min="1"
-                            max="65535" required>
+                    <div id="statusBox" class="status-box"></div>
+
+                    <div style="text-align: right;">
+                        <button type="submit" class="btn btn-primary" id="deployBtn">
+                            <span class="btn-text">Data Center Deploy</span>
+                            <span>→</span>
+                        </button>
                     </div>
-                </div>
+                </form>
+            </div>
 
-                <div id="statusBox" class="status-box"></div>
-
-                <div style="text-align: right;">
-                    <button type="submit" class="btn btn-primary" id="deployBtn">
-                        <span class="btn-text">Data Center Deploy</span>
-                        <span>→</span>
-                    </button>
-                </div>
-            </form>
-        </div>
-
-        <!-- Services List (Yellow Theme) -->
-        <div class="card list-theme">
-            <h2>
-                <div class="icon-box">📡</div> Active Deployments
-            </h2>
-            <div id="servicesContainer">
-                <!-- Skeleton Loader -->
-                <div style="padding: 24px; opacity: 0.5;">
-                    <div
-                        style="height: 60px; background: rgba(255,255,255,0.2); margin-bottom: 12px; border-radius: 12px;">
-                    </div>
-                    <div
-                        style="height: 60px; background: rgba(255,255,255,0.2); margin-bottom: 12px; border-radius: 12px;">
+            <!-- Services List (Yellow Theme) -->
+            <div class="card list-theme">
+                <h2>
+                    <div class="icon-box">📡</div> Active Deployments
+                </h2>
+                <div id="servicesContainer">
+                    <!-- Skeleton Loader -->
+                    <div style="padding: 24px; opacity: 0.5;">
+                        <div
+                            style="height: 60px; background: rgba(255,255,255,0.2); margin-bottom: 12px; border-radius: 12px;">
+                        </div>
+                        <div
+                            style="height: 60px; background: rgba(255,255,255,0.2); margin-bottom: 12px; border-radius: 12px;">
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
         </div>
 
         <footer>
@@ -1102,6 +1123,9 @@
                         portInput.style.borderColor = 'var(--success)';
                         setTimeout(() => portInput.style.borderColor = 'var(--accent)', 1000);
                     }
+
+                    // Trigger Trivy Scan UI
+                    showTrivyScanPrompt();
                 } else {
                     throw new Error(data.detail);
                 }
@@ -1111,6 +1135,113 @@
                 shakeElement(dropZone);
                 console.error(err);
             }
+        }
+
+        // --- Trivy Scan Logic ---
+        function showTrivyScanPrompt() {
+            const container = document.getElementById('trivyScanContainer');
+            if (!container) return;
+            container.style.display = 'block';
+            container.style.border = '1px solid var(--accent)';
+            container.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span><span class="icon-box" style="width:24px;height:24px;font-size:12px;margin:0;">🛡️</span> <strong>Security Scan Recommended</strong></span>
+                    <button type="button" class="btn btn-outline" onclick="runTrivyScan()" style="padding: 4px 12px; font-size: 0.85em;">Run Trivy Scan</button>
+                </div>
+            `;
+        }
+
+        async function runTrivyScan() {
+            const container = document.getElementById('trivyScanContainer');
+            container.innerHTML = `
+                <div style="display: flex; align-items: center;">
+                    <div class="spinner" style="border-top-color: currentColor; width:16px; height:16px; border-width:2px; margin-right:8px;"></div>
+                    <span>Scanning image for vulnerabilities... This may take a minute.</span>
+                </div>
+            `;
+
+            try {
+                // Trigger scan
+                const triggerResp = await fetch(`${API_BASE}/scan-image`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image_name: uploadedImageName })
+                });
+
+                if (!triggerResp.ok) throw new Error("Failed to start scan");
+
+                // Poll results
+                let attempts = 0;
+                const maxAttempts = 30; // 30 * 4s = 2 minutes max
+
+                const pollInterval = setInterval(async () => {
+                    attempts++;
+                    try {
+                        const pollResp = await fetch(`${API_BASE}/scan-image/${uploadedImageName}`);
+                        if (pollResp.ok) {
+                            const result = await pollResp.json();
+                            if (result.scan_status === 'completed') {
+                                clearInterval(pollInterval);
+                                showTrivyResult(result);
+                            } else if (result.scan_status === 'failed') {
+                                clearInterval(pollInterval);
+                                container.innerHTML = `<span style="color:var(--error)">✗ Scan failed: ${result.error}</span>`;
+                            }
+                        }
+                    } catch (e) {
+                        console.error('Polling error', e);
+                    }
+                    if (attempts >= maxAttempts) {
+                        clearInterval(pollInterval);
+                        container.innerHTML = `<span style="color:var(--error)">✗ Scan timed out</span>`;
+                    }
+                }, 4000);
+            } catch (err) {
+                container.innerHTML = `<span style="color:var(--error)">✗ Error: ${err.message}</span>`;
+            }
+        }
+
+        function showTrivyResult(result) {
+            const container = document.getElementById('trivyScanContainer');
+
+            let badgeColor = 'var(--success)';
+            let title = 'Image is Secure';
+
+            if (result.critical_findings > 0) {
+                badgeColor = 'var(--error)';
+                title = `${result.critical_findings} Critical Vulnerabilities!`;
+            } else if (result.high_findings > 0) {
+                badgeColor = 'var(--warning)';
+                title = `${result.high_findings} High Vulnerabilities`;
+            }
+
+            container.style.border = `1px solid ${badgeColor}`;
+            container.style.background = `rgba(${badgeColor === 'var(--error)' ? '239,68,68' : (badgeColor === 'var(--success)' ? '34,197,94' : '245,158,11')}, 0.1)`;
+
+            let html = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <strong style="color: ${badgeColor};">🛡️ ${title}</strong>
+                    <span>Total Findings: ${result.total_findings}</span>
+                </div>
+            `;
+
+            if (result.vulnerabilities.length > 0) {
+                html += `<div style="max-height: 150px; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 4px; padding: 6px;">`;
+                result.vulnerabilities.slice(0, 10).forEach(v => {
+                    let c = v.severity === 'CRITICAL' ? 'var(--error)' : (v.severity === 'HIGH' ? 'var(--warning)' : 'inherit');
+                    html += `
+                        <div style="padding: 4px; border-bottom: 1px solid rgba(255,255,255,0.1); display: flex; justify-content: space-between;">
+                            <span><strong style="color:${c}">${v.severity}</strong>: ${v.pkg_name}</span>
+                            <span style="opacity:0.7">${v.id}</span>
+                        </div>
+                    `;
+                });
+                if (result.vulnerabilities.length > 10) {
+                    html += `<div style="text-align: center; padding: 4px; font-style: italic; opacity: 0.7;">+ ${result.vulnerabilities.length - 10} more...</div>`;
+                }
+                html += `</div>`;
+            }
+            container.innerHTML = html;
         }
 
         // Deploy Submission with Animation
@@ -1149,6 +1280,8 @@
                     document.getElementById('deployForm').reset();
                     uploadedImageName = null;
                     fileNameDisplay.textContent = '';
+                    const trivyContainer = document.getElementById('trivyScanContainer');
+                    if (trivyContainer) trivyContainer.style.display = 'none';
                     loadServices();
                 } else {
                     throw new Error(data.detail);

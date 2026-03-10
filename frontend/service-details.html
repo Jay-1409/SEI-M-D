@@ -704,29 +704,50 @@
             align-items: flex-start;
             margin-bottom: 28px;
         }
+
         .scan-header-title h2 {
-            margin: 0; padding: 0; font-size: 22px;
+            margin: 0;
+            padding: 0;
+            font-size: 22px;
         }
+
         .scan-header-title p {
-            margin: 6px 0 0; font-size: 13px; color: var(--text-muted);
+            margin: 6px 0 0;
+            font-size: 13px;
+            color: var(--text-muted);
         }
+
         .scan-btn {
-            display: inline-flex; align-items: center; gap: 8px;
-            padding: 10px 20px; border: none; border-radius: 12px;
-            font-size: 14px; font-weight: 700; cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
             background: linear-gradient(135deg, #E8707E, #D4606E);
-            color: white; box-shadow: 0 4px 14px rgba(212, 96, 110, 0.3);
+            color: white;
+            box-shadow: 0 4px 14px rgba(212, 96, 110, 0.3);
             transition: all 0.25s;
         }
+
         .scan-btn:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(212, 96, 110, 0.45);
         }
+
         .scan-btn:disabled {
-            opacity: 0.6; cursor: not-allowed; transform: none;
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
             box-shadow: 0 4px 14px rgba(212, 96, 110, 0.15);
         }
-        .scan-btn svg { flex-shrink: 0; }
+
+        .scan-btn svg {
+            flex-shrink: 0;
+        }
 
         /* Summary strip */
         .scan-summary {
@@ -735,6 +756,7 @@
             gap: 12px;
             margin-bottom: 24px;
         }
+
         .scan-stat {
             background: var(--info-item-bg);
             border: 1px solid var(--info-item-border);
@@ -742,14 +764,21 @@
             padding: 16px 18px;
             text-align: center;
         }
+
         .scan-stat-value {
-            font-size: 26px; font-weight: 800;
+            font-size: 26px;
+            font-weight: 800;
             color: var(--text-primary);
             line-height: 1.1;
         }
+
         .scan-stat-label {
-            font-size: 11px; text-transform: uppercase; font-weight: 700;
-            letter-spacing: 0.8px; color: var(--text-muted); margin-top: 6px;
+            font-size: 11px;
+            text-transform: uppercase;
+            font-weight: 700;
+            letter-spacing: 0.8px;
+            color: var(--text-muted);
+            margin-top: 6px;
         }
 
         /* Progress bar */
@@ -761,64 +790,146 @@
             margin-bottom: 24px;
             display: none;
         }
-        .scan-progress.active { display: block; }
+
+        .scan-progress.active {
+            display: block;
+        }
+
         .scan-progress-header {
-            display: flex; justify-content: space-between; align-items: center;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             margin-bottom: 12px;
         }
+
         .scan-progress-label {
-            font-size: 13px; font-weight: 700; color: var(--text-primary);
-            display: flex; align-items: center; gap: 8px;
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
+
         .scan-progress-time {
-            font-size: 12px; color: var(--text-muted);
+            font-size: 12px;
+            color: var(--text-muted);
             font-family: 'JetBrains Mono', monospace;
         }
+
         .scan-progress-bar {
-            height: 6px; border-radius: 3px;
-            background: rgba(0,0,0,0.06); overflow: hidden;
+            height: 6px;
+            border-radius: 3px;
+            background: rgba(0, 0, 0, 0.06);
+            overflow: hidden;
         }
+
         [data-theme="dark"] .scan-progress-bar {
-            background: rgba(255,255,255,0.08);
+            background: rgba(255, 255, 255, 0.08);
         }
+
         .scan-progress-fill {
-            height: 100%; border-radius: 3px;
+            height: 100%;
+            border-radius: 3px;
             background: linear-gradient(90deg, #E8707E, #D4606E);
             animation: progressPulse 2s ease-in-out infinite;
             width: 60%;
         }
+
         @keyframes progressPulse {
-            0%,100% { opacity: 0.7; width: 40%; }
-            50% { opacity: 1; width: 75%; }
+
+            0%,
+            100% {
+                opacity: 0.7;
+                width: 40%;
+            }
+
+            50% {
+                opacity: 1;
+                width: 75%;
+            }
         }
 
         /* Severity badges */
         .sev-badge {
-            display: inline-flex; align-items: center; gap: 5px;
-            padding: 3px 10px; border-radius: 20px;
-            font-size: 11px; font-weight: 800; text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        .sev-badge.critical { background: #FDE2E2; color: #9B2C2C; }
-        .sev-badge.high     { background: #FDE2E2; color: #9B2C2C; }
-        .sev-badge.medium   { background: #FEFCBF; color: #975A16; }
-        .sev-badge.low      { background: #E6F6EE; color: #276749; }
-        .sev-badge.info     { background: #E0ECFF; color: #2B4B7E; }
-        [data-theme="dark"] .sev-badge.critical { background: rgba(254,178,178,0.15); color: #FEB2B2; }
-        [data-theme="dark"] .sev-badge.high     { background: rgba(254,178,178,0.15); color: #FEB2B2; }
-        [data-theme="dark"] .sev-badge.medium   { background: rgba(246,224,94,0.12); color: #F6E05E; }
-        [data-theme="dark"] .sev-badge.low      { background: rgba(154,230,180,0.12); color: #9AE6B4; }
-        [data-theme="dark"] .sev-badge.info     { background: rgba(144,205,244,0.12); color: #90CDF4; }
+
+        .sev-badge.critical {
+            background: #FDE2E2;
+            color: #9B2C2C;
+        }
+
+        .sev-badge.high {
+            background: #FDE2E2;
+            color: #9B2C2C;
+        }
+
+        .sev-badge.medium {
+            background: #FEFCBF;
+            color: #975A16;
+        }
+
+        .sev-badge.low {
+            background: #E6F6EE;
+            color: #276749;
+        }
+
+        .sev-badge.info {
+            background: #E0ECFF;
+            color: #2B4B7E;
+        }
+
+        [data-theme="dark"] .sev-badge.critical {
+            background: rgba(254, 178, 178, 0.15);
+            color: #FEB2B2;
+        }
+
+        [data-theme="dark"] .sev-badge.high {
+            background: rgba(254, 178, 178, 0.15);
+            color: #FEB2B2;
+        }
+
+        [data-theme="dark"] .sev-badge.medium {
+            background: rgba(246, 224, 94, 0.12);
+            color: #F6E05E;
+        }
+
+        [data-theme="dark"] .sev-badge.low {
+            background: rgba(154, 230, 180, 0.12);
+            color: #9AE6B4;
+        }
+
+        [data-theme="dark"] .sev-badge.info {
+            background: rgba(144, 205, 244, 0.12);
+            color: #90CDF4;
+        }
 
         /* Severity group */
-        .sev-group { margin-bottom: 20px; }
+        .sev-group {
+            margin-bottom: 20px;
+        }
+
         .sev-group-header {
-            display: flex; align-items: center; gap: 10px;
-            margin-bottom: 10px; padding-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+            padding-bottom: 8px;
             border-bottom: 1px solid var(--border);
         }
+
         .sev-group-count {
-            font-size: 12px; color: var(--text-muted);
+            font-size: 12px;
+            color: var(--text-muted);
             font-weight: 600;
         }
 
@@ -832,91 +943,160 @@
             transition: all 0.2s;
             cursor: pointer;
         }
+
         .vuln-card:hover {
             box-shadow: 0 4px 12px var(--vuln-item-shadow);
             transform: translateY(-1px);
         }
+
         .vuln-card-top {
-            display: flex; align-items: center; justify-content: space-between;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
         }
+
         .vuln-card-id {
             font-family: 'JetBrains Mono', monospace;
-            font-size: 12px; font-weight: 600;
+            font-size: 12px;
+            font-weight: 600;
             color: var(--text-muted);
         }
+
         .vuln-card-chevron {
-            color: var(--text-muted); transition: transform 0.2s;
+            color: var(--text-muted);
+            transition: transform 0.2s;
         }
-        .vuln-card.open .vuln-card-chevron { transform: rotate(180deg); }
+
+        .vuln-card.open .vuln-card-chevron {
+            transform: rotate(180deg);
+        }
+
         .vuln-card-desc {
-            margin-top: 8px; font-size: 14px;
-            color: var(--text-secondary); line-height: 1.6;
+            margin-top: 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.6;
         }
+
         .vuln-card-details {
-            display: none; margin-top: 12px;
-            padding-top: 12px; border-top: 1px dashed var(--border);
+            display: none;
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px dashed var(--border);
         }
-        .vuln-card.open .vuln-card-details { display: block; }
+
+        .vuln-card.open .vuln-card-details {
+            display: block;
+        }
+
         .vuln-detail-row {
-            display: flex; gap: 8px; align-items: baseline;
-            font-size: 13px; margin-bottom: 4px;
+            display: flex;
+            gap: 8px;
+            align-items: baseline;
+            font-size: 13px;
+            margin-bottom: 4px;
         }
+
         .vuln-detail-label {
-            font-weight: 700; color: var(--text-muted);
-            min-width: 60px; text-transform: uppercase; font-size: 11px;
+            font-weight: 700;
+            color: var(--text-muted);
+            min-width: 60px;
+            text-transform: uppercase;
+            font-size: 11px;
         }
+
         .vuln-detail-value {
             color: var(--text-secondary);
-            font-family: 'JetBrains Mono', monospace; font-size: 12px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
             word-break: break-all;
         }
+
         .vuln-detail-value a {
-            color: var(--accent); text-decoration: none;
+            color: var(--accent);
+            text-decoration: none;
         }
-        .vuln-detail-value a:hover { text-decoration: underline; }
+
+        .vuln-detail-value a:hover {
+            text-decoration: underline;
+        }
 
         /* Empty / clean state */
         .scan-empty {
-            padding: 48px 30px; text-align: center;
+            padding: 48px 30px;
+            text-align: center;
             background: var(--info-item-bg);
             border: 2px dashed var(--border);
             border-radius: 16px;
         }
-        .scan-empty-icon { font-size: 40px; margin-bottom: 12px; }
+
+        .scan-empty-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+        }
+
         .scan-empty-title {
-            font-size: 16px; font-weight: 700;
-            color: var(--text-primary); margin-bottom: 6px;
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 6px;
         }
+
         .scan-empty-sub {
-            font-size: 13px; color: var(--text-muted);
+            font-size: 13px;
+            color: var(--text-muted);
         }
+
         .scan-clean {
-            padding: 48px 30px; text-align: center;
-            background: linear-gradient(135deg, rgba(140,200,168,0.1), rgba(140,200,168,0.05));
-            border: 2px solid rgba(140,200,168,0.3);
+            padding: 48px 30px;
+            text-align: center;
+            background: linear-gradient(135deg, rgba(140, 200, 168, 0.1), rgba(140, 200, 168, 0.05));
+            border: 2px solid rgba(140, 200, 168, 0.3);
             border-radius: 16px;
         }
-        .scan-clean-icon { font-size: 40px; margin-bottom: 12px; }
-        .scan-clean-title {
-            font-size: 16px; font-weight: 700; color: #38A169;
+
+        .scan-clean-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
         }
-        [data-theme="dark"] .scan-clean-title { color: #9AE6B4; }
+
+        .scan-clean-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #38A169;
+        }
+
+        [data-theme="dark"] .scan-clean-title {
+            color: #9AE6B4;
+        }
+
         .scan-clean-sub {
-            font-size: 13px; color: var(--text-muted); margin-top: 4px;
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-top: 4px;
         }
 
         /* Scan meta footer */
         .scan-meta {
-            display: flex; flex-wrap: wrap; gap: 20px;
-            margin-top: 20px; padding-top: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-top: 20px;
+            padding-top: 16px;
             border-top: 1px solid var(--border);
         }
+
         .scan-meta-item {
-            font-size: 12px; color: var(--text-muted);
-            display: flex; align-items: center; gap: 5px;
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 5px;
         }
+
         .scan-meta-item strong {
-            color: var(--text-secondary); font-weight: 600;
+            color: var(--text-secondary);
+            font-weight: 600;
         }
     </style>
 </head>
@@ -1056,20 +1236,27 @@
                     <!-- SUB-TAB: RATE LIMITING -->
                     <div id="api-content-ratelimit">
                         <!-- Global Rate Limit Config (moved from Settings) -->
-                        <div style="background: rgba(255,255,255,0.6); padding: 24px; border-radius: 12px; margin-bottom: 24px; border: 1px solid rgba(0,0,0,0.05);">
-                            <h3 style="font-size: 14px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; margin-bottom: 16px;">Global Rate Limit</h3>
+                        <div
+                            style="background: rgba(255,255,255,0.6); padding: 24px; border-radius: 12px; margin-bottom: 24px; border: 1px solid rgba(0,0,0,0.05);">
+                            <h3
+                                style="font-size: 14px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8; margin-bottom: 16px;">
+                                Global Rate Limit</h3>
                             <p style="opacity: 0.7; margin-bottom: 20px; font-size: 13px; line-height: 1.5;">
-                                Limits are enforced per unique client IP address via Redis. Per-endpoint overrides can be set below.
+                                Limits are enforced per unique client IP address via Redis. Per-endpoint overrides can
+                                be set below.
                             </p>
                             <div style="display: flex; gap: 16px; flex-wrap: wrap; align-items: flex-end;">
                                 <div class="form-group" style="margin-bottom:0; flex: 0 0 140px;">
                                     <label class="form-label">Status</label>
                                     <div style="position:relative;">
-                                        <select id="rlEnabled" class="form-input" style="appearance:none; font-weight:600;">
+                                        <select id="rlEnabled" class="form-input"
+                                            style="appearance:none; font-weight:600;">
                                             <option value="true">Enabled</option>
                                             <option value="false">Disabled</option>
                                         </select>
-                                        <div style="position:absolute; right:16px; top:16px; pointer-events:none; font-size:12px;">▼</div>
+                                        <div
+                                            style="position:absolute; right:16px; top:16px; pointer-events:none; font-size:12px;">
+                                            ▼</div>
                                     </div>
                                 </div>
                                 <div class="form-group" style="margin-bottom:0; flex: 0 0 140px;">
@@ -1085,7 +1272,8 @@
                                     onclick="saveRateLimit()">
                                     💾 Save
                                 </button>
-                                <span id="rlSaveStatus" style="font-weight: 700; color: #7A5A4A; font-size: 13px;"></span>
+                                <span id="rlSaveStatus"
+                                    style="font-weight: 700; color: #7A5A4A; font-size: 13px;"></span>
                             </div>
                         </div>
 
@@ -1151,69 +1339,137 @@
 
             <!-- TAB 3: SECURITY (Red Theme) -->
             <div id="tab-security" class="tab-content">
-                <div class="card security-theme">
-                    <!-- Header -->
-                    <div class="scan-header">
-                        <div class="scan-header-title">
-                            <h2>🛡️ Vulnerability Scanner</h2>
-                            <p>Nikto-powered security analysis of your running service</p>
-                        </div>
-                        <button class="scan-btn" id="scanTriggerBtn" onclick="triggerScan()">
-                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                                <circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/>
-                            </svg>
-                            Run Scan
-                        </button>
-                    </div>
-
-                    <!-- Progress (shown during scan) -->
-                    <div class="scan-progress" id="scanProgress">
-                        <div class="scan-progress-header">
-                            <div class="scan-progress-label">
-                                <span class="spinner" style="width:16px;height:16px;border-width:2px;color:#E8707E;"></span>
-                                Scanning in progress…
+                <div style="display: flex; gap: 24px;">
+                    <!-- NIKTO (DAST) SCANNER CARD -->
+                    <div class="card security-theme" style="flex: 1; padding: 24px; border-radius: 16px;">
+                        <!-- Header -->
+                        <div class="scan-header">
+                            <div class="scan-header-title">
+                                <h2>🛡️ Web Vulnerability Scanner</h2>
+                                <p>Nikto-powered security analysis of your running service</p>
                             </div>
-                            <div class="scan-progress-time" id="scanElapsed">0:00</div>
+                            <button class="scan-btn" id="scanTriggerBtn" onclick="triggerScan()">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <polygon points="10 8 16 12 10 16 10 8" />
+                                </svg>
+                                Run Scan
+                            </button>
                         </div>
-                        <div class="scan-progress-bar">
-                            <div class="scan-progress-fill"></div>
+
+                        <!-- Progress (shown during scan) -->
+                        <div class="scan-progress" id="scanProgress">
+                            <div class="scan-progress-header">
+                                <div class="scan-progress-label">
+                                    <span class="spinner"
+                                        style="width:16px;height:16px;border-width:2px;color:#E8707E;"></span>
+                                    Scanning in progress…
+                                </div>
+                                <div class="scan-progress-time" id="scanElapsed">0:00</div>
+                            </div>
+                            <div class="scan-progress-bar">
+                                <div class="scan-progress-fill"></div>
+                            </div>
+                        </div>
+
+                        <!-- Summary stats -->
+                        <div class="scan-summary" id="scanSummary" style="display:none;">
+                            <div class="scan-stat">
+                                <div class="scan-stat-value" id="statTotal">0</div>
+                                <div class="scan-stat-label">Findings</div>
+                            </div>
+                            <div class="scan-stat">
+                                <div class="scan-stat-value" id="statCritical" style="color:#C53030;">0</div>
+                                <div class="scan-stat-label">Critical / High</div>
+                            </div>
+                            <div class="scan-stat">
+                                <div class="scan-stat-value" id="statMedium" style="color:#B7791F;">0</div>
+                                <div class="scan-stat-label">Medium</div>
+                            </div>
+                            <div class="scan-stat">
+                                <div class="scan-stat-value" id="statLow" style="color:#276749;">0</div>
+                                <div class="scan-stat-label">Low / Info</div>
+                            </div>
+                        </div>
+
+                        <!-- Vulnerability list -->
+                        <div id="vulnList">
+                            <div class="scan-empty">
+                                <div class="scan-empty-icon">🔍</div>
+                                <div class="scan-empty-title">No scan results yet</div>
+                                <div class="scan-empty-sub">Click "Run Scan" to start a web vulnerability assessment
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Scan metadata footer -->
+                        <div class="scan-meta" id="scanMeta" style="display:none;">
+                            <div class="scan-meta-item">🕐 Duration: <strong id="metaDuration">—</strong></div>
+                            <div class="scan-meta-item">📅 Completed: <strong id="metaCompleted">—</strong></div>
+                            <div class="scan-meta-item">🎯 Target: <strong id="metaTarget">—</strong></div>
                         </div>
                     </div>
 
-                    <!-- Summary stats -->
-                    <div class="scan-summary" id="scanSummary" style="display:none;">
-                        <div class="scan-stat">
-                            <div class="scan-stat-value" id="statTotal">0</div>
-                            <div class="scan-stat-label">Findings</div>
+                    <!-- TRIVY (IMAGE) SCANNER CARD -->
+                    <div class="card security-theme"
+                        style="flex: 1; padding: 24px; border-radius: 16px; border-left: 4px solid var(--accent);">
+                        <!-- Header -->
+                        <div class="scan-header">
+                            <div class="scan-header-title">
+                                <h2>📦 Container Image Security</h2>
+                                <p>Trivy-powered vulnerability analysis of the Docker image</p>
+                            </div>
+                            <button class="scan-btn" id="trivyTriggerBtn" onclick="triggerTrivyScan()"
+                                style="background: var(--accent); color: white;">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                                    stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                    <circle cx="12" cy="12" r="10" />
+                                    <polygon points="10 8 16 12 10 16 10 8" />
+                                </svg>
+                                Run Trivy
+                            </button>
                         </div>
-                        <div class="scan-stat">
-                            <div class="scan-stat-value" id="statCritical" style="color:#C53030;">0</div>
-                            <div class="scan-stat-label">Critical / High</div>
-                        </div>
-                        <div class="scan-stat">
-                            <div class="scan-stat-value" id="statMedium" style="color:#B7791F;">0</div>
-                            <div class="scan-stat-label">Medium</div>
-                        </div>
-                        <div class="scan-stat">
-                            <div class="scan-stat-value" id="statLow" style="color:#276749;">0</div>
-                            <div class="scan-stat-label">Low / Info</div>
-                        </div>
-                    </div>
 
-                    <!-- Vulnerability list -->
-                    <div id="vulnList">
-                        <div class="scan-empty">
-                            <div class="scan-empty-icon">🔍</div>
-                            <div class="scan-empty-title">No scan results yet</div>
-                            <div class="scan-empty-sub">Click "Run Scan" to start a vulnerability assessment</div>
+                        <!-- Progress (shown during scan) -->
+                        <div class="scan-progress" id="trivyProgress">
+                            <div class="scan-progress-header">
+                                <div class="scan-progress-label">
+                                    <span class="spinner"
+                                        style="width:16px;height:16px;border-width:2px;color:var(--accent);"></span>
+                                    Scanning container filesystem…
+                                </div>
+                                <div class="scan-progress-time" id="trivyElapsed">0:00</div>
+                            </div>
                         </div>
-                    </div>
 
-                    <!-- Scan metadata footer -->
-                    <div class="scan-meta" id="scanMeta" style="display:none;">
-                        <div class="scan-meta-item">🕐 Duration: <strong id="metaDuration">—</strong></div>
-                        <div class="scan-meta-item">📅 Completed: <strong id="metaCompleted">—</strong></div>
-                        <div class="scan-meta-item">🎯 Target: <strong id="metaTarget">—</strong></div>
+                        <!-- Summary stats -->
+                        <div class="scan-summary" id="trivySummary" style="display:none;">
+                            <div class="scan-stat">
+                                <div class="scan-stat-value" id="trivyTotal">0</div>
+                                <div class="scan-stat-label">Total Findings</div>
+                            </div>
+                            <div class="scan-stat"
+                                style="background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.2);">
+                                <div class="scan-stat-value" id="trivyCritical" style="color:#EF4444;">0</div>
+                                <div class="scan-stat-label">Critical</div>
+                            </div>
+                            <div class="scan-stat"
+                                style="background: rgba(245,158,11,0.1); border: 1px solid rgba(245,158,11,0.2);">
+                                <div class="scan-stat-value" id="trivyHigh" style="color:#F59E0B;">0</div>
+                                <div class="scan-stat-label">High</div>
+                            </div>
+                        </div>
+
+                        <!-- Vulnerability list -->
+                        <div id="trivyVulnList" style="max-height: 400px; overflow-y: auto;">
+                            <div class="scan-empty">
+                                <div class="scan-empty-icon">🐋</div>
+                                <div class="scan-empty-title">Secure Container</div>
+                                <div class="scan-empty-sub">Run a Trivy scan to inspect OS packages and dependencies
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1221,38 +1477,50 @@
             <!-- TAB: AUTH (API Key Management) -->
             <div id="tab-auth" class="tab-content">
                 <div class="card security-theme">
-                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; border-bottom:2px solid rgba(0,0,0,0.05); padding-bottom:20px;">
+                    <div
+                        style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; border-bottom:2px solid rgba(0,0,0,0.05); padding-bottom:20px;">
                         <div>
                             <h2 style="margin:0; padding:0;">🔑 API Key Authentication</h2>
                             <p style="margin-top:4px; font-size:14px; opacity:0.7;">
-                                Require an <code style="background:rgba(0,0,0,0.06); padding:2px 6px; border-radius:4px; font-size:12px;">X-API-Key</code> header for protected routes
+                                Require an <code
+                                    style="background:rgba(0,0,0,0.06); padding:2px 6px; border-radius:4px; font-size:12px;">X-API-Key</code>
+                                header for protected routes
                             </p>
                         </div>
                         <!-- Global toggle -->
                         <label style="display:flex; align-items:center; gap:10px; cursor:pointer;">
                             <span style="font-size:13px; font-weight:600;" id="authStatusLabel">Disabled</span>
                             <div style="position:relative; width:44px; height:24px;">
-                                <input type="checkbox" id="authEnabled" onchange="onAuthToggle()" style="opacity:0; width:0; height:0; position:absolute;">
-                                <span id="authToggleTrack" style="position:absolute; inset:0; background:rgba(0,0,0,0.15); border-radius:12px; transition:all 0.2s; cursor:pointer;"></span>
-                                <span id="authToggleThumb" style="position:absolute; top:2px; left:2px; width:20px; height:20px; background:white; border-radius:50%; box-shadow:0 1px 3px rgba(0,0,0,0.2); transition:all 0.2s; pointer-events:none;"></span>
+                                <input type="checkbox" id="authEnabled" onchange="onAuthToggle()"
+                                    style="opacity:0; width:0; height:0; position:absolute;">
+                                <span id="authToggleTrack"
+                                    style="position:absolute; inset:0; background:rgba(0,0,0,0.15); border-radius:12px; transition:all 0.2s; cursor:pointer;"></span>
+                                <span id="authToggleThumb"
+                                    style="position:absolute; top:2px; left:2px; width:20px; height:20px; background:white; border-radius:50%; box-shadow:0 1px 3px rgba(0,0,0,0.2); transition:all 0.2s; pointer-events:none;"></span>
                             </div>
                         </label>
                     </div>
 
                     <!-- API Keys Section -->
                     <div style="margin-bottom:28px;">
-                        <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
-                            <h3 style="margin:0; font-size:15px; text-transform:uppercase; letter-spacing:1px; opacity:0.8;">API Keys</h3>
-                            <button onclick="addNewApiKey()" class="btn-primary" style="background:var(--accent); color:white; font-size:12px; padding:8px 16px; display:flex; align-items:center; gap:6px;">
+                        <div
+                            style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+                            <h3
+                                style="margin:0; font-size:15px; text-transform:uppercase; letter-spacing:1px; opacity:0.8;">
+                                API Keys</h3>
+                            <button onclick="addNewApiKey()" class="btn-primary"
+                                style="background:var(--accent); color:white; font-size:12px; padding:8px 16px; display:flex; align-items:center; gap:6px;">
                                 ➕ Generate New Key
                             </button>
                         </div>
 
                         <!-- Empty state -->
-                        <div id="authKeysEmpty" style="padding:32px; text-align:center; background:var(--info-item-bg); border:1px dashed var(--info-item-border); border-radius:12px;">
+                        <div id="authKeysEmpty"
+                            style="padding:32px; text-align:center; background:var(--info-item-bg); border:1px dashed var(--info-item-border); border-radius:12px;">
                             <div style="font-size:28px; margin-bottom:8px;">🔐</div>
                             <div style="font-weight:600; margin-bottom:4px;">No API keys yet</div>
-                            <div style="font-size:13px; color:var(--text-muted);">Generate a key to start protecting your routes</div>
+                            <div style="font-size:13px; color:var(--text-muted);">Generate a key to start protecting
+                                your routes</div>
                         </div>
 
                         <!-- Keys list -->
@@ -1261,40 +1529,58 @@
 
                     <!-- Protected Routes Section -->
                     <div>
-                        <h3 style="margin:0 0 14px 0; font-size:15px; text-transform:uppercase; letter-spacing:1px; opacity:0.8;">Protected Routes</h3>
+                        <h3
+                            style="margin:0 0 14px 0; font-size:15px; text-transform:uppercase; letter-spacing:1px; opacity:0.8;">
+                            Protected Routes</h3>
                         <p style="font-size:12px; color:var(--text-muted); margin-bottom:14px;">
                             Select which routes require an API key. Unselected routes remain publicly accessible.
                         </p>
                         <div id="authRoutesList" style="margin-bottom:16px;"></div>
                         <div style="display:flex; justify-content:flex-end;">
-                            <button onclick="saveAuthConfig()" class="btn-primary" style="background:var(--accent); color:white; font-size:13px; padding:10px 24px;">
+                            <button onclick="saveAuthConfig()" class="btn-primary"
+                                style="background:var(--accent); color:white; font-size:13px; padding:10px 24px;">
                                 💾 Save Auth Config
                             </button>
                         </div>
                     </div>
 
                     <!-- Usage Guide -->
-                    <div style="margin-top:8px; padding:20px; background:var(--info-item-bg); border:1px solid var(--info-item-border); border-radius:12px;">
-                        <h3 style="margin:0 0 12px 0; font-size:14px; text-transform:uppercase; letter-spacing:1px; opacity:0.8;">📖 Usage Guide</h3>
+                    <div
+                        style="margin-top:8px; padding:20px; background:var(--info-item-bg); border:1px solid var(--info-item-border); border-radius:12px;">
+                        <h3
+                            style="margin:0 0 12px 0; font-size:14px; text-transform:uppercase; letter-spacing:1px; opacity:0.8;">
+                            📖 Usage Guide</h3>
                         <p style="font-size:13px; color:var(--text-muted); margin-bottom:12px; line-height:1.6;">
-                            Protected routes require an <code style="background:rgba(0,0,0,0.06); padding:2px 6px; border-radius:4px; font-size:12px;">X-API-Key</code> header. Requests without a valid key will receive a <strong>401 Unauthorized</strong> response.
+                            Protected routes require an <code
+                                style="background:rgba(0,0,0,0.06); padding:2px 6px; border-radius:4px; font-size:12px;">X-API-Key</code>
+                            header. Requests without a valid key will receive a <strong>401 Unauthorized</strong>
+                            response.
                         </p>
-                        <div style="background:rgba(0,0,0,0.04); border-radius:8px; padding:14px 16px; font-family:'JetBrains Mono',monospace; font-size:12px; line-height:1.8; overflow-x:auto;">
+                        <div
+                            style="background:rgba(0,0,0,0.04); border-radius:8px; padding:14px 16px; font-family:'JetBrains Mono',monospace; font-size:12px; line-height:1.8; overflow-x:auto;">
                             <div style="color:var(--text-muted); margin-bottom:4px;"># ❌ Without key — returns 401</div>
-                            <div>curl http://localhost:30080/<strong id="authGuideService">SERVICE</strong>/endpoint</div>
+                            <div>curl http://localhost:30080/<strong id="authGuideService">SERVICE</strong>/endpoint
+                            </div>
                             <br>
-                            <div style="color:var(--text-muted); margin-bottom:4px;"># ✅ With key — request goes through</div>
-                            <div>curl -H "X-API-Key: <span id="authGuideKey" style="color:var(--accent);">your-api-key</span>" \</div>
-                            <div style="padding-left:24px;">http://localhost:30080/<strong id="authGuideService2">SERVICE</strong>/endpoint</div>
+                            <div style="color:var(--text-muted); margin-bottom:4px;"># ✅ With key — request goes through
+                            </div>
+                            <div>curl -H "X-API-Key: <span id="authGuideKey"
+                                    style="color:var(--accent);">your-api-key</span>" \</div>
+                            <div style="padding-left:24px;">http://localhost:30080/<strong
+                                    id="authGuideService2">SERVICE</strong>/endpoint</div>
                             <br>
                             <div style="color:var(--text-muted); margin-bottom:4px;"># Python requests</div>
                             <div>requests.get(</div>
-                            <div style="padding-left:24px;">"http://localhost:30080/<strong id="authGuideService3">SERVICE</strong>/endpoint",</div>
-                            <div style="padding-left:24px;">headers={"X-API-Key": "<span id="authGuideKey2" style="color:var(--accent);">your-api-key</span>"})</div>
+                            <div style="padding-left:24px;">"http://localhost:30080/<strong
+                                    id="authGuideService3">SERVICE</strong>/endpoint",</div>
+                            <div style="padding-left:24px;">headers={"X-API-Key": "<span id="authGuideKey2"
+                                    style="color:var(--accent);">your-api-key</span>"})</div>
                             <br>
                             <div style="color:var(--text-muted); margin-bottom:4px;"># JavaScript fetch</div>
-                            <div>fetch("http://localhost:30080/<strong id="authGuideService4">SERVICE</strong>/endpoint", {</div>
-                            <div style="padding-left:24px;">headers: { "X-API-Key": "<span id="authGuideKey3" style="color:var(--accent);">your-api-key</span>" }</div>
+                            <div>fetch("http://localhost:30080/<strong
+                                    id="authGuideService4">SERVICE</strong>/endpoint", {</div>
+                            <div style="padding-left:24px;">headers: { "X-API-Key": "<span id="authGuideKey3"
+                                    style="color:var(--accent);">your-api-key</span>" }</div>
                             <div>})</div>
                         </div>
                     </div>
@@ -1304,77 +1590,122 @@
             <!-- TAB 4: FIREWALL (WAF) -->
             <div id="tab-firewall" class="tab-content">
                 <div class="card security-theme">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 2px solid rgba(0,0,0,0.05); padding-bottom: 20px;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; border-bottom: 2px solid rgba(0,0,0,0.05); padding-bottom: 20px;">
                         <div>
                             <h2 style="margin: 0; padding: 0;">🔥 Web Application Firewall</h2>
-                            <p style="margin-top:4px; font-size:14px; opacity:0.7;">SQL Injection, XSS & Header Sanitization on all gateway traffic to this service</p>
+                            <p style="margin-top:4px; font-size:14px; opacity:0.7;">SQL Injection, XSS & Header
+                                Sanitization on all gateway traffic to this service</p>
                         </div>
                     </div>
 
                     <!-- WAF Toggles -->
                     <div style="display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;">
                         <!-- SQLi Toggle -->
-                        <div style="flex:1; min-width: 200px; background: rgba(255,255,255,0.7); padding: 20px 24px; border-radius: 16px; display:flex; align-items:center; justify-content:space-between;">
+                        <div
+                            style="flex:1; min-width: 200px; background: rgba(255,255,255,0.7); padding: 20px 24px; border-radius: 16px; display:flex; align-items:center; justify-content:space-between;">
                             <div>
-                                <div style="font-size: 11px; text-transform: uppercase; font-weight: 800; color: #7A5060; margin-bottom: 4px; letter-spacing:1px;">SQL Injection</div>
-                                <div id="sqliStatusLabel" style="font-weight: 800; text-transform: uppercase; font-size: 16px; color: #B07070;">OFF</div>
+                                <div
+                                    style="font-size: 11px; text-transform: uppercase; font-weight: 800; color: #7A5060; margin-bottom: 4px; letter-spacing:1px;">
+                                    SQL Injection</div>
+                                <div id="sqliStatusLabel"
+                                    style="font-weight: 800; text-transform: uppercase; font-size: 16px; color: #B07070;">
+                                    OFF</div>
                             </div>
-                            <label style="position: relative; display: inline-block; width: 60px; height: 32px; cursor: pointer;">
-                                <input type="checkbox" id="sqliToggle" onchange="toggleWafType('sqli')" style="opacity: 0; width: 0; height: 0;">
-                                <span id="sqliToggleSlider" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #D4CCC4; border-radius: 32px; transition: 0.3s;"></span>
-                                <span id="sqliToggleKnob" style="position: absolute; height: 26px; width: 26px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></span>
+                            <label
+                                style="position: relative; display: inline-block; width: 60px; height: 32px; cursor: pointer;">
+                                <input type="checkbox" id="sqliToggle" onchange="toggleWafType('sqli')"
+                                    style="opacity: 0; width: 0; height: 0;">
+                                <span id="sqliToggleSlider"
+                                    style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #D4CCC4; border-radius: 32px; transition: 0.3s;"></span>
+                                <span id="sqliToggleKnob"
+                                    style="position: absolute; height: 26px; width: 26px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></span>
                             </label>
                         </div>
                         <!-- XSS Toggle -->
-                        <div style="flex:1; min-width: 200px; background: rgba(255,255,255,0.7); padding: 20px 24px; border-radius: 16px; display:flex; align-items:center; justify-content:space-between;">
+                        <div
+                            style="flex:1; min-width: 200px; background: rgba(255,255,255,0.7); padding: 20px 24px; border-radius: 16px; display:flex; align-items:center; justify-content:space-between;">
                             <div>
-                                <div style="font-size: 11px; text-transform: uppercase; font-weight: 800; color: #7A6050; margin-bottom: 4px; letter-spacing:1px;">XSS Protection</div>
-                                <div id="xssStatusLabel" style="font-weight: 800; text-transform: uppercase; font-size: 16px; color: #B07070;">OFF</div>
+                                <div
+                                    style="font-size: 11px; text-transform: uppercase; font-weight: 800; color: #7A6050; margin-bottom: 4px; letter-spacing:1px;">
+                                    XSS Protection</div>
+                                <div id="xssStatusLabel"
+                                    style="font-weight: 800; text-transform: uppercase; font-size: 16px; color: #B07070;">
+                                    OFF</div>
                             </div>
-                            <label style="position: relative; display: inline-block; width: 60px; height: 32px; cursor: pointer;">
-                                <input type="checkbox" id="xssToggle" onchange="toggleWafType('xss')" style="opacity: 0; width: 0; height: 0;">
-                                <span id="xssToggleSlider" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #D4CCC4; border-radius: 32px; transition: 0.3s;"></span>
-                                <span id="xssToggleKnob" style="position: absolute; height: 26px; width: 26px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></span>
+                            <label
+                                style="position: relative; display: inline-block; width: 60px; height: 32px; cursor: pointer;">
+                                <input type="checkbox" id="xssToggle" onchange="toggleWafType('xss')"
+                                    style="opacity: 0; width: 0; height: 0;">
+                                <span id="xssToggleSlider"
+                                    style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #D4CCC4; border-radius: 32px; transition: 0.3s;"></span>
+                                <span id="xssToggleKnob"
+                                    style="position: absolute; height: 26px; width: 26px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></span>
                             </label>
                         </div>
                         <!-- Header Sanitization Toggle -->
-                        <div style="flex:1; min-width: 200px; background: rgba(255,255,255,0.7); padding: 20px 24px; border-radius: 16px; display:flex; align-items:center; justify-content:space-between;">
+                        <div
+                            style="flex:1; min-width: 200px; background: rgba(255,255,255,0.7); padding: 20px 24px; border-radius: 16px; display:flex; align-items:center; justify-content:space-between;">
                             <div>
-                                <div style="font-size: 11px; text-transform: uppercase; font-weight: 800; color: #6A8AAA; margin-bottom: 4px; letter-spacing:1px;">Header Sanitization</div>
-                                <div id="headersStatusLabel" style="font-weight: 800; text-transform: uppercase; font-size: 16px; color: #B07070;">OFF</div>
+                                <div
+                                    style="font-size: 11px; text-transform: uppercase; font-weight: 800; color: #6A8AAA; margin-bottom: 4px; letter-spacing:1px;">
+                                    Header Sanitization</div>
+                                <div id="headersStatusLabel"
+                                    style="font-weight: 800; text-transform: uppercase; font-size: 16px; color: #B07070;">
+                                    OFF</div>
                             </div>
-                            <label style="position: relative; display: inline-block; width: 60px; height: 32px; cursor: pointer;">
-                                <input type="checkbox" id="headersToggle" onchange="toggleWafType('headers')" style="opacity: 0; width: 0; height: 0;">
-                                <span id="headersToggleSlider" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #D4CCC4; border-radius: 32px; transition: 0.3s;"></span>
-                                <span id="headersToggleKnob" style="position: absolute; height: 26px; width: 26px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></span>
+                            <label
+                                style="position: relative; display: inline-block; width: 60px; height: 32px; cursor: pointer;">
+                                <input type="checkbox" id="headersToggle" onchange="toggleWafType('headers')"
+                                    style="opacity: 0; width: 0; height: 0;">
+                                <span id="headersToggleSlider"
+                                    style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-color: #D4CCC4; border-radius: 32px; transition: 0.3s;"></span>
+                                <span id="headersToggleKnob"
+                                    style="position: absolute; height: 26px; width: 26px; left: 3px; bottom: 3px; background-color: white; border-radius: 50%; transition: 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2);"></span>
                             </label>
                         </div>
                     </div>
 
                     <!-- WAF Stats -->
                     <div id="wafStatsRow" style="display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;">
-                        <div style="flex:1; min-width: 120px; padding: 16px; background: rgba(255,255,255,0.5); border-radius: 12px; text-align: center; border: 1px solid rgba(0,0,0,0.05);">
+                        <div
+                            style="flex:1; min-width: 120px; padding: 16px; background: rgba(255,255,255,0.5); border-radius: 12px; text-align: center; border: 1px solid rgba(0,0,0,0.05);">
                             <div style="font-size: 28px; font-weight: 800; color: #B07070;" id="wafTotalBlocks">0</div>
-                            <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Total Blocked</div>
+                            <div
+                                style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
+                                Total Blocked</div>
                         </div>
-                        <div style="flex:1; min-width: 120px; padding: 16px; background: rgba(255,255,255,0.5); border-radius: 12px; text-align: center; border: 1px solid rgba(0,0,0,0.05);">
+                        <div
+                            style="flex:1; min-width: 120px; padding: 16px; background: rgba(255,255,255,0.5); border-radius: 12px; text-align: center; border: 1px solid rgba(0,0,0,0.05);">
                             <div style="font-size: 28px; font-weight: 800; color: #A06070;" id="wafSqliBlocks">0</div>
-                            <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">SQLi Blocked</div>
+                            <div
+                                style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
+                                SQLi Blocked</div>
                         </div>
-                        <div style="flex:1; min-width: 120px; padding: 16px; background: rgba(255,255,255,0.5); border-radius: 12px; text-align: center; border: 1px solid rgba(0,0,0,0.05);">
+                        <div
+                            style="flex:1; min-width: 120px; padding: 16px; background: rgba(255,255,255,0.5); border-radius: 12px; text-align: center; border: 1px solid rgba(0,0,0,0.05);">
                             <div style="font-size: 28px; font-weight: 800; color: #C0906A;" id="wafXssBlocks">0</div>
-                            <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">XSS Blocked</div>
+                            <div
+                                style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
+                                XSS Blocked</div>
                         </div>
-                        <div style="flex:1; min-width: 120px; padding: 16px; background: rgba(255,255,255,0.5); border-radius: 12px; text-align: center; border: 1px solid rgba(0,0,0,0.05);">
-                            <div style="font-size: 28px; font-weight: 800; color: #6A8AAA;" id="wafHeadersBlocks">0</div>
-                            <div style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">Headers Sanitized</div>
+                        <div
+                            style="flex:1; min-width: 120px; padding: 16px; background: rgba(255,255,255,0.5); border-radius: 12px; text-align: center; border: 1px solid rgba(0,0,0,0.05);">
+                            <div style="font-size: 28px; font-weight: 800; color: #6A8AAA;" id="wafHeadersBlocks">0
+                            </div>
+                            <div
+                                style="font-size: 11px; color: var(--text-muted); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
+                                Headers Sanitized</div>
                         </div>
                     </div>
 
                     <!-- Recent WAF Events -->
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                         <h3 style="font-size: 15px; font-weight: 700;">Recent Blocked Attacks</h3>
-                        <button onclick="clearServiceWafEvents()" style="font-size: 12px; padding: 6px 14px; background: transparent; border: 1px solid rgba(0,0,0,0.1); color: var(--text-secondary); border-radius: 8px; cursor: pointer;">Clear Logs</button>
+                        <button onclick="clearServiceWafEvents()"
+                            style="font-size: 12px; padding: 6px 14px; background: transparent; border: 1px solid rgba(0,0,0,0.1); color: var(--text-secondary); border-radius: 8px; cursor: pointer;">Clear
+                            Logs</button>
                     </div>
                     <div id="wafEventsContainer" style="max-height: 400px; overflow-y: auto;">
                         <div style="text-align:center; padding:40px; color:var(--text-muted);">
@@ -1389,24 +1720,30 @@
             <div id="tab-settings" class="tab-content">
                 <div class="card settings-theme">
                     <h2>Service Settings</h2>
-                    <p style="opacity: 0.8; margin-bottom: 32px; color: #7A5A4A; font-size: 15px; max-width:600px; line-height:1.6;">
+                    <p
+                        style="opacity: 0.8; margin-bottom: 32px; color: #7A5A4A; font-size: 15px; max-width:600px; line-height:1.6;">
                         Manage your service configuration.
                     </p>
 
                     <div style="max-width: 500px;">
                         <!-- Rename Service -->
-                        <div style="background: rgba(255,255,255,0.5); padding: 24px; border-radius: 16px; margin-bottom: 24px; border: 1px solid rgba(0,0,0,0.05);">
+                        <div
+                            style="background: rgba(255,255,255,0.5); padding: 24px; border-radius: 16px; margin-bottom: 24px; border: 1px solid rgba(0,0,0,0.05);">
                             <h3 style="margin-top: 0; font-size: 16px;">Rename Service</h3>
                             <p style="font-size: 13px; opacity: 0.7; margin-bottom: 16px; line-height: 1.5;">
-                                Change the display name of this service. The internal service identifier remains unchanged.
+                                Change the display name of this service. The internal service identifier remains
+                                unchanged.
                             </p>
                             <div class="form-group">
                                 <label class="form-label">Current Name</label>
-                                <div id="currentServiceName" style="font-weight: 700; font-size: 16px; font-family: 'JetBrains Mono', monospace; padding: 8px 0;"></div>
+                                <div id="currentServiceName"
+                                    style="font-weight: 700; font-size: 16px; font-family: 'JetBrains Mono', monospace; padding: 8px 0;">
+                                </div>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">New Name</label>
-                                <input type="text" id="renameInput" class="form-input" placeholder="Enter new service name">
+                                <input type="text" id="renameInput" class="form-input"
+                                    placeholder="Enter new service name">
                                 <div class="form-hint">ℹ️ Lowercase letters, numbers, and hyphens only</div>
                             </div>
                             <button class="btn btn-primary"
@@ -1414,17 +1751,20 @@
                                 onclick="renameService()">
                                 ✏️ Rename Service
                             </button>
-                            <span id="renameSaveStatus" style="margin-left: 16px; font-weight: 700; color: #7A5A4A;"></span>
+                            <span id="renameSaveStatus"
+                                style="margin-left: 16px; font-weight: 700; color: #7A5A4A;"></span>
                         </div>
 
                         <!-- Danger Zone -->
-                        <div style="background: rgba(224,144,143,0.06); padding: 24px; border-radius: 16px; border: 1px solid rgba(224,144,143,0.15);">
+                        <div
+                            style="background: rgba(224,144,143,0.06); padding: 24px; border-radius: 16px; border: 1px solid rgba(224,144,143,0.15);">
                             <h3 style="margin-top: 0; font-size: 16px; color: #B05050;">⚠️ Danger Zone</h3>
                             <p style="font-size: 13px; opacity: 0.7; margin-bottom: 16px; line-height: 1.5;">
                                 These actions are irreversible. Proceed with caution.
                             </p>
                             <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                                <button class="btn" style="background:rgba(224,144,143,0.12); color:#B05050;" onclick="deleteService()">
+                                <button class="btn" style="background:rgba(224,144,143,0.12); color:#B05050;"
+                                    onclick="deleteService()">
                                     🗑 Delete Service
                                 </button>
                             </div>
@@ -1495,7 +1835,7 @@
             if (tabId === 'api') loadRateLimit();
             if (tabId === 'auth') loadApiKeyConfig();
             if (tabId === 'settings') { document.getElementById('currentServiceName').textContent = SERVICE_NAME; }
-            if (tabId === 'security') fetchScanResults();
+            if (tabId === 'security') { fetchScanResults(); fetchTrivyResults(); }
             if (tabId === 'firewall') { loadWafConfig(); loadWafStats(); loadWafEvents(); }
         }
 
@@ -1533,6 +1873,7 @@
                 loadSwagger();
                 loadRateLimit(); // Ensure config is loaded for Grid
                 fetchScanResults();
+                fetchTrivyResults();
             } catch (e) {
                 console.error(e);
             }
@@ -1802,11 +2143,11 @@
             renderKeysList();
             renderAuthRoutes();
             // Update usage guide
-            const svcEls = ['authGuideService','authGuideService2','authGuideService3','authGuideService4'];
-            svcEls.forEach(id => { const el = document.getElementById(id); if(el) el.textContent = SERVICE_NAME; });
+            const svcEls = ['authGuideService', 'authGuideService2', 'authGuideService3', 'authGuideService4'];
+            svcEls.forEach(id => { const el = document.getElementById(id); if (el) el.textContent = SERVICE_NAME; });
             const firstKey = (currentApiKeyConfig.keys && currentApiKeyConfig.keys.length > 0) ? currentApiKeyConfig.keys[0].key : 'your-api-key';
-            const keyEls = ['authGuideKey','authGuideKey2','authGuideKey3'];
-            keyEls.forEach(id => { const el = document.getElementById(id); if(el) el.textContent = firstKey; });
+            const keyEls = ['authGuideKey', 'authGuideKey2', 'authGuideKey3'];
+            keyEls.forEach(id => { const el = document.getElementById(id); if (el) el.textContent = firstKey; });
             // Also refresh endpoint grid auth badges
             if (currentSpec) renderEndpointGrid();
         }
@@ -2057,7 +2398,7 @@
                         clearInterval(interval);
                         _stopScanUI();
                     }
-                } catch(e) {
+                } catch (e) {
                     clearInterval(interval);
                     _stopScanUI();
                 }
@@ -2065,10 +2406,10 @@
         }
 
         function _sevOrder(s) {
-            return {critical:0,high:1,medium:2,low:3,info:4}[s] ?? 5;
+            return { critical: 0, high: 1, medium: 2, low: 3, info: 4 }[s] ?? 5;
         }
         function _sevIcon(s) {
-            return {critical:'🔴',high:'🟠',medium:'🟡',low:'🔵',info:'⚪'}[s] ?? '⚪';
+            return { critical: '🔴', high: '🟠', medium: '🟡', low: '🔵', info: '⚪' }[s] ?? '⚪';
         }
 
         function _extractLinks(text) {
@@ -2099,8 +2440,8 @@
                     </div>`;
             } else if (vulns.length > 0) {
                 // Count by severity
-                const counts = {critical:0,high:0,medium:0,low:0,info:0};
-                vulns.forEach(v => { counts[v.severity] = (counts[v.severity]||0) + 1; });
+                const counts = { critical: 0, high: 0, medium: 0, low: 0, info: 0 };
+                vulns.forEach(v => { counts[v.severity] = (counts[v.severity] || 0) + 1; });
 
                 // Update summary stats
                 summary.style.display = 'grid';
@@ -2115,7 +2456,7 @@
                     if (!grouped[v.severity]) grouped[v.severity] = [];
                     grouped[v.severity].push(v);
                 });
-                const orderedKeys = Object.keys(grouped).sort((a,b) => _sevOrder(a) - _sevOrder(b));
+                const orderedKeys = Object.keys(grouped).sort((a, b) => _sevOrder(a) - _sevOrder(b));
 
                 let html = '';
                 orderedKeys.forEach(sev => {
@@ -2123,7 +2464,7 @@
                     html += `<div class="sev-group">`;
                     html += `<div class="sev-group-header">
                         <span class="sev-badge ${sev}">${_sevIcon(sev)} ${sev}</span>
-                        <span class="sev-group-count">${items.length} finding${items.length>1?'s':''}</span>
+                        <span class="sev-group-count">${items.length} finding${items.length > 1 ? 's' : ''}</span>
                     </div>`;
                     items.forEach((v, i) => {
                         const uid = `vuln-${sev}-${i}`;
@@ -2152,7 +2493,7 @@
                 meta.style.display = 'flex';
                 const dur = result.scan_duration;
                 document.getElementById('metaDuration').textContent = dur >= 60
-                    ? `${Math.floor(dur/60)}m ${Math.round(dur%60)}s`
+                    ? `${Math.floor(dur / 60)}m ${Math.round(dur % 60)}s`
                     : `${Math.round(dur)}s`;
                 if (result.completed_at) {
                     const d = new Date(result.completed_at + 'Z');
@@ -2160,8 +2501,135 @@
                 }
                 if (result.vulnerabilities?.[0]?.url) {
                     const u = result.vulnerabilities[0].url;
-                    document.getElementById('metaTarget').textContent = u.length > 50 ? u.substring(0,47)+'…' : u;
+                    document.getElementById('metaTarget').textContent = u.length > 50 ? u.substring(0, 47) + '…' : u;
                 }
+            }
+        }
+
+        // ── TRIVY SCAN LOGIC ────────────────────────────────
+
+        let _trivyScanTimer = null;
+        let _trivyScanStart = null;
+
+        async function triggerTrivyScan() {
+            const btn = document.getElementById('trivyTriggerBtn');
+            btn.disabled = true;
+            btn.innerHTML = `<span class="spinner" style="width:14px;height:14px;border-width:2px;color:white;"></span> Scanning…`;
+
+            document.getElementById('trivyProgress').classList.add('active');
+            _trivyScanStart = Date.now();
+            _trivyScanTimer = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - _trivyScanStart) / 1000);
+                const m = Math.floor(elapsed / 60);
+                const s = String(elapsed % 60).padStart(2, '0');
+                document.getElementById('trivyElapsed').textContent = `${m}:${s}`;
+            }, 1000);
+
+            try {
+                await fetch(`${API_BASE}/services/${SERVICE_NAME}/trivy-scan`, { method: 'POST' });
+                pollTrivyScan();
+            } catch (e) {
+                _stopTrivyUI();
+                alert('Failed to start Trivy scan.');
+            }
+        }
+
+        function _stopTrivyUI() {
+            clearInterval(_trivyScanTimer);
+            const btn = document.getElementById('trivyTriggerBtn');
+            btn.disabled = false;
+            btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg> Run Trivy`;
+            document.getElementById('trivyProgress').classList.remove('active');
+        }
+
+        async function fetchTrivyResults() {
+            try {
+                const resp = await fetch(`${API_BASE}/services/${SERVICE_NAME}/trivy-scan`);
+                if (!resp.ok) return;
+                const result = await resp.json();
+                renderTrivyResults(result);
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        function pollTrivyScan() {
+            const interval = setInterval(async () => {
+                try {
+                    const resp = await fetch(`${API_BASE}/services/${SERVICE_NAME}/trivy-scan`);
+                    const result = await resp.json();
+                    renderTrivyResults(result);
+                    if (result.scan_status !== 'running') {
+                        clearInterval(interval);
+                        _stopTrivyUI();
+                    }
+                } catch (e) {
+                    clearInterval(interval);
+                    _stopTrivyUI();
+                }
+            }, 4000);
+        }
+
+        function renderTrivyResults(result) {
+            const list = document.getElementById('trivyVulnList');
+            const summary = document.getElementById('trivySummary');
+
+            if (result.scan_status === 'running') {
+                document.getElementById('trivyProgress').classList.add('active');
+                return;
+            }
+
+            const vulns = result.vulnerabilities || [];
+
+            if (vulns.length === 0 && result.scan_status === 'completed') {
+                summary.style.display = 'none';
+                list.innerHTML = `
+                    <div class="scan-clean">
+                        <div class="scan-clean-icon">✅</div>
+                        <div class="scan-clean-title">Image is Secure</div>
+                        <div class="scan-clean-sub">Trivy found no vulnerabilities in the container image.</div>
+                    </div>`;
+            } else if (vulns.length > 0) {
+                summary.style.display = 'flex';
+                summary.style.gap = '12px';
+                summary.style.marginBottom = '20px';
+
+                document.getElementById('trivyTotal').textContent = result.total_findings || vulns.length;
+                document.getElementById('trivyCritical').textContent = result.critical_findings || 0;
+                document.getElementById('trivyHigh').textContent = result.high_findings || 0;
+
+                let html = '<div style="display: flex; flex-direction: column; gap: 8px;">';
+                vulns.forEach(v => {
+                    const sevColor = v.severity === 'CRITICAL' ? '#EF4444' : (v.severity === 'HIGH' ? '#F59E0B' : (v.severity === 'MEDIUM' ? '#FBBF24' : '#9CA3AF'));
+                    const sevBg = v.severity === 'CRITICAL' ? 'rgba(239,68,68,0.1)' : (v.severity === 'HIGH' ? 'rgba(245,158,11,0.1)' : (v.severity === 'MEDIUM' ? 'rgba(251,191,36,0.1)' : 'rgba(156,163,175,0.1)'));
+
+                    html += `
+                        <div style="background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.05); border-radius: 8px; padding: 12px; border-left: 4px solid ${sevColor}; display: flex; flex-direction: column; gap: 6px;">
+                            <div style="display: flex; justify-content: space-between; align-items: start;">
+                                <div style="font-weight: 600; font-size: 14px; color: var(--text-primary); word-break: break-all;">
+                                    ${v.pkg_name} <span style="font-weight: 400; opacity: 0.7; font-size: 13px;">${v.installed_version}</span>
+                                </div>
+                                <span style="background: ${sevBg}; color: ${sevColor}; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700;">
+                                    ${v.severity}
+                                </span>
+                            </div>
+                            <div style="font-size: 12px; font-family: 'JetBrains Mono', monospace; color: var(--accent);">
+                                <a href="${v.primary_url || '#'}" target="_blank" style="color: inherit; text-decoration: none;">${v.id}</a>
+                            </div>
+                            ${v.title ? `<div style="font-size: 13px; color: var(--text-secondary); line-height: 1.4;">${v.title}</div>` : ''}
+                            ${v.fixed_version ? `<div style="font-size: 12px; margin-top: 4px;"><span style="color: var(--success); font-weight: 600;">Fix available:</span> ${v.fixed_version}</div>` : ''}
+                        </div>
+                    `;
+                });
+                html += '</div>';
+                list.innerHTML = html;
+            } else if (result.scan_status === 'failed') {
+                list.innerHTML = `
+                    <div class="scan-clean" style="background: rgba(239,68,68,0.05); border-color: rgba(239,68,68,0.2);">
+                        <div class="scan-clean-icon" style="color: #EF4444;">❌</div>
+                        <div class="scan-clean-title" style="color: #EF4444;">Scan Failed</div>
+                        <div class="scan-clean-sub">Error: ${result.error || 'Unknown error occurred during scan.'}</div>
+                    </div>`;
             }
         }
 
