@@ -14,11 +14,15 @@ from datetime import datetime
 from pydantic import BaseModel
 from typing import Optional, List
 import redis
+import threading
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("trivy-service")
 
 app = FastAPI(title="Trivy Scanner Service", version="1.0.0")
+
+# Lock to prevent concurrent Trivy processes from corrupting or locking the cache
+scan_lock = threading.Lock()
 
 # CORS middleware
 app.add_middleware(
@@ -141,7 +145,9 @@ def run_trivy_scan(scan_id: str, image_name: str):
         ]
         
         logger.info(f"Running Trivy command: {' '.join(trivy_cmd)}")
-        result = subprocess.run(trivy_cmd, capture_output=True, text=True, timeout=300)
+        
+        with scan_lock:
+            result = subprocess.run(trivy_cmd, capture_output=True, text=True, timeout=300)
         
         # Trivy exit codes: 0 = success, other = error
         # If --exit-code is not set, it defaults to 0 even if vulnerabilities are found.
