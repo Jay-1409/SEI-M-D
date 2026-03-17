@@ -1,4 +1,4 @@
-# Secure Microservice Deployer
+# SEcure Image [Microservice] Deployer 
 
 A web-based platform that deploys Docker images into Kubernetes as internal microservices and exposes them securely through a centralized API gateway with built-in vulnerability scanning and per-route rate limiting.
 
