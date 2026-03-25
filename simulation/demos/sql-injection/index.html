@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SQL Injection Demo</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <div class="expo-nav">
+      <a href="../../index.html">Back to Launcher</a>
+    </div>
+    <header class="hero">
+      <div class="hero-copy">
+        <p class="eyebrow">Expo Security Simulation</p>
+        <h1>Fake Login Trick vs Protected Login</h1>
+        <p class="hero-text">
+          This demo shows how a weak login can be fooled by a malicious input, and how the protected version
+          blocks the same attack before access is granted.
+        </p>
+      </div>
+      <div class="hero-actions">
+        <div id="protectionPill" class="protection-pill vulnerable">Protection OFF</div>
+        <button id="toggleProtectionButton" class="button secondary" type="button">Turn Protection ON</button>
+        <button id="resetButton" class="button ghost" type="button">Reset Demo</button>
+      </div>
+    </header>
+    <main class="main-grid">
+      <section class="panel login-panel">
+        <div class="panel-header">
+          <p class="panel-kicker">Left Panel</p>
+          <h2>Staff Attendance Portal</h2>
+        </div>
+
+        <div class="form-group">
+          <label for="usernameInput">Username</label>
+          <input id="usernameInput" class="text-input" type="text" autocomplete="off" placeholder="Enter username">
+        </div>
+
+        <div class="form-group">
+          <label for="passwordInput">Password</label>
+          <input id="passwordInput" class="text-input" type="text" autocomplete="off" placeholder="Enter password or attack input">
+        </div>
+
+        <p class="form-helper">Try a normal login or a malicious input.</p>
+
+        <div class="quick-actions">
+          <button id="fillNormalButton" class="button secondary" type="button">Fill Normal User</button>
+          <button id="fillAttackButton" class="button warning" type="button">Fill Attack Input</button>
+        </div>
+
+        <button id="loginButton" class="button primary login-button" type="button">Login</button>
+
+        <section id="resultBanner" class="result-banner idle">
+          <strong>Waiting for login attempt</strong>
+          <p>No action yet. Choose a safe login or the malicious demo input.</p>
+        </section>
+
+        <section class="legend-card">
+          <h3>Color guide</h3>
+          <div class="legend-row">
+            <span class="legend-swatch green"></span>
+            <span>Normal allowed action</span>
+          </div>
+          <div class="legend-row">
+            <span class="legend-swatch amber"></span>
+            <span>Vulnerable behavior</span>
+          </div>
+          <div class="legend-row">
+            <span class="legend-swatch red"></span>
+            <span>Suspicious or blocked action</span>
+          </div>
+        </section>
+      </section>
+
+      <section class="panel process-panel">
+        <div class="panel-header">
+          <p class="panel-kicker">Center Panel</p>
+          <h2>What the app is doing</h2>
+        </div>
+
+        <div class="step-stack">
+          <article class="step-card">
+            <div class="step-number">1</div>
+            <div>
+              <p class="step-label">User Input</p>
+              <div id="inputSummary" class="step-content">No request yet.</div>
+            </div>
+          </article>
+
+          <article class="step-card">
+            <div class="step-number">2</div>
+            <div>
+              <p class="step-label">Query Built By App</p>
+              <div id="querySummary" class="step-content code-block">Waiting for a login attempt.</div>
+            </div>
+          </article>
+
+          <article class="step-card">
+            <div class="step-number">3</div>
+            <div>
+              <p class="step-label">Decision</p>
+              <div id="decisionSummary" class="step-content">The app has not processed anything yet.</div>
+            </div>
+          </article>
+        </div>
+
+        <article class="explain-card">
+          <h3>Why the protected version is safer</h3>
+          <p id="protectionExplanation">
+            Protection is OFF right now, so the demo shows what happens when a weak login treats raw input as part of
+            the database logic.
+          </p>
+        </article>
+      </section>
+
+      <section class="panel proof-panel">
+        <div class="panel-header">
+          <p class="panel-kicker">Right Panel</p>
+          <h2>Visible Proof</h2>
+        </div>
+
+        <div id="proofBadge" class="proof-badge neutral">No action yet</div>
+
+        <div class="proof-grid">
+          <article class="metric-card">
+            <p class="metric-label">Current Outcome</p>
+            <p id="currentOutcome" class="metric-value">Waiting for login attempt</p>
+          </article>
+          <article class="metric-card">
+            <p class="metric-label">Attack Status</p>
+            <p id="attackStatus" class="metric-value">None</p>
+          </article>
+          <article class="metric-card">
+            <p class="metric-label">Access Granted To</p>
+            <p id="accessGranted" class="metric-value">No access yet</p>
+          </article>
+          <article class="metric-card">
+            <p class="metric-label">Blocked Attacks</p>
+            <p id="blockedCount" class="metric-value">0</p>
+          </article>
+        </div>
+
+        <article id="securityEventCard" class="security-event">
+          <h3>Security Event</h3>
+          <div class="event-grid">
+            <div>
+              <span class="event-label">Threat</span>
+              <strong id="eventThreat">None</strong>
+            </div>
+            <div>
+              <span class="event-label">Input Field</span>
+              <strong id="eventField">None</strong>
+            </div>
+            <div>
+              <span class="event-label">Action</span>
+              <strong id="eventAction">Waiting</strong>
+            </div>
+            <div>
+              <span class="event-label">Reason</span>
+              <strong id="eventReason">No request yet</strong>
+            </div>
+          </div>
+        </article>
+
+        <article class="proof-note">
+          <h3>Proof explanation</h3>
+          <p id="proofExplanation">
+            The proof panel will show either unauthorized access in vulnerable mode or a blocked security event in
+            protected mode.
+          </p>
+        </article>
+
+        <article class="activity-card">
+          <div class="activity-header">
+            <h3>Activity Log</h3>
+            <span id="requestCount">0 requests</span>
+          </div>
+          <div id="activityLog" class="activity-log">
+            <p class="empty-log">No activity yet.</p>
+          </div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <script src="./script.js"></script>
+</body>
+</html>

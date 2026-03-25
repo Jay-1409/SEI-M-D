@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulation Expo Launcher</title>
+  <link rel="stylesheet" href="./launcher.css">
+</head>
+<body>
+  <div class="page-shell">
+    <main class="content-grid">
+      <section class="panel">
+        <div class="panel-heading">
+          <p class="panel-kicker">Built Demos</p>
+          <h2>Custom Simulation Pages</h2>
+        </div>
+
+        <div class="card-grid">
+          <article class="demo-card">
+            <span class="type-pill">Custom Demo</span>
+            <h3>SQL Injection</h3>
+            <p>Shows the same fake-login trick with protection OFF versus ON, with visible proof of unauthorized access or blocking.</p>
+            <p class="meta"><strong>Story:</strong> staff attendance portal login</p>
+            <p class="meta"><strong>Best proof:</strong> same attack, different result</p>
+            <a class="action-link" href="./demos/sql-injection/index.html">Open demo</a>
+          </article>
+
+          <article class="demo-card">
+            <span class="type-pill">Custom Demo</span>
+            <h3>XSS Feedback Wall</h3>
+            <p>Shows a public comment wall accepting a dangerous script-style comment in unsafe mode and blocking it in protected mode.</p>
+            <p class="meta"><strong>Story:</strong> campus tech fest feedback wall</p>
+            <p class="meta"><strong>Best proof:</strong> wall changes in OFF mode, stays safe in ON mode</p>
+            <a class="action-link" href="./demos/xss-feedback-wall/index.html">Open demo</a>
+          </article>
+
+          <article class="demo-card">
+            <span class="type-pill">Custom Demo</span>
+            <h3>Rate Limiting</h3>
+            <p>Shows a ticket-booking flood with and without rate limiting, including queue pressure and blocked <code>429</code> proof.</p>
+            <p class="meta"><strong>Story:</strong> concert ticket booking queue</p>
+            <p class="meta"><strong>Best proof:</strong> blocked spam while normal users still succeed</p>
+            <a class="action-link" href="./demos/rate-limiting/index.html">Open demo</a>
+          </article>
+
+          <article class="demo-card">
+            <span class="type-pill">Custom Demo</span>
+            <h3>API Key Protection</h3>
+            <p>Shows the difference between a public route and a staff-only action that requires a valid simulated access key.</p>
+            <p class="meta"><strong>Story:</strong> campus service desk routes</p>
+            <p class="meta"><strong>Best proof:</strong> public info stays open while protected action needs a valid key</p>
+            <a class="action-link" href="./demos/api-key-protection/index.html">Open demo</a>
+          </article>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</body>
+</html>

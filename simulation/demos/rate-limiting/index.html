@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ticket Rush Rate Limiting Demo</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <div class="expo-nav">
+        <a href="../../index.html">Back to Launcher</a>
+      </div>
+      <section class="panel control-panel">
+        <p class="eyebrow">Expo Simulation</p>
+        <h1>Ticket Rush: Rate Limiting</h1>
+        <p class="lead">
+          Stops one bot from flooding the booking line so real visitors can still
+          book normally.
+        </p>
+
+        <div class="mode-card">
+          <div>
+            <p class="label">Protection Mode</p>
+            <p id="modeHeadline" class="mode-headline">Rate Limit ON</p>
+          </div>
+          <button id="modeToggle" class="toggle-button protected" type="button">
+            Switch to OFF
+          </button>
+        </div>
+
+        <div class="control-group">
+          <label for="speedSelect">Spam speed</label>
+          <select id="speedSelect">
+            <option value="slow">Slow</option>
+            <option value="medium" selected>Medium</option>
+            <option value="fast">Fast</option>
+          </select>
+        </div>
+
+        <div class="control-group">
+          <label for="burstSelect">Spam burst size</label>
+          <select id="burstSelect">
+            <option value="10">10 requests</option>
+            <option value="25" selected>25 requests</option>
+            <option value="50">50 requests</option>
+          </select>
+        </div>
+
+        <div class="action-stack">
+          <button id="normalButton" class="action-button primary" type="button">
+            Send Normal Booking Request
+          </button>
+          <button id="spamButton" class="action-button danger" type="button">
+            Start Spam Flood
+          </button>
+          <button id="replayButton" class="action-button secondary" type="button">
+            Replay Guided Demo
+          </button>
+          <button id="resetButton" class="action-button ghost" type="button">
+            Reset
+          </button>
+        </div>
+
+        <div class="control-notes">
+          <p class="label">How to use</p>
+          <ol>
+            <li>Try one normal booking request.</li>
+            <li>Run the flood with rate limiting OFF.</li>
+            <li>Reset, switch ON, and run the same flood again.</li>
+          </ol>
+        </div>
+      </section>
+
+      <section class="panel simulation-panel">
+        <div class="simulation-header">
+          <div>
+            <p class="label">Story</p>
+            <h2>Concert Ticket Booking Queue</h2>
+          </div>
+          <div id="gateBadge" class="gate-badge protected">Rate Limiter Active</div>
+        </div>
+
+        <div class="pressure-card">
+          <div class="pressure-text">
+            <p class="label">Queue Pressure</p>
+            <p id="pressureLabel" class="pressure-label">LOW</p>
+          </div>
+          <div class="pressure-track">
+            <div id="pressureFill" class="pressure-fill low"></div>
+          </div>
+        </div>
+
+        <div class="arena">
+          <div class="lane customer-lane">
+            <div class="actor-card customer">
+              <div class="actor-avatar">C</div>
+              <div>
+                <h3>Normal Customer</h3>
+                <p>Small number of booking requests</p>
+              </div>
+            </div>
+            <div id="customerLane" class="lane-track">
+              <div class="lane-caption">Fair-use lane</div>
+            </div>
+          </div>
+
+          <div class="server-column">
+            <div id="serverBox" class="server-box">
+              <p class="label">Booking Server</p>
+              <h3>Ticket Counter</h3>
+              <p id="serverHint">Protected traffic stays fair and stable.</p>
+            </div>
+          </div>
+
+          <div class="lane bot-lane">
+            <div class="actor-card bot">
+              <div class="actor-avatar">B</div>
+              <div>
+                <h3>Bot / Spammer</h3>
+                <p>Rapid repeated booking attempts</p>
+              </div>
+            </div>
+            <div id="botLane" class="lane-track">
+              <div class="lane-caption">Flood lane</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="legend">
+          <span><i class="dot allowed"></i> Allowed</span>
+          <span><i class="dot blocked"></i> Blocked 429</span>
+          <span><i class="dot waiting"></i> Waiting / stressed</span>
+        </div>
+
+        <div id="summaryCard" class="summary-card hidden">
+          <p class="label">Run Summary</p>
+          <h3 id="summaryHeadline">Summary appears here</h3>
+          <p id="summaryText"></p>
+        </div>
+      </section>
+
+      <section class="panel proof-panel">
+        <div class="proof-header">
+          <div>
+            <p class="eyebrow">Proof</p>
+            <h2>What Visitors Should Notice</h2>
+          </div>
+          <div id="modePill" class="mode-pill protected">Protected</div>
+        </div>
+
+        <div class="counter-grid">
+          <article class="counter-card">
+            <p>Total Requests</p>
+            <strong id="totalRequests">0</strong>
+          </article>
+          <article class="counter-card">
+            <p>Normal Allowed</p>
+            <strong id="normalAllowed">0</strong>
+          </article>
+          <article class="counter-card">
+            <p>Spam Allowed</p>
+            <strong id="spamAllowed">0</strong>
+          </article>
+          <article class="counter-card alert">
+            <p>Spam Blocked</p>
+            <strong id="spamBlocked">0</strong>
+          </article>
+        </div>
+
+        <div class="narration-card">
+          <p class="label">Plain-language explanation</p>
+          <p id="narrationText">
+            Rate limiting is ON. Regular visitors should not feel it, but repeated
+            flooding will be blocked with 429 responses.
+          </p>
+        </div>
+
+        <div class="log-card">
+          <div class="log-header">
+            <p class="label">Live event log</p>
+            <p id="logHint">Waiting for traffic</p>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Time</th>
+                  <th>Actor</th>
+                  <th>Request</th>
+                  <th>Result</th>
+                  <th>Reason</th>
+                </tr>
+              </thead>
+              <tbody id="eventLogBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script src="./script.js"></script>
+  </body>
+</html>

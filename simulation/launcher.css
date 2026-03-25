@@ -1,0 +1,222 @@
+:root {
+  --bg: #f5efe5;
+  --panel: rgba(255, 252, 247, 0.9);
+  --text: #223140;
+  --muted: #5d6972;
+  --line: rgba(34, 49, 64, 0.12);
+  --brand: #11556a;
+  --brand-strong: #0d7380;
+  --safe: #1f7a5c;
+  --shadow: 0 22px 46px rgba(65, 50, 27, 0.1);
+  --radius-xl: 28px;
+  --radius-lg: 22px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: "Trebuchet MS", "Segoe UI", sans-serif;
+  color: var(--text);
+  background:
+    radial-gradient(circle at top left, rgba(243, 201, 117, 0.36), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(17, 85, 106, 0.18), transparent 32%),
+    linear-gradient(180deg, #f8f3ea 0%, #efe6d7 100%);
+}
+
+.page-shell {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 28px;
+}
+
+.hero,
+.panel,
+.demo-card,
+.guide-item {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: 1.9fr 1fr;
+  gap: 20px;
+  border-radius: var(--radius-xl);
+  padding: 30px;
+}
+
+.eyebrow,
+.panel-kicker,
+.hero-card-label,
+.type-pill {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.77rem;
+  font-weight: 800;
+}
+
+.eyebrow,
+.panel-kicker,
+.hero-card-label {
+  color: var(--brand);
+}
+
+.hero h1,
+.panel h2,
+.demo-card h3,
+.guide-item h3 {
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.hero h1 {
+  margin: 0;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1.04;
+}
+
+.hero-text {
+  margin: 14px 0 0;
+  max-width: 60ch;
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.hero-card {
+  border-radius: var(--radius-lg);
+  padding: 22px;
+  background: linear-gradient(135deg, rgba(17, 85, 106, 0.9), rgba(13, 115, 128, 0.86));
+  color: #fff;
+}
+
+.hero-card ol {
+  margin: 12px 0 0;
+  padding-left: 20px;
+  line-height: 1.7;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 20px;
+  margin-top: 22px;
+}
+
+.panel {
+  border-radius: var(--radius-xl);
+  padding: 24px;
+}
+
+.panel-heading h2 {
+  margin: 6px 0 0;
+  font-size: 1.75rem;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.demo-card,
+.guide-item {
+  border-radius: var(--radius-lg);
+  padding: 18px;
+}
+
+.type-pill {
+  display: inline-flex;
+  padding: 7px 10px;
+  border-radius: 999px;
+  color: var(--safe);
+  background: rgba(31, 122, 92, 0.12);
+}
+
+.demo-card h3,
+.guide-item h3 {
+  margin: 12px 0 8px;
+  font-size: 1.35rem;
+}
+
+.demo-card p,
+.guide-item p,
+.doc-list li {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.meta {
+  margin: 8px 0 0;
+}
+
+.guide-list,
+.doc-list {
+  display: grid;
+  gap: 14px;
+  margin-top: 18px;
+}
+
+.doc-list {
+  padding-left: 20px;
+}
+
+.action-link,
+.doc-link {
+  display: inline-flex;
+  margin-top: 14px;
+  padding: 11px 14px;
+  border-radius: 999px;
+  text-decoration: none;
+  font-weight: 800;
+}
+
+.action-link {
+  color: #fff;
+  background: linear-gradient(135deg, var(--brand), var(--brand-strong));
+}
+
+.doc-link {
+  color: var(--brand);
+  background: rgba(17, 85, 106, 0.09);
+}
+
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+code {
+  font-family: Consolas, "Courier New", monospace;
+}
+
+@media (max-width: 1080px) {
+  .hero,
+  .content-grid,
+  .bottom-grid,
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .page-shell {
+    padding: 16px;
+  }
+
+  .hero,
+  .panel {
+    padding: 20px;
+  }
+}
