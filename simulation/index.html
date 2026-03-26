@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulation Expo Launcher</title>
+  <!-- Font imports are handled in CSS but index.html can also have them for robustness -->
+  <link rel="stylesheet" href="./launcher.css">
+</head>
+<body>
+  <div class="page-shell">
+    <header class="panel-heading">
+      <div style="display: inline-flex; align-items: center; justify-content: center; margin-bottom: 20px; position: relative;">
+        <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #E4D4F4, #FFE0CC); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 32px; box-shadow: 0 12px 30px rgba(201, 160, 208, 0.35); color: white; z-index: 2;">
+          🧪
+        </div>
+        <div style="position: absolute; width: 100%; height: 100%; background: #E4D4F4; filter: blur(20px); opacity: 0.4; z-index: 1; border-radius: 50%;"></div>
+      </div>
+      <p class="panel-kicker">Security Lab</p>
+      <h2>Simulation Expo Launcher</h2>
+    </header>
+
+    <main class="content-grid">
+      <section class="panel">
+        <div class="card-grid">
+          <article class="demo-card">
+            <span class="type-pill">Injection Defense</span>
+            <h3>SQL Injection</h3>
+            <p>Compare vulnerability versus protection in a simulated staff attendance portal. Proof of unauthorized access vs blocking.</p>
+            <div class="meta"><strong>Story:</strong> Portal Attendance Logs</div>
+            <div class="meta"><strong>Proof:</strong> <code>' OR 1=1 --</code> bypass</div>
+            <a class="action-link" href="./demos/sql-injection/index.html">Launch Simulation</a>
+          </article>
+
+          <article class="demo-card">
+            <span class="type-pill">Scripting Security</span>
+            <h3>XSS Feedback Wall</h3>
+            <p>Interact with a public comment wall that demonstrates dangerous script execution in unsafe mode and sanitization in protected mode.</p>
+            <div class="meta"><strong>Story:</strong> Campus Tech Fest Wall</div>
+            <div class="meta"><strong>Proof:</strong> Script tag execution</div>
+            <a class="action-link" href="./demos/xss-feedback-wall/index.html">Launch Simulation</a>
+          </article>
+
+          <article class="demo-card">
+            <span class="type-pill">Traffic Governance</span>
+            <h3>Rate Limiting</h3>
+            <p>Flood a ticket-booking system to see how rate limits manage queue pressure and block <code>429 Too Many Requests</code>.</p>
+            <div class="meta"><strong>Story:</strong> Concert Booking Queue</div>
+            <div class="meta"><strong>Proof:</strong> Burst request blocking</div>
+            <a class="action-link" href="./demos/rate-limiting/index.html">Launch Simulation</a>
+          </article>
+
+          <article class="demo-card">
+            <span class="type-pill">Access Control</span>
+            <h3>API Key Protection</h3>
+            <p>Differentiate between public info routes and staff-only actions that strictly require a validated simulated access key.</p>
+            <div class="meta"><strong>Story:</strong> Campus Service Desk</div>
+            <div class="meta"><strong>Proof:</strong> Header-based auth</div>
+            <a class="action-link" href="./demos/api-key-protection/index.html">Launch Simulation</a>
+          </article>
+        </div>
+      </section>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Simulation #2 | XSS Feedback Wall</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="page-shell">
+    <div class="expo-nav">
+      <a href="../../index.html">Back to Launcher</a>
+    </div>
+
+
+
+    <main class="demo-grid">
+      <section class="panel composer-panel">
+        <div class="panel-head">
+          <p class="panel-kicker">Interactive Feed</p>
+          <h2>Leave Public Feedback</h2>
+          <p class="panel-copy">Visitors can leave public feedback here. Normal comments should appear as plain text.</p>
+        </div>
+
+        <section class="connection-card">
+          <div class="connection-card-header">
+            <div>
+              <p class="panel-kicker">Connection Mode</p>
+              <p class="connection-copy">Keep the local simulation for offline fallback, or point the demo at the real gateway.</p>
+            </div>
+            <span id="connection-mode-badge" class="mode-badge local">Local Simulation</span>
+          </div>
+
+          <label class="field compact-field" for="connection-mode-select">
+            <span>Mode</span>
+            <select id="connection-mode-select">
+              <option value="local">Local simulation mode</option>
+              <option value="live">Live gateway mode</option>
+            </select>
+          </label>
+
+          <div id="live-config-fields" class="live-config-fields" hidden>
+            <label class="field compact-field" for="gateway-base-url-input">
+              <span>Gateway Base URL</span>
+              <input id="gateway-base-url-input" type="text" autocomplete="off" placeholder="http://localhost:30080">
+            </label>
+
+            <label class="field compact-field" for="comments-route-input">
+              <span>Comments Route</span>
+              <input id="comments-route-input" type="text" autocomplete="off" placeholder="/expo-xss-demo/comments">
+            </label>
+
+            <label class="field compact-field" for="platform-api-base-input">
+              <span>Platform API URL (optional)</span>
+              <input id="platform-api-base-input" type="text" autocomplete="off" placeholder="http://localhost:30000/api">
+            </label>
+
+            <div class="connection-actions">
+              <button id="live-defaults-button" type="button" class="secondary-button compact-button">Use Expo Service Defaults</button>
+              <button id="sync-live-button" type="button" class="ghost-button compact-button">Load Live Wall</button>
+            </div>
+          </div>
+
+          <div id="connection-status-card" class="connection-status-card">
+            Local simulation is ready. Switch to live mode after the XSS target service is deployed behind the gateway.
+          </div>
+        </section>
+
+        <div class="toggle-card">
+          <div class="toggle-copy">
+            <p class="toggle-label">Gateway XSS Protection</p>
+            <p id="toggle-state-text" class="toggle-state-text">Protection OFF</p>
+          </div>
+          <label class="switch" for="protection-toggle">
+            <input id="protection-toggle" type="checkbox" aria-label="Gateway XSS protection toggle">
+            <span class="switch-track"></span>
+          </label>
+        </div>
+
+        <p id="mode-helper" class="mode-helper">
+          Unsafe mode: the page is not filtering dangerous script-style comments.
+        </p>
+
+        <form id="comment-form" class="comment-form">
+          <label class="field">
+            <span>Name</span>
+            <input id="name-input" type="text" maxlength="40" value="Visitor 1" autocomplete="off">
+          </label>
+
+          <label class="field">
+            <span>Comment</span>
+            <textarea id="comment-input" rows="7" placeholder="Share your event feedback here..."></textarea>
+          </label>
+
+          <div class="quick-actions">
+            <button id="preset-normal" type="button" class="ghost-button">Use Normal Comment</button>
+            <button id="preset-attack" type="button" class="ghost-button danger-ghost">Use Attack Payload</button>
+          </div>
+
+          <div class="action-row">
+            <button id="submit-button" type="submit" class="primary-button">Post Comment</button>
+            <button id="reset-button" type="button" class="secondary-button">Reset Demo</button>
+          </div>
+        </form>
+
+        <p id="form-feedback" class="form-feedback" aria-live="polite"></p>
+
+        <div class="notice-card">
+          <h3>What to notice</h3>
+          <ul>
+            <li>Normal comments should work in both modes.</li>
+            <li>Hidden script-style content should be blocked only when protection is ON.</li>
+            <li>The same payload creates different results in unsafe and protected mode.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="panel wall-panel">
+        <div class="panel-head">
+          <p class="panel-kicker">Public Interface</p>
+          <h2>Live Feedback Wall</h2>
+          <p class="panel-copy">This center panel shows what other visitors would see on a public site.</p>
+        </div>
+
+        <div id="demo-banner" class="demo-banner safe">
+          <div>
+            <p class="banner-title">Wall status</p>
+            <p id="banner-message">Feedback wall is showing normal public comments.</p>
+          </div>
+          <span id="session-pill" class="session-pill safe">Visitor session safe</span>
+        </div>
+
+        <div class="wall-subhead">
+          <p>Newest comment appears first</p>
+          <p id="comment-count-label">3 visible comments</p>
+        </div>
+
+        <div id="comment-list" class="comment-list" aria-live="polite"></div>
+      </section>
+
+      <section class="panel proof-panel">
+        <div class="panel-head">
+          <p class="panel-kicker">Simulation Data</p>
+          <h2>Security Proof</h2>
+          <p class="panel-copy">This panel explains what the gateway allowed, what it blocked, and why.</p>
+        </div>
+
+        <div class="status-card">
+          <div class="status-heading">
+            <span id="status-badge" class="status-badge idle">Idle</span>
+            <span id="protection-badge" class="mini-badge off">Protection OFF</span>
+          </div>
+          <p id="status-message" class="status-message">Choose a comment type and submit it to start the demo.</p>
+        </div>
+
+        <div class="metrics-grid">
+          <article class="metric-card">
+            <p class="metric-label">Last action</p>
+            <p id="last-action" class="metric-value">Waiting for first submission</p>
+          </article>
+          <article class="metric-card">
+            <p class="metric-label">XSS blocks</p>
+            <p id="block-count" class="metric-value">0</p>
+          </article>
+        </div>
+
+        <article class="proof-card">
+          <div class="proof-head">
+            <h3>Event Proof</h3>
+            <span id="event-proof-tag" class="proof-tag neutral">No gateway event yet</span>
+          </div>
+          <dl id="event-proof-details" class="proof-details"></dl>
+        </article>
+
+        <article class="proof-card">
+          <div class="proof-head">
+            <h3>Request Preview</h3>
+            <span id="request-route-tag" class="proof-tag neutral">/feedback/submit</span>
+          </div>
+          <pre id="request-preview" class="request-preview"></pre>
+        </article>
+
+        <article id="live-proof-card" class="proof-card" hidden>
+          <div class="proof-head">
+            <h3>Live Gateway Proof</h3>
+            <span class="proof-tag neutral">Optional platform proof</span>
+          </div>
+          <dl class="proof-details">
+            <dt>Service</dt>
+            <dd id="live-proof-service">Not configured</dd>
+            <dt>WAF XSS Blocks</dt>
+            <dd id="live-proof-blocks">Unknown</dd>
+            <dt>Latest Event</dt>
+            <dd id="live-proof-event">No live event loaded</dd>
+            <dt>Proof Source</dt>
+            <dd id="live-proof-source">Gateway response only</dd>
+          </dl>
+        </article>
+
+        <article class="proof-card">
+          <div class="proof-head">
+            <h3>Recent Timeline</h3>
+            <span class="proof-tag neutral">Last 3 actions</span>
+          </div>
+          <div id="timeline-list" class="timeline-list"></div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <script src="./script.js"></script>
+</body>
+</html>
