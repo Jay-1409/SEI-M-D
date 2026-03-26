@@ -1,233 +1,226 @@
 # API Key Protection Demo Backend Connection Plan
 
-## Purpose
+## Status
 
-This file evaluates whether the existing API key protection demo in `simulation/demos/api-key-protection` can be connected to the real project backend and gateway without changing the current main project code.
+Implemented inside `simulation`.
 
-This is a planning and feasibility file only.
+The API key demo now supports:
 
-No code changes are made here.
+- `Local simulation` fallback mode
+- `Live platform mode` that sends real traffic through the main gateway
 
----
-
-## 1. Current Situation
-
-The current API key demo is standalone.
-
-Right now:
-- route behavior is simulated locally in JavaScript
-- public route success is simulated locally
-- protected-route denial and allow states are simulated locally
-- no real API key config is created in the gateway
-- no real request goes through the real platform
-
-So the current demo explains the idea clearly, but it does not yet prove the real gateway is checking real keys.
+No main-project files were modified.
 
 ---
 
-## 2. Is Real Backend Connection Possible?
+## 1. Goal
 
-## Short Answer
+Keep the current polished public-vs-protected route story, but let the demo prove real gateway enforcement when the platform is available.
 
-Yes, it is possible.
+The live proof must show:
 
-And it is also a good candidate for real integration without changing the main project code.
-
-The best path is:
-
-1. deploy a simple service through the real platform
-2. choose one public route and one protected route
-3. configure real API key protection in the existing platform
-4. let the demo send requests through the real gateway
-5. show real success or denial results in the current UI
+1. public route with no key
+2. protected route with no key
+3. protected route with invalid key
+4. protected route with valid key
 
 ---
 
-## 3. Why This Can Work With Existing Platform Features
+## 2. Chosen Architecture
 
-The current platform already includes:
-- API key configuration endpoints proxied through the deployer
-- gateway-side API key enforcement
-- per-service route selection
-
-So unlike SQLi/XSS, API key protection already has a very clear management path in the existing project.
-
-What is still needed is only a suitable target service and route pair.
+- The demo UI stays in `simulation/demos/api-key-protection`
+- The gateway remains the only public entry point
+- API key configuration is still done through the real platform UI and backend
+- The demo sends browser requests directly to the gateway in live mode
+- The demo maps real gateway responses back into the same proof cards already used for the simulation
 
 ---
 
-## 4. Best Connection Model
+## 3. Why This Works With The Existing Platform
 
-## Recommended Architecture
+The main project already supports:
 
-- Demo UI stays in `simulation`
-- a real service is deployed through the platform
-- that service has:
-  - at least one public route
-  - at least one route chosen for protection
-- API key config is applied using the real platform
-- the demo sends requests through the real gateway
-- the demo reads the real responses
+- `X-API-Key` header enforcement in the gateway
+- per-service API key configuration
+- per-route protection rules
+- deployer endpoints that proxy API key config
+- service details UI for selecting protected routes
 
-## Practical Flow
-
-1. Deploy a simple service through the platform
-2. Identify:
-   - one route to leave public
-   - one route to protect
-
-3. Use the real service settings to configure API key protection
-
-4. Generate or assign a real API key in the platform
-
-5. Later, update the demo UI with:
-   - target service URL/route inputs
-   - optional real key field
-
-6. The demo then sends:
-   - public route request with no key
-   - protected route request with no key
-   - protected route request with invalid key
-   - protected route request with valid key
-
-7. The demo UI maps actual gateway responses into the existing proof cards
+So the only missing piece was a demo-friendly target service plus a UI path inside `simulation` for sending real requests.
 
 ---
 
-## 5. Can It Be Done Without Changing The Main Project?
+## 4. Chosen Target Service Strategy
 
-## Yes
+### Preferred option
 
-This is very feasible without touching the main project.
+Use the simulation-owned service in:
 
-What is needed:
-- a real deployed service behind the gateway
-- route definitions suitable for public/protected demonstration
-- real API key config set through the current platform endpoints/UI
+- [simulation/demos/api-key-protection/live-target-service](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\demos\api-key-protection\live-target-service)
 
-No main-project code changes are inherently required.
+Why this service was added:
 
----
+- it keeps the same layman story as the simulation
+- it exposes one clearly public route
+- it exposes one clearly protected-friendly route
+- it stays fully inside `simulation`
+- it can be deployed through the existing platform like any other service
+- FastAPI provides OpenAPI automatically, which helps the platform route picker
 
-## 6. Detailed “Possible Without Main Changes” Plan
+### Provided routes
 
-## Option A: Best Option
+- `GET /public/help-hours`
+- `POST /staff/open-maintenance-panel`
 
-### Idea
-Use a simple service behind the real gateway and configure one of its routes as protected with the platform’s existing API key controls.
+### Suggested deployed service name
 
-### Detailed Steps
+- `expo-api-demo`
 
-1. Choose or deploy a target service
-   - should have at least one safe GET route for public proof
-   - should have one additional route suitable for protection proof
+### Resulting gateway paths
 
-2. Verify the service is reachable through the gateway
-
-3. Configure API key protection through the real platform
-   - create key
-   - enable key enforcement
-   - assign protected route(s)
-
-4. Later, extend the API key demo UI with:
-   - target URL field
-   - public route field
-   - protected route field
-   - API key input field
-   - maybe a “load from live platform” mode
-
-5. Send the four demonstration requests:
-   - public route, no key
-   - protected route, no key
-   - protected route, invalid key
-   - protected route, valid key
-
-6. Display:
-   - allowed public access
-   - denied protected access without key
-   - denied protected access with wrong key
-   - allowed protected access with valid key
-
-### Why This Is Best
-
-- uses real platform API key enforcement
-- keeps the current polished UI
-- requires no main-project changes
+- `http://localhost:30080/expo-api-demo/public/help-hours`
+- `http://localhost:30080/expo-api-demo/staff/open-maintenance-panel`
 
 ---
 
-## 7. What The Demo UI Would Eventually Need
+## 5. Live Demo UI Changes That Were Added
 
-Later, the API key demo would likely need:
+The existing API key demo UI was preserved as much as possible.
 
-- service URL/route fields
-- optional “fetch current config” or “live mode” behavior
-- real request sending
-- real response interpretation
+Minimal connection-oriented additions were made:
 
-The current UI already matches this story very well, so only connection-oriented changes should be needed.
+- mode switch: local vs live
+- gateway base URL field
+- public route field
+- protected route field
+- live defaults button for the simulation-owned target service
+- compact live status / setup message area
+- HTTP status proof field
 
----
-
-## 8. Can An Existing Sample Service Be Used?
-
-## Likely yes, if it has the right routes
-
-If one of the example services already has:
-- one safe public route
-- one route that looks more administrative or sensitive
-
-then you may be able to use it directly.
-
-If not, you can still deploy a very small demo service inside `simulation` and use that as the target, again without changing the main project.
-
-So API key protection is flexible:
-- existing service may be enough
-- demo service is easy fallback
+The original local simulation remains available at all times.
 
 ---
 
-## 9. If Real Connection Cannot Be Done Using Existing Services, What Backend Changes Would Be Needed?
+## 6. Live Request Behavior
 
-Only if no suitable route structure exists anywhere.
+### Public route
 
-In that case, fallback options are:
+Selected route:
 
-### Backend Change Option 1
-Add a better demo-friendly route pair to an existing service
+- `GET /public/help-hours`
 
-### Backend Change Option 2
-Add a built-in demo service to the main repo
+Live request:
 
-### Why This Is Less Preferred
+- sent to the configured gateway base URL plus configured public route
+- no API key header required
 
-- breaks the read-only separation
-- mixes expo demo concerns into the main product
+Expected result:
 
-So this should be avoided unless absolutely necessary.
+- success through gateway
+- proof panel shows `Allowed`
+
+### Protected route with no key
+
+Selected route:
+
+- `POST /staff/open-maintenance-panel`
+
+Live request:
+
+- sent with no `X-API-Key`
+
+Expected result:
+
+- gateway returns `401`
+- proof panel shows `Denied`
+- key status shows `Missing`
+
+### Protected route with invalid key
+
+Live request:
+
+- sent with wrong `X-API-Key`
+
+Expected result:
+
+- gateway returns `401`
+- proof panel shows `Denied`
+- key status shows `Invalid`
+
+### Protected route with valid key
+
+Live request:
+
+- sent with the real generated `X-API-Key`
+
+Expected result:
+
+- gateway forwards the request
+- proof panel shows `Allowed`
+- key status shows `Valid`
 
 ---
 
-## 10. Final Recommendation
+## 7. Graceful Fallback Behavior
 
-## Verdict
+If live setup is incomplete, the demo does not break the expo flow.
 
-Yes, the API key protection demo can be connected to the real platform without changing the main project.
+Instead, it shows a clear `Check Setup` state for cases like:
 
-## Recommended Method
+- gateway unreachable
+- route path missing
+- public route accidentally protected
+- protected route accidentally left open
+- unexpected upstream response
 
-Use a real deployed service behind the gateway, configure one route as public and one as protected using the existing API key controls, and let the current demo UI send real requests to those routes.
+The presenter can then:
 
-## What Should Happen Later
+1. correct the live setup
+2. or switch back to local simulation instantly
 
-When implementation starts:
+---
 
-1. choose target service and routes
-2. configure real API key protection in the platform
-3. add service URL/route fields to the demo
-4. send real requests
-5. map real responses into the existing demo cards
+## 8. Recommended Platform Setup
 
-## Main Project Changes Needed?
+1. Build `expo-api-key-demo.tar` from the live target service folder
+2. Upload it through the main dashboard
+3. Deploy with:
+   - service name `expo-api-demo`
+   - container port `8000`
+4. Open the service details page
+5. Go to `API Key Authentication`
+6. Enable API key auth
+7. Generate one key
+8. Protect only:
+   - `POST /staff/open-maintenance-panel`
+9. Save the config
+10. Use that real generated key in the live demo
 
-No, as long as a suitable target service exists or a simulation-owned test service is deployed through the current platform.
+Important:
+
+- leave `GET /public/help-hours` unchecked so it stays public
+
+---
+
+## 9. Existing Service Reuse
+
+An existing deployed service may still be used if it already has:
+
+- one clearly public route
+- one clearly protectable route
+- predictable responses for the expo
+
+But the simulation-owned target service is the safer default because it matches the story exactly.
+
+---
+
+## 10. Final Verdict
+
+The API key demo is now connected to real platform behavior without changing the main project.
+
+The final approach uses:
+
+- local simulation as fallback
+- live gateway traffic when available
+- real platform API key configuration
+- a simulation-owned deployable target service when needed

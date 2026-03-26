@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ticket Rush Rate Limiting Demo</title>
+    <title>Simulation #3 | Ticket Rush</title>
     <link rel="stylesheet" href="./styles.css" />
   </head>
   <body>
@@ -11,13 +11,66 @@
       <div class="expo-nav">
         <a href="../../index.html">Back to Launcher</a>
       </div>
+
       <section class="panel control-panel">
-        <p class="eyebrow">Expo Simulation</p>
-        <h1>Ticket Rush: Rate Limiting</h1>
+        <p class="eyebrow">Security Simulation #3</p>
+        <h1>Ticket Rush <span class="title-icon" aria-hidden="true">Tickets</span></h1>
         <p class="lead">
-          Stops one bot from flooding the booking line so real visitors can still
-          book normally.
+          Demonstrate how rate limiting prevents bot floods from overwhelming a booking service.
+          Keep the local simulation for offline use, or switch to live mode to hit a real gateway
+          route and watch genuine <code>429</code> responses appear in the same story.
         </p>
+
+        <div class="mode-card connection-mode-card">
+          <div>
+            <p class="label">Connection Mode</p>
+            <p id="connectionModeBadge" class="mode-headline">Local Simulation</p>
+          </div>
+          <select id="connectionModeSelect" aria-label="Connection mode">
+            <option value="local" selected>Local simulation</option>
+            <option value="live">Live gateway mode</option>
+          </select>
+        </div>
+
+        <div id="liveConfigFields" class="live-config-card" hidden>
+          <div class="control-group compact">
+            <label for="gatewayBaseUrlInput">Gateway base URL</label>
+            <input
+              id="gatewayBaseUrlInput"
+              type="text"
+              inputmode="url"
+              placeholder="http://localhost:30080"
+            />
+          </div>
+
+          <div class="control-group compact">
+            <label for="targetRouteInput">Target route</label>
+            <input
+              id="targetRouteInput"
+              type="text"
+              placeholder="/expo-rate-limit-demo/tickets"
+            />
+          </div>
+
+          <div class="control-group compact">
+            <label for="platformApiBaseInput">Platform API URL</label>
+            <input
+              id="platformApiBaseInput"
+              type="text"
+              inputmode="url"
+              placeholder="http://localhost:30000/api"
+            />
+          </div>
+
+          <button id="liveDefaultsButton" class="action-button secondary" type="button">
+            Use Expo Service Defaults
+          </button>
+        </div>
+
+        <div id="connectionStatusCard" class="connection-status-card">
+          Local simulation is ready. Switch to live gateway mode after a target route is deployed and
+          rate limiting is configured in the platform.
+        </div>
 
         <div class="mode-card">
           <div>
@@ -65,9 +118,9 @@
         <div class="control-notes">
           <p class="label">How to use</p>
           <ol>
-            <li>Try one normal booking request.</li>
-            <li>Run the flood with rate limiting OFF.</li>
-            <li>Reset, switch ON, and run the same flood again.</li>
+            <li>Try a normal booking request first.</li>
+            <li>In local mode, compare OFF versus ON on the same page.</li>
+            <li>In live mode, point the demo to a real gateway route and let the platform decide when <code>429</code> starts.</li>
           </ol>
         </div>
       </section>
@@ -75,7 +128,7 @@
       <section class="panel simulation-panel">
         <div class="simulation-header">
           <div>
-            <p class="label">Story</p>
+            <p class="label">Booking Scenario</p>
             <h2>Concert Ticket Booking Queue</h2>
           </div>
           <div id="gateBadge" class="gate-badge protected">Rate Limiter Active</div>
@@ -143,7 +196,7 @@
       <section class="panel proof-panel">
         <div class="proof-header">
           <div>
-            <p class="eyebrow">Proof</p>
+            <p class="eyebrow">Simulation Data</p>
             <h2>What Visitors Should Notice</h2>
           </div>
           <div id="modePill" class="mode-pill protected">Protected</div>
@@ -174,6 +227,15 @@
             Rate limiting is ON. Regular visitors should not feel it, but repeated
             flooding will be blocked with 429 responses.
           </p>
+        </div>
+
+        <div id="liveProofCard" class="narration-card live-proof-card" hidden>
+          <p class="label">Live gateway proof</p>
+          <p><strong>Service:</strong> <span id="liveProofService">Not configured</span></p>
+          <p><strong>Target:</strong> <span id="liveProofTarget">Not configured</span></p>
+          <p><strong>Rate limit config:</strong> <span id="liveProofConfig">Unknown</span></p>
+          <p><strong>Last live result:</strong> <span id="liveProofLastResult">No live request yet</span></p>
+          <p><strong>Proof source:</strong> <span id="liveProofSource">Gateway responses only</span></p>
         </div>
 
         <div class="log-card">

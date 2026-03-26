@@ -2,66 +2,67 @@
 
 This file is a lightweight progress snapshot for future agents.
 
-Last updated: 2026-03-23
+Last updated: 2026-03-25
 
-## Foundation Status
+## Current State
 
-Completed:
-- workspace rules and continuation docs exist
-- roadmap exists with priorities, dependencies, and a demo status table
-- decisions log exists and matches the current simulation direction
-- base folders exist: `specs/`, `demos/`, `assets/`, `scripts/`
-- shared launcher exists at `simulation/index.html`
-- presenter playbook exists
-- expo setup and reset guide exists
-- the SQL injection spec is written
-- the SQL injection custom demo is built in `demos/sql-injection`
-- the XSS spec is written
-- the XSS custom demo is built in `demos/xss-feedback-wall`
-- the rate limiting spec is written
-- the rate limiting custom demo is built in `demos/rate-limiting`
-- the API key protection spec is written
-- the API key protection custom demo is built in `demos/api-key-protection`
-- real-platform guides now exist for deployment/gateway, Trivy, Nikto, and WAF logs/stats
-
-Not started yet:
-- OpenAPI detection guide
-- service lifecycle guide
-- optional dangerous-headers decision/demo
-- final expo-machine rehearsal across the real-platform route
-
-## Current Working Truth
-
-The simulation workspace is now in an integration-and-presentation stage.
+The `simulation` workspace is in expo-integration and rehearsal mode, not core build mode.
 
 Completed now:
-- launcher page for opening demos and docs from one place
-- helper scripts for launcher, SQL injection, XSS, rate limiting, and API key demos
-- presenter playbook with intro, per-demo explanation, full route, fast route, and likely Q&A
-- expo setup and reset runbook
-- light shared navigation added to all built custom demos
-- SQL injection spec and custom demo build
-- XSS spec and custom demo build
-- rate limiting spec and custom demo build
-- API key protection spec and custom demo build
-- real-platform spec guides for deployment/gateway, Trivy, Nikto, and WAF proof flow
 
-The current plan direction remains:
-- custom simulations for SQL injection, XSS, rate limiting, and API key protection
-- real-platform demo guides for deployment/gateway, Trivy, Nikto, WAF logs, and related supporting flows
+- shared launcher exists at `simulation/index.html`
+- SQL injection demo is built and supports local fallback plus live gateway mode
+- XSS feedback wall demo is built and supports local fallback plus live gateway mode
+- rate limiting demo is built and supports local fallback plus live gateway mode
+- API key protection demo is built and supports local fallback plus live platform mode
+- per-demo live target services exist inside `simulation`
+- run documentation has been aligned across the four demos
+- handoff/status docs now reflect the shared local-vs-live model
+- a simple recommended expo order is documented
 
-## Recommended Next Safe Actions
+## Verified In Source
 
-1. Rehearse the launcher-driven expo route on the exact presentation machine.
-2. Manually sanity-check each built demo in the browser after any future polish changes.
-3. Complete optional remaining docs only if they materially help the expo: OpenAPI detection, service lifecycle, or dangerous headers.
-4. Keep `HANDOFF.md`, `STATUS.md`, `SIMULATION_TASK_LIST.md`, and `SIMULATION_ROADMAP.md` synchronized whenever more work is added.
-5. Preserve the current low-risk approach: improve consistency and navigation without rewriting stable demo behavior.
+This status has been checked against the demo files, READMEs, specs, and shared run docs inside `simulation`.
 
-## Coordination Notes
+Verified:
 
-- Do not mark a spec task complete until its presenter script and implementation notes are written.
-- Do not start demo builds until the matching spec task is complete.
-- SQL injection, XSS, rate limiting, and API key specs/builds now satisfy those conditions.
-- Several real-platform guides also already include presenter and setup guidance, so the docs should reflect that reality.
-- If a future agent begins a task, update the status markers first so parallel work stays clear.
+- all four demos preserve their current UI quality and storytelling structure
+- all four provide a local mode that remains usable if live mode is unavailable
+- all four surface live setup problems in-page instead of failing silently
+- all four include launcher navigation
+
+Not yet completed in this pass:
+
+- full browser rehearsal on the actual expo machine
+- live deployment verification for all four services in one session
+
+## Recommended Expo Order
+
+1. SQL injection
+2. XSS feedback wall
+3. rate limiting
+4. API key protection
+
+## Live Mode Prerequisites
+
+Needed only if the team wants live proof during the expo:
+
+- dashboard reachable at `http://localhost:30000`
+- gateway reachable at `http://localhost:30080`
+- deployed services:
+  - `expo-sqli-demo`
+  - `expo-xss-demo`
+  - `expo-rate-limit-demo`
+  - `expo-api-demo`
+- matching platform setup:
+  - SQLi protection configured
+  - XSS protection configured
+  - rate limiting configured
+  - API key auth configured and real generated key ready
+
+## Next Safe Actions
+
+1. Rehearse the launcher-driven route on the expo laptop.
+2. Manually open each demo and confirm the documented starting state.
+3. If live mode matters for the event, verify all four gateway routes and configs before visitors arrive.
+4. If live mode is unstable, present the four demos in local mode only and treat live proof as optional.

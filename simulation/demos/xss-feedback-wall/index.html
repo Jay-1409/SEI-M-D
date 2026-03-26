@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Feedback Wall XSS Demo</title>
+  <title>Simulation #2 | XSS Feedback Wall</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
@@ -13,13 +13,58 @@
     </div>
 
 
+
     <main class="demo-grid">
       <section class="panel composer-panel">
         <div class="panel-head">
-          <p class="panel-kicker">Comment Composer</p>
+          <p class="panel-kicker">Interactive Feed</p>
           <h2>Leave Public Feedback</h2>
           <p class="panel-copy">Visitors can leave public feedback here. Normal comments should appear as plain text.</p>
         </div>
+
+        <section class="connection-card">
+          <div class="connection-card-header">
+            <div>
+              <p class="panel-kicker">Connection Mode</p>
+              <p class="connection-copy">Keep the local simulation for offline fallback, or point the demo at the real gateway.</p>
+            </div>
+            <span id="connection-mode-badge" class="mode-badge local">Local Simulation</span>
+          </div>
+
+          <label class="field compact-field" for="connection-mode-select">
+            <span>Mode</span>
+            <select id="connection-mode-select">
+              <option value="local">Local simulation mode</option>
+              <option value="live">Live gateway mode</option>
+            </select>
+          </label>
+
+          <div id="live-config-fields" class="live-config-fields" hidden>
+            <label class="field compact-field" for="gateway-base-url-input">
+              <span>Gateway Base URL</span>
+              <input id="gateway-base-url-input" type="text" autocomplete="off" placeholder="http://localhost:30080">
+            </label>
+
+            <label class="field compact-field" for="comments-route-input">
+              <span>Comments Route</span>
+              <input id="comments-route-input" type="text" autocomplete="off" placeholder="/expo-xss-demo/comments">
+            </label>
+
+            <label class="field compact-field" for="platform-api-base-input">
+              <span>Platform API URL (optional)</span>
+              <input id="platform-api-base-input" type="text" autocomplete="off" placeholder="http://localhost:30000/api">
+            </label>
+
+            <div class="connection-actions">
+              <button id="live-defaults-button" type="button" class="secondary-button compact-button">Use Expo Service Defaults</button>
+              <button id="sync-live-button" type="button" class="ghost-button compact-button">Load Live Wall</button>
+            </div>
+          </div>
+
+          <div id="connection-status-card" class="connection-status-card">
+            Local simulation is ready. Switch to live mode after the XSS target service is deployed behind the gateway.
+          </div>
+        </section>
 
         <div class="toggle-card">
           <div class="toggle-copy">
@@ -72,7 +117,7 @@
 
       <section class="panel wall-panel">
         <div class="panel-head">
-          <p class="panel-kicker">Public Page</p>
+          <p class="panel-kicker">Public Interface</p>
           <h2>Live Feedback Wall</h2>
           <p class="panel-copy">This center panel shows what other visitors would see on a public site.</p>
         </div>
@@ -95,7 +140,7 @@
 
       <section class="panel proof-panel">
         <div class="panel-head">
-          <p class="panel-kicker">Security View</p>
+          <p class="panel-kicker">Simulation Data</p>
           <h2>Security Proof</h2>
           <p class="panel-copy">This panel explains what the gateway allowed, what it blocked, and why.</p>
         </div>
@@ -130,9 +175,26 @@
         <article class="proof-card">
           <div class="proof-head">
             <h3>Request Preview</h3>
-            <span class="proof-tag neutral">/feedback/submit</span>
+            <span id="request-route-tag" class="proof-tag neutral">/feedback/submit</span>
           </div>
           <pre id="request-preview" class="request-preview"></pre>
+        </article>
+
+        <article id="live-proof-card" class="proof-card" hidden>
+          <div class="proof-head">
+            <h3>Live Gateway Proof</h3>
+            <span class="proof-tag neutral">Optional platform proof</span>
+          </div>
+          <dl class="proof-details">
+            <dt>Service</dt>
+            <dd id="live-proof-service">Not configured</dd>
+            <dt>WAF XSS Blocks</dt>
+            <dd id="live-proof-blocks">Unknown</dd>
+            <dt>Latest Event</dt>
+            <dd id="live-proof-event">No live event loaded</dd>
+            <dt>Proof Source</dt>
+            <dd id="live-proof-source">Gateway response only</dd>
+          </dl>
         </article>
 
         <article class="proof-card">

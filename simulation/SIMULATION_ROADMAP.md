@@ -13,9 +13,9 @@ Status legend:
 
 | ID | Demo | Type | Priority | Status | Depends On | Notes |
 |---|---|---|---|---|---|---|
-| D1 | SQL injection login demo | Custom simulation | Very High | complete | shared design system | Built as a self-contained static simulation inside `simulation/demos/sql-injection` |
+| D1 | SQL injection login demo | Custom simulation | Very High | complete | shared design system | Built inside `simulation/demos/sql-injection` with local fallback and optional live gateway mode |
 | D2 | XSS feedback wall demo | Custom simulation | Very High | complete | shared design system | Built as a self-contained static simulation inside `simulation/demos/xss-feedback-wall` |
-| D3 | Rate limiting ticket-rush demo | Custom simulation | Very High | complete | shared design system | Built as a self-contained static simulation inside `simulation/demos/rate-limiting` |
+| D3 | Rate limiting ticket-rush demo | Custom simulation | Very High | complete | shared design system | Built inside `simulation/demos/rate-limiting` with local fallback and optional live gateway mode |
 | D4 | API key protected-route demo | Custom simulation | High | complete | shared design system | Built as a self-contained static simulation inside `simulation/demos/api-key-protection` |
 | D5 | Trivy image scan comparison | Real-platform demo guide | High | complete | none | Spec and expo flow are documented |
 | D6 | Deployment and gateway access flow | Real-platform demo guide | High | complete | none | Spec and expo flow are documented |

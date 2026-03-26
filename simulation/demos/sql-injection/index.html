@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SQL Injection Demo</title>
+  <title>Simulation #1 | SQL Injection</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
@@ -13,34 +13,77 @@
     </div>
     <header class="hero">
       <div class="hero-copy">
-        <p class="eyebrow">Expo Security Simulation</p>
-        <h1>Fake Login Trick vs Protected Login</h1>
+        <p class="eyebrow">Security Simulation #1</p>
+        <h1>SQL Injection <span style="font-size: 0.5em; vertical-align: middle; opacity: 0.7; margin-left: 0.3em;">💉</span></h1>
         <p class="hero-text">
-          This demo shows how a weak login can be fooled by a malicious input, and how the protected version
-          blocks the same attack before access is granted.
+          Explore how unsanitized database queries allow attackers to bypass authentication. 
+          Use the toggle to compare <strong>Protection OFF</strong> and <strong>Protection ON</strong>, then switch to live mode if you want the same story to travel through the real gateway.
         </p>
       </div>
       <div class="hero-actions">
         <div id="protectionPill" class="protection-pill vulnerable">Protection OFF</div>
-        <button id="toggleProtectionButton" class="button secondary" type="button">Turn Protection ON</button>
-        <button id="resetButton" class="button ghost" type="button">Reset Demo</button>
+        <button id="toggleProtectionButton" class="button primary" type="button">Enable Protection</button>
+        <button id="resetButton" class="button ghost" type="button">Reset Simulation</button>
       </div>
     </header>
     <main class="main-grid">
       <section class="panel login-panel">
         <div class="panel-header">
-          <p class="panel-kicker">Left Panel</p>
+          <p class="panel-kicker">Interactive Portal</p>
           <h2>Staff Attendance Portal</h2>
         </div>
 
-        <div class="form-group">
-          <label for="usernameInput">Username</label>
-          <input id="usernameInput" class="text-input" type="text" autocomplete="off" placeholder="Enter username">
-        </div>
+        <section class="connection-card">
+          <div class="connection-card-header">
+            <div>
+              <p class="panel-kicker">Connection Mode</p>
+              <p class="connection-copy">Keep the local simulation for offline fallback, or point the demo at the real gateway.</p>
+            </div>
+            <span id="connectionModeBadge" class="mode-badge local">Local Simulation</span>
+          </div>
 
-        <div class="form-group">
-          <label for="passwordInput">Password</label>
-          <input id="passwordInput" class="text-input" type="text" autocomplete="off" placeholder="Enter password or attack input">
+          <label class="form-group compact-field" for="connectionModeSelect">
+            <span>Mode</span>
+            <select id="connectionModeSelect" class="text-input compact-input">
+              <option value="local">Local simulation mode</option>
+              <option value="live">Live gateway mode</option>
+            </select>
+          </label>
+
+          <div id="liveConfigFields" class="live-config-fields" hidden>
+            <label class="form-group compact-field" for="gatewayBaseUrlInput">
+              <span>Gateway Base URL</span>
+              <input id="gatewayBaseUrlInput" class="text-input compact-input" type="text" autocomplete="off" placeholder="http://localhost:30080">
+            </label>
+
+            <label class="form-group compact-field" for="loginRouteInput">
+              <span>Login Route</span>
+              <input id="loginRouteInput" class="text-input compact-input" type="text" autocomplete="off" placeholder="/expo-sqli-demo/login">
+            </label>
+
+            <label class="form-group compact-field" for="platformApiBaseInput">
+              <span>Platform API URL (optional)</span>
+              <input id="platformApiBaseInput" class="text-input compact-input" type="text" autocomplete="off" placeholder="http://localhost:30000/api">
+            </label>
+
+            <button id="liveDefaultsButton" class="button secondary compact-button" type="button">Use Expo Service Defaults</button>
+          </div>
+
+          <div id="connectionStatusCard" class="connection-status-card">
+            Local simulation is ready. Switch to live mode after the SQL injection target service is deployed behind the gateway.
+          </div>
+        </section>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="usernameInput">Username</label>
+            <input id="usernameInput" class="text-input" type="text" autocomplete="off" placeholder="Enter username">
+          </div>
+
+          <div class="form-group">
+            <label for="passwordInput">Password</label>
+            <input id="passwordInput" class="text-input" type="text" autocomplete="off" placeholder="Enter password or attack input">
+          </div>
         </div>
 
         <p class="form-helper">Try a normal login or a malicious input.</p>
@@ -74,50 +117,11 @@
         </section>
       </section>
 
-      <section class="panel process-panel">
-        <div class="panel-header">
-          <p class="panel-kicker">Center Panel</p>
-          <h2>What the app is doing</h2>
-        </div>
 
-        <div class="step-stack">
-          <article class="step-card">
-            <div class="step-number">1</div>
-            <div>
-              <p class="step-label">User Input</p>
-              <div id="inputSummary" class="step-content">No request yet.</div>
-            </div>
-          </article>
-
-          <article class="step-card">
-            <div class="step-number">2</div>
-            <div>
-              <p class="step-label">Query Built By App</p>
-              <div id="querySummary" class="step-content code-block">Waiting for a login attempt.</div>
-            </div>
-          </article>
-
-          <article class="step-card">
-            <div class="step-number">3</div>
-            <div>
-              <p class="step-label">Decision</p>
-              <div id="decisionSummary" class="step-content">The app has not processed anything yet.</div>
-            </div>
-          </article>
-        </div>
-
-        <article class="explain-card">
-          <h3>Why the protected version is safer</h3>
-          <p id="protectionExplanation">
-            Protection is OFF right now, so the demo shows what happens when a weak login treats raw input as part of
-            the database logic.
-          </p>
-        </article>
-      </section>
 
       <section class="panel proof-panel">
         <div class="panel-header">
-          <p class="panel-kicker">Right Panel</p>
+          <p class="panel-kicker">Simulation Proof</p>
           <h2>Visible Proof</h2>
         </div>
 
@@ -170,6 +174,28 @@
             The proof panel will show either unauthorized access in vulnerable mode or a blocked security event in
             protected mode.
           </p>
+        </article>
+
+        <article id="liveProofCard" class="live-proof-card" hidden>
+          <h3>Live Gateway Proof</h3>
+          <div class="event-grid">
+            <div>
+              <span class="event-label">Service</span>
+              <strong id="liveProofService">Not configured</strong>
+            </div>
+            <div>
+              <span class="event-label">WAF SQLi Blocks</span>
+              <strong id="liveProofBlocks">Unknown</strong>
+            </div>
+            <div>
+              <span class="event-label">Latest Event</span>
+              <strong id="liveProofEvent">No live event loaded</strong>
+            </div>
+            <div>
+              <span class="event-label">Proof Source</span>
+              <strong id="liveProofSource">Gateway response only</strong>
+            </div>
+          </div>
         </article>
 
         <article class="activity-card">

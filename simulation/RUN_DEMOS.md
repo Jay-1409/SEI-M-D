@@ -1,336 +1,354 @@
 # Run Demos
 
-Last updated: 2026-03-24
+Last updated: 2026-03-25
 
-This file is the single runbook for every completed demo under `simulation`.
+This is the single runbook for the four custom expo demos inside `simulation`.
 
 It covers:
-- how to open each completed demo
-- how to reset it between visitors
-- the recommended expo order
-- the safest fallback order if the live platform is unavailable
+- what `local mode` means
+- what `live mode` means
+- the platform setup needed before the expo
+- the recommended presenter order
+- per-demo open, run, and reset guidance
 
-## What Counts As Completed Right Now
+## Demo Set Covered Here
 
-Completed custom demos:
 - SQL injection
 - XSS feedback wall
 - rate limiting
 - API key protection
 
-Completed real-platform demo guides:
-- deployment and gateway access
-- Trivy image scan
-- Nikto live scan
-- WAF logs and stats
+## Shared Demo Language
 
-Not included here because they are not complete:
-- OpenAPI detection
-- service lifecycle controls
-- dangerous headers
+Use the same meaning across all four demos:
+
+- `Local mode`
+  Browser-only fallback. No dashboard, no gateway, and no deployed demo service are required. Use this whenever the live platform is unavailable or you need the safest presenter flow.
+
+- `Live mode`
+  The same demo page sends real requests through the platform gateway to a simulation-owned target service deployed from `simulation`. Optional platform proof may also appear if the platform API is reachable.
+
+Important presenter rule:
+- if live mode fails, switch back to local mode immediately and keep the story moving
+
+## Recommended Expo Order
+
+Use this order for the four custom demos:
+
+1. SQL injection
+2. XSS feedback wall
+3. rate limiting
+4. API key protection
+
+Why this order is recommended:
+- SQL injection is the fastest attack story to understand
+- XSS extends the idea into public content
+- rate limiting shifts from input abuse to traffic abuse
+- API key protection closes on route-level access control
 
 ## Fastest Starting Point
 
 Open the launcher:
+
 - Direct file: [simulation/index.html](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\index.html)
 - PowerShell helper: [simulation/scripts/open-simulation-launcher.ps1](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\scripts\open-simulation-launcher.ps1)
 
-The launcher links to:
-- all four custom demo pages
-- the four completed real-platform guides
-- presenter docs
+## Platform Setup Needed Before The Expo
 
-## Recommended Expo Order
+Live mode is optional. The full demo route still works in local mode only.
 
-Use this full route when the main platform is available:
+If you want live mode ready, prepare these shared items first:
 
-1. Deployment and gateway access
-2. Trivy image scan or Nikto live scan
-3. SQL injection
-4. XSS feedback wall
-5. Rate limiting
-6. API key protection
-7. WAF logs and stats
+1. Confirm the main dashboard is reachable at `http://localhost:30000`.
+2. Confirm the gateway is reachable at `http://localhost:30080`.
+3. Build the four demo images from each demo's `live-target-service`.
+4. Deploy each demo target service through the existing platform.
+5. Verify each service works through its gateway route before visitors arrive.
 
-Why this order works:
-- it starts with the real platform foundation
-- then shows a real scan
-- then moves into the clearest crowd-friendly attack stories
-- then ends on proof from the firewall logs
+Recommended deployed service names:
 
-If time is short, use this short route:
+- SQL injection: `expo-sqli-demo`
+- XSS: `expo-xss-demo`
+- rate limiting: `expo-rate-limit-demo`
+- API key protection: `expo-api-demo`
 
-1. SQL injection
-2. XSS feedback wall
-3. Rate limiting
-4. API key protection or WAF logs
+Per-demo platform configuration:
 
-If the live platform is down, use this simulation-only fallback:
+- SQL injection
+  In `Firewall`, toggle `SQLi Protection` OFF for the vulnerable pass-through proof and ON for the blocked proof.
 
-1. SQL injection
-2. XSS feedback wall
-3. Rate limiting
-4. API key protection
+- XSS
+  In `Firewall`, toggle `XSS Protection` OFF for the vulnerable pass-through proof and ON for the blocked proof.
 
-## Completed Custom Demos
+- rate limiting
+  In `Firewall > Rate Limiting`, keep rate limiting enabled and set an obvious threshold such as `5 requests / 10 seconds`.
+
+- API key protection
+  In `API Key Authentication`, enable auth, generate one real key, and protect only `POST /staff/open-maintenance-panel`.
+
+Optional but recommended before live proof runs:
+
+- clear WAF logs before SQL injection and XSS proof runs
+- keep the real generated API key copied and ready for the API key demo
+
+## Per-Demo Run Guide
 
 ### 1. SQL Injection
 
 Open it:
+
 - Direct file: [simulation/demos/sql-injection/index.html](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\demos\sql-injection\index.html)
 - PowerShell helper: [simulation/scripts/open-sql-injection-demo.ps1](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\scripts\open-sql-injection-demo.ps1)
+- Demo README: [simulation/demos/sql-injection/README.md](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\demos\sql-injection\README.md)
 
-Exact presenter flow:
-1. Leave `Protection OFF`.
-2. Click `Fill Normal User`.
-3. Click `Login`.
-4. Click `Fill Attack Input`.
-5. Click `Login`.
+UI and story check:
+
+- polished three-panel layout is preserved
+- local and live mode use the same proof language
+- back-to-launcher navigation exists
+
+Recommended local fallback flow:
+
+1. Stay in `Local simulation mode`.
+2. Leave `Protection OFF`.
+3. Click `Fill Normal User`, then `Login`.
+4. Click `Fill Attack Input`, then `Login`.
+5. Point to `Unauthorized access allowed`.
+6. Turn protection ON.
+7. Click `Fill Attack Input`, then `Login`.
+8. Point to `Attack blocked`.
+
+Live mode defaults:
+
+- gateway base URL `http://localhost:30080`
+- login route `/expo-sqli-demo/login`
+- platform API URL `http://localhost:30000/api`
+
+Recommended live flow:
+
+1. Switch to `Live gateway mode`.
+2. Click `Use Expo Service Defaults`.
+3. Keep platform `SQLi Protection` OFF.
+4. Click `Fill Normal User`, then `Login`.
+5. Click `Fill Attack Input`, then `Login`.
 6. Point to `Unauthorized access allowed`.
-7. Click `Turn Protection ON`.
-8. Click `Fill Attack Input` again.
-9. Click `Login`.
-10. Point to `Attack blocked`.
+7. Turn platform `SQLi Protection` ON.
+8. Click `Fill Attack Input`, then `Login`.
+9. Point to `Attack blocked`.
 
-Supported demo inputs:
-- `admin` / `admin123`
-- `admin` / `' OR '1'='1`
+Fallback behavior if live mode fails:
 
-Exact reset behavior:
-- `Reset Demo` only clears the username, password, and current result state.
-- It does **not** clear `Blocked Attacks`.
-- It does **not** clear `Activity Log`.
-- It does **not** clear total request count.
-- It keeps the current protection mode.
+- the page keeps working and shows what setup is missing or what request failed
+- local mode remains available immediately
 
-Best between-visitors reset:
-1. Refresh the tab for a full clean state.
-2. Then leave the page in the mode you want to start with, usually `Protection OFF`.
+Reset:
+
+- `Reset Demo` clears the form and current result but keeps mode, log, counters, and connection fields
+- for a fully clean between-visitors state, refresh the tab
 
 ### 2. XSS Feedback Wall
 
 Open it:
+
 - Direct file: [simulation/demos/xss-feedback-wall/index.html](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\demos\xss-feedback-wall\index.html)
 - PowerShell helper: [simulation/scripts/open-xss-demo.ps1](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\scripts\open-xss-demo.ps1)
+- Demo README: [simulation/demos/xss-feedback-wall/README.md](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\demos\xss-feedback-wall\README.md)
 
-Exact presenter flow:
-1. Click `Use Normal Comment`.
-2. Click `Post Comment`.
+UI and story check:
+
+- polished composer / wall / proof layout is preserved
+- local and live mode use the same comment-wall story
+- back-to-launcher navigation exists
+
+Recommended local fallback flow:
+
+1. Stay in `Local simulation mode`.
+2. Click `Use Normal Comment`, then `Post Comment`.
 3. Click `Use Attack Payload`.
-4. Leave `Protection OFF`.
+4. Leave protection OFF.
 5. Click `Post Comment`.
-6. Point to the warning banner and `No gateway block occurred`.
+6. Point to the warning banner and accepted dangerous comment.
 7. Click `Reset Demo`.
-8. Turn protection on with the toggle.
-9. Click `Use Attack Payload`.
-10. Click `Post Comment`.
-11. Point to `Attack Blocked` and the unchanged wall.
+8. Turn protection ON.
+9. Click `Use Attack Payload`, then `Post Comment`.
+10. Point to `Attack Blocked` and the unchanged wall.
 
-Exact reset behavior:
-- `Reset Demo` fully resets the page.
-- It turns protection back to `OFF`.
-- It restores the original seeded comments.
-- It clears the block counter.
-- It clears timeline and proof state.
-- It removes the unsafe warning banner.
+Live mode defaults:
 
-Best between-visitors reset:
-1. Click `Reset Demo`.
-2. Confirm the banner says the wall is normal and the block count is `0`.
+- gateway base URL `http://localhost:30080`
+- comments route `/expo-xss-demo/comments`
+- platform API URL `http://localhost:30000/api`
+
+Recommended live flow:
+
+1. Switch to `Live gateway mode`.
+2. Click `Use Expo Service Defaults`.
+3. Click `Load Live Wall`.
+4. Keep platform `XSS Protection` OFF.
+5. Click `Use Normal Comment`, then `Post Comment`.
+6. Click `Use Attack Payload`, then `Post Comment`.
+7. Point to the dangerous comment being accepted.
+8. Turn platform `XSS Protection` ON.
+9. Click `Use Attack Payload`, then `Post Comment`.
+10. Point to `Attack Blocked`.
+
+Fallback behavior if live mode fails:
+
+- failed load, post, or reset actions produce a setup message instead of breaking the demo
+- local mode remains available immediately
+
+Reset:
+
+- in local mode, `Reset Demo` fully restores the seeded wall
+- in live mode, `Reset Demo` tries the target reset route and falls back to a safe local-looking state if that fails
 
 ### 3. Rate Limiting
 
 Open it:
+
 - Direct file: [simulation/demos/rate-limiting/index.html](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\demos\rate-limiting\index.html)
-- There is no dedicated helper script beyond the launcher.
+- PowerShell helper: [simulation/scripts/open-rate-limiting-demo.ps1](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\scripts\open-rate-limiting-demo.ps1)
+- Demo README: [simulation/demos/rate-limiting/README.md](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\demos\rate-limiting\README.md)
 
-Default state when opened:
-- `Rate Limit ON`
-- spam speed `Medium`
-- burst size `25 requests`
+UI and story check:
 
-Exact presenter flow:
-1. With `Rate Limit ON`, click `Send Normal Booking Request`.
-2. Click the mode button and switch to `OFF`.
-3. Click `Start Spam Flood`.
-4. Point to high pressure and zero blocked spam.
-5. Click `Reset`.
-6. Switch back to `ON`.
-7. Click `Start Spam Flood` again.
-8. Point to `Spam Blocked`, `Blocked 429`, and the summary card.
+- polished queue-and-proof layout is preserved
+- local and live mode use the same fairness story
+- back-to-launcher navigation exists
 
-Useful built-in option:
-- `Replay Guided Demo` automatically runs the ON normal request, OFF flood, then ON flood sequence.
+Recommended local fallback flow:
 
-Exact reset behavior:
-- `Reset` clears counters, log, pressure, summary, and in-flight animations.
-- It keeps the current protection mode.
-- It keeps the current speed and burst selections.
+1. Stay in `Local simulation mode`.
+2. With `Rate Limit ON`, click `Send Normal Booking Request`.
+3. Switch to `Rate Limit OFF`.
+4. Click `Start Spam Flood`.
+5. Point to high pressure and zero blocked spam.
+6. Click `Reset`.
+7. Switch back to `Rate Limit ON`.
+8. Click `Start Spam Flood`.
+9. Point to `Spam Blocked`, `Blocked 429`, and the summary.
 
-Best between-visitors reset:
-1. Click `Reset`.
-2. Make sure the mode is the one you want to start with.
-3. For the usual route, set it back to `Rate Limit ON`.
+Live mode defaults:
+
+- gateway base URL `http://localhost:30080`
+- target route `/expo-rate-limit-demo/tickets`
+- platform API URL `http://localhost:30000/api`
+
+Recommended live flow:
+
+1. Switch to `Live gateway mode`.
+2. Click `Use Expo Service Defaults`.
+3. Click `Send Normal Booking Request`.
+4. Point out that real traffic succeeds.
+5. Click `Start Spam Flood`.
+6. Point to real `429` log rows and the `Spam Blocked` counter.
+7. End on the summary card.
+
+Fallback behavior if live mode fails:
+
+- missing route, unreachable gateway, or unexpected responses are shown in the narration/log state
+- local mode remains available immediately
+
+Reset:
+
+- `Reset` clears counters, log, pressure, summary, and animations
+- it keeps the current mode, connection fields, speed, and burst settings
 
 ### 4. API Key Protection
 
 Open it:
+
 - Direct file: [simulation/demos/api-key-protection/index.html](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\demos\api-key-protection\index.html)
 - PowerShell helper: [simulation/scripts/open-api-key-demo.ps1](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\scripts\open-api-key-demo.ps1)
+- Demo README: [simulation/demos/api-key-protection/README.md](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\demos\api-key-protection\README.md)
 
-Exact presenter flow:
-1. Leave the route on `GET /public/help-hours`.
-2. Click `Use No Key`.
-3. Click `Send Request`.
+UI and story check:
+
+- polished request / logic / proof layout is preserved
+- local and live mode use the same public-vs-protected route story
+- back-to-launcher navigation exists
+
+Recommended local fallback flow:
+
+1. Stay in `Local simulation`.
+2. Leave the route on `GET /public/help-hours`.
+3. Click `Use No Key`, then `Send Request`.
 4. Switch route to `POST /staff/open-maintenance-panel`.
-5. Click `Use No Key`.
-6. Click `Send Request`.
-7. Click `Use Wrong Key`.
-8. Click `Send Request`.
-9. Click `Use Valid Staff Key`.
-10. Click `Send Request`.
+5. Click `Use No Key`, then `Send Request`.
+6. Click `Use Wrong Key`, then `Send Request`.
+7. Click `Use Valid Staff Key`, then `Send Request`.
 
-Demo key values:
-- Valid: `STAFF-ACCESS-DEMO-2026`
-- Wrong: `STAFF-KEY-DEMO-WRONG`
+Live mode defaults:
 
-Exact reset behavior:
-- `Reset Demo` returns the route to `GET /public/help-hours`.
-- It clears the key field.
-- It clears allowed and denied counters.
-- It clears the session event log.
+- gateway base URL `http://localhost:30080`
+- public route `/expo-api-demo/public/help-hours`
+- protected route `/expo-api-demo/staff/open-maintenance-panel`
 
-Best between-visitors reset:
-1. Click `Reset Demo`.
-2. Confirm the route is back on the public route and both counters are `0`.
+Recommended live flow:
 
-## Completed Real-Platform Demo Guides
+1. Switch to `Live platform mode`.
+2. Click `Use Expo Service Defaults`.
+3. Keep the route on the public path.
+4. Click `Use No Key`, then `Send Request`.
+5. Switch to the protected route.
+6. Click `Use No Key`, then `Send Request`.
+7. Click `Use Wrong Key`, then `Send Request`.
+8. Paste the real generated key into `Access Key`.
+9. Click `Send Request`.
 
-These are completed as presentation guides inside `simulation/specs`. They are not standalone static demo pages.
+Fallback behavior if live mode fails:
 
-### 5. Deployment And Gateway Access
-
-Guide:
-- [simulation/specs/deployment-gateway-access-demo-spec.md](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\specs\deployment-gateway-access-demo-spec.md)
-
-What you need ready:
-- main dashboard at `http://localhost:30000`
-- gateway at `http://localhost:30080`
-- `example-api.tar` from `examples/simple-api`
-
-Exact run flow:
-1. Open the dashboard.
-2. Go to `Deploy New Service`.
-3. Upload `example-api.tar`.
-4. Use service name `example-api`.
-5. Use container port `8000`.
-6. Deploy.
-7. Open the generated gateway URL.
-8. Point out that the public route is `http://localhost:30080/example-api`.
+- the page shows `Check Setup` guidance when the route is unprotected, wrongly protected, unreachable, or otherwise mismatched
+- local mode remains available immediately
 
 Reset:
-- easiest reset is to reuse the already deployed service
-- if you want the full deploy story again, delete and redeploy `example-api`
 
-### 6. Trivy Image Scan
-
-Guide:
-- [simulation/specs/trivy-image-scan-demo-spec.md](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\specs\trivy-image-scan-demo-spec.md)
-
-What you need ready:
-- main dashboard at `http://localhost:30000`
-- Trivy available in the main platform
-- prepared images:
-  - `example-api.tar`
-  - `vulnerable-api.tar`
-
-Exact run flow:
-1. Upload one prepared image in `Deploy New Service`, or open a deployed service.
-2. Click `Run Trivy`.
-3. Wait for the scan state.
-4. Point to `Total Findings`, `Critical`, and `High`.
-
-Reset:
-- simplest reset is to rerun `Run Trivy`
-- if time is short, leave one good result already on screen for the next visitor
-
-### 7. Nikto Live Scan
-
-Guide:
-- [simulation/specs/nikto-live-scan-demo-spec.md](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\specs\nikto-live-scan-demo-spec.md)
-
-What you need ready:
-- main dashboard at `http://localhost:30000`
-- deployed service `vulnerable-api`
-- gateway path reachable for that service
-
-Exact run flow:
-1. Open `vulnerable-api` in the service list.
-2. Click `Manage`.
-3. Open the `Security` tab.
-4. In `Web Vulnerability Scanner`, click `Run Scan`.
-5. Point to the total findings and visible issue list.
-
-Reset:
-- easiest reset is to keep `vulnerable-api` deployed
-- rerun `Run Scan` when you want a fresh live scan
-- reload the page if the UI looks busy
-
-### 8. WAF Logs And Stats
-
-Guide:
-- [simulation/specs/waf-logs-stats-demo-spec.md](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\specs\waf-logs-stats-demo-spec.md)
-
-What you need ready:
-- a deployed demo service in the main platform
-- its `Firewall` tab working
-- Bruno attack requests ready:
-  - `bruno/10-Test SQLi Attack.bru`
-  - `bruno/11-Test XSS Attack GET.bru`
-
-Exact run flow:
-1. Open the service `Firewall` tab.
-2. Turn `SQLi Protection` and `XSS Protection` on.
-3. Click `Clear Logs`.
-4. Send the SQLi Bruno request.
-5. Return and point to `Total Blocked`, `SQLi Blocked`, and the new event.
-6. Send the XSS Bruno request.
-7. Return and point to `Total Blocked`, `XSS Blocked`, and the second event.
-
-Reset:
-1. Click `Clear Logs`.
-2. Leave SQLi and XSS protection enabled.
-3. Keep Bruno open and ready for the next run.
+- `Reset Demo` returns the route to the public route
+- clears the key field, counters, event log, and latest result
+- keeps the current mode and live connection fields
 
 ## Best Tab Layout For The Expo Laptop
 
-If possible, preload tabs in this order:
+Recommended tab order:
 
 1. [simulation/index.html](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\index.html)
-2. main dashboard at `http://localhost:30000`
-3. SQL injection
-4. XSS feedback wall
-5. rate limiting
-6. API key protection
+2. SQL injection
+3. XSS feedback wall
+4. rate limiting
+5. API key protection
+6. main dashboard at `http://localhost:30000`
 
-If you are also doing live WAF proof:
+If you plan to show live proof:
 
-7. service `Firewall` tab
-8. Bruno with the SQLi and XSS requests ready
+7. the relevant service details page in the dashboard
+8. firewall or API key configuration tab already open for quick switching
 
 ## Start-Of-Day Reset Checklist
 
-1. Open the launcher once.
+1. Open the launcher.
 2. Open all four custom demos once.
-3. Refresh the SQL injection tab so its counters and log start clean.
-4. Click `Reset Demo` in XSS.
-5. Click `Reset` in rate limiting.
-6. Click `Reset Demo` in API key protection.
-7. If using the live platform, open the dashboard and the firewall tab.
-8. If using WAF proof, click `Clear Logs` before visitors arrive.
+3. Put each demo in the starting mode you want for the first visitor, usually local mode.
+4. SQL injection: refresh the tab for a full clean state.
+5. XSS: click `Reset Demo`.
+6. rate limiting: click `Reset`.
+7. API key protection: click `Reset Simulation`.
+8. If using live mode, confirm all four gateway routes respond before visitors arrive.
+9. If using live WAF proof, clear logs before the first run.
 
-## Important Notes
+## Expo-Ready Summary
 
-- All four custom demos are fully self-contained inside `simulation`.
-- The completed real-platform items in this workspace are guides, not cloned copies of the main platform.
-- The SQL injection page is the only custom demo whose reset button does not fully clear the session proof. Use a browser refresh for a truly clean restart.
+What is ready now:
+
+- all four custom demos are integrated under one launcher
+- all four preserve their current UI and storytelling
+- all four support local fallback
+- all four have live-mode setup paths documented
+- all four have a consistent recommended presenter order
+
+What setup is still required for live mode:
+
+- deploy the four simulation-owned target services
+- configure the matching platform protections
+- verify gateway reachability and, for API key protection, keep the real generated key ready
+
+If any of that is not ready, the expo can still run cleanly in local mode only.

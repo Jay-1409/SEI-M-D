@@ -129,3 +129,34 @@ Use a shared launcher and light navigation polish instead of rewriting the alrea
 
 ### Reason
 The custom demos already follow a compatible single-page, story-first pattern. A shared entry point and consistent navigation improve presentation smoothness without risking unnecessary breakage.
+
+---
+
+## Decision 9
+
+### Topic
+SQL injection live connection strategy
+
+### Decision
+Use a dual-mode SQL injection demo:
+- local simulation mode stays available as the default fallback
+- live gateway mode sends login requests through the real gateway to a simulation-owned target service deployed through the existing platform
+
+### Reason
+This keeps the current polished demo usable offline, avoids changes to the main project, and still allows real gateway and WAF behavior to be demonstrated when the platform is available.
+
+---
+
+## Decision 10
+
+### Topic
+Rate limiting live connection strategy
+
+### Decision
+Use a dual-mode rate limiting demo:
+- local simulation mode stays available as the default fallback
+- live gateway mode sends normal and flood traffic through a real gateway route and reads real `429` outcomes back into the existing queue UI
+- if no suitable existing route is ready, use a tiny simulation-owned target service deployed through the platform
+
+### Reason
+Rate limiting is especially well suited to real gateway proof because any safe repeatable endpoint can demonstrate the behavior, and the existing demo UI already has the right counters and story for showing real `429` results with minimal disruption.

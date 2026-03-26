@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>API Key Demo: Public Info vs Staff-Only Action</title>
+  <title>Simulation #4 | API Key Protection</title>
   <link rel="stylesheet" href="./styles.css">
 </head>
 <body>
@@ -13,27 +13,88 @@
     </div>
     <header class="hero">
       <div class="hero-copy">
-        <p class="eyebrow">Campus Service Desk Simulation</p>
-        <h1>API Key Demo: Public Info vs Staff-Only Action</h1>
+        <p class="eyebrow">Security Simulation #4</p>
+        <h1>API Key Protection <span style="font-size: 0.5em; vertical-align: middle; opacity: 0.7; margin-left: 0.3em;">🔑</span></h1>
         <p class="hero-text">
-          See why public information can stay open, while sensitive actions need a valid digital access card.
+          Explore why public information stays open while sensitive actions require a valid digital access key.
+          Test different routes with and without the correct credentials.
         </p>
       </div>
-
       <div class="hero-actions">
         <div class="route-badge-card">
           <span class="mini-label">Current Route Type</span>
           <span id="routeTypeBadge" class="route-type-badge public">Public Route</span>
         </div>
-        <button id="resetButton" class="ghost-button" type="button">Reset Demo</button>
+        <button id="resetButton" class="ghost-button" type="button">Reset Simulation</button>
       </div>
     </header>
 
     <main class="demo-grid">
       <section class="panel request-panel">
         <div class="panel-header">
-          <p class="panel-kicker">Step 1</p>
+          <p class="panel-kicker">Interactive Setup (Step 1)</p>
           <h2>Service Desk Request</h2>
+        </div>
+
+        <div class="connection-card">
+          <div class="connection-card-header">
+            <div>
+              <p class="helper-title">Connection Mode</p>
+              <p class="connection-copy">Keep local simulation as a safe fallback, or point the demo at the real gateway.</p>
+            </div>
+            <span id="connectionModeBadge" class="mode-badge local">Local Simulation</span>
+          </div>
+
+          <label class="field-group compact-field" for="connectionModeSelect">
+            <span class="field-label">Mode</span>
+            <select id="connectionModeSelect" class="field-input">
+              <option value="local">Local simulation</option>
+              <option value="live">Live platform mode</option>
+            </select>
+          </label>
+
+          <div id="liveConfigFields" class="live-config-fields" hidden>
+            <label class="field-group compact-field" for="gatewayBaseUrlInput">
+              <span class="field-label">Gateway Base URL</span>
+              <input
+                id="gatewayBaseUrlInput"
+                class="field-input"
+                type="text"
+                autocomplete="off"
+                placeholder="http://localhost:30080"
+              >
+            </label>
+
+            <label class="field-group compact-field" for="publicRouteInput">
+              <span class="field-label">Public Route</span>
+              <input
+                id="publicRouteInput"
+                class="field-input"
+                type="text"
+                autocomplete="off"
+                placeholder="/expo-api-demo/public/help-hours"
+              >
+            </label>
+
+            <label class="field-group compact-field" for="protectedRouteInput">
+              <span class="field-label">Protected Route</span>
+              <input
+                id="protectedRouteInput"
+                class="field-input"
+                type="text"
+                autocomplete="off"
+                placeholder="/expo-api-demo/staff/open-maintenance-panel"
+              >
+            </label>
+
+            <div class="button-row compact-actions">
+              <button id="liveDefaultsButton" class="quick-button" type="button">Use Expo Service Defaults</button>
+            </div>
+          </div>
+
+          <div id="connectionStatusCard" class="connection-status-card">
+            Local simulation is ready. Switch to live mode after a real service is deployed behind the gateway.
+          </div>
         </div>
 
         <label class="field-group" for="routeSelect">
@@ -74,7 +135,7 @@
           </p>
         </div>
 
-        <div class="key-reference">
+        <div id="demoKeyReference" class="key-reference">
           <p class="key-reference-label">Demo-only key shown on purpose</p>
           <code>STAFF-ACCESS-DEMO-2026</code>
           <p class="key-reference-note">This is a simulated expo key, not a real secret.</p>
@@ -83,7 +144,7 @@
 
       <section class="panel flow-panel">
         <div class="panel-header">
-          <p class="panel-kicker">Step 2</p>
+          <p class="panel-kicker">Logic Validation (Step 2)</p>
           <h2>What the System Checks</h2>
         </div>
 
@@ -138,7 +199,7 @@
 
       <section class="panel proof-panel">
         <div class="panel-header">
-          <p class="panel-kicker">Step 3</p>
+          <p class="panel-kicker">Simulation Output (Step 3)</p>
           <h2>Visible Proof</h2>
         </div>
 
@@ -148,6 +209,10 @@
         </div>
 
         <div class="proof-facts">
+          <div class="proof-fact">
+            <span class="proof-label">Mode</span>
+            <strong id="proofMode">Local simulation</strong>
+          </div>
           <div class="proof-fact">
             <span class="proof-label">Current Outcome</span>
             <strong id="currentOutcome">No action yet</strong>
@@ -163,6 +228,10 @@
           <div class="proof-fact">
             <span class="proof-label">Action Result</span>
             <strong id="actionResult">Waiting for request</strong>
+          </div>
+          <div class="proof-fact">
+            <span class="proof-label">HTTP Status</span>
+            <strong id="httpStatus">Not sent</strong>
           </div>
         </div>
 

@@ -2,80 +2,84 @@
 
 ## Current Status
 
-The simulation workspace has moved from isolated demo builds into an integrated expo-kit state.
-
-Completed foundation work:
-- workspace rules and continuation guidance are documented
-- the functionality-to-simulation mapping is written
-- the numbered task list exists
-- the roadmap exists with priorities, dependencies, and demo inventory
-- the decisions log exists
-- base folders exist: `specs/`, `demos/`, `assets/`, `scripts/`
-- coordination docs were aligned so foundation tasks match their real completion state
-- shared launcher page exists at `simulation/index.html`
-- presenter playbook exists
-- expo setup/reset guide exists
-
-Completed custom demo work:
-- SQL injection
-- XSS feedback wall
-- rate limiting
-- API key protection
-
-Completed real-platform guide work:
-- deployment and gateway access
-- Trivy image scan
-- Nikto live scan
-- WAF logs and stats
+The `simulation` workspace is now in an integrated expo-ready documentation state for the four custom demos.
 
 Current reality:
-- all four planned custom simulation demos are built and self-contained
-- the main real-platform guides most relevant to the expo are written
-- a shared launcher/navigation page now ties the workspace together
-- presenter and setup docs now exist
-- remaining work is mostly rehearsal, verification, and optional supporting guides rather than core demo creation
 
-Reference files:
+- SQL injection is built, documented, and supports both local fallback and live gateway mode
+- XSS feedback wall is built, documented, and supports both local fallback and live gateway mode
+- rate limiting is built, documented, and supports both local fallback and live gateway mode
+- API key protection is built, documented, and supports both local fallback and live platform mode
+- the launcher ties the four demos together from one entry point
+- the shared docs now use consistent language for `local mode`, `live mode`, fallback behavior, and platform setup
+
+## What Was Verified In This Pass
+
+By source review inside `simulation`:
+
+- all four demos preserve their existing UI/story structure
+- all four expose a clear connection-mode switch without replacing the original local story
+- all four keep local mode available even if live mode setup is incomplete
+- all four surface setup problems or request failures in-page instead of crashing the presenter flow
+- each demo includes cross-demo navigation back to the launcher
+
+Important nuance:
+
+- this pass verified behavior and consistency from the demo HTML, JavaScript, READMEs, and specs
+- no browser rehearsal was run in this pass, so final machine rehearsal is still recommended before the expo
+
+## Docs Updated In This Pass
+
 - [README.md](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\README.md)
-- [index.html](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\index.html)
-- [FUNCTIONALITY_SIMULATION_PLAN.md](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\FUNCTIONALITY_SIMULATION_PLAN.md)
-- [SIMULATION_TASK_LIST.md](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\SIMULATION_TASK_LIST.md)
-- [SIMULATION_ROADMAP.md](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\SIMULATION_ROADMAP.md)
-- [DECISIONS.md](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\DECISIONS.md)
+- [RUN_DEMOS.md](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\RUN_DEMOS.md)
+- [HANDOFF.md](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\HANDOFF.md)
 - [STATUS.md](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\STATUS.md)
-- [PRESENTER_PLAYBOOK.md](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\PRESENTER_PLAYBOOK.md)
-- [EXPO_SETUP_AND_RESET_GUIDE.md](C:\Users\ARTH PATEL\OneDrive\Desktop\ARTH\Sem-6\Cyber\Project\SEI-M-D\simulation\EXPO_SETUP_AND_RESET_GUIDE.md)
 
-## Recommended Next Actions
+Main alignment changes:
 
-Recommended order:
-1. Rehearse the full launcher-driven route on the exact expo machine.
-2. Sanity-check each custom demo in a browser after any future edits.
-3. Decide whether the optional OpenAPI and service-control guides are worth adding for this expo.
-4. Keep `STATUS.md`, `HANDOFF.md`, `SIMULATION_TASK_LIST.md`, and `SIMULATION_ROADMAP.md` synchronized when more polish or testing happens.
+- unified explanation of `local mode` versus `live mode`
+- one simple recommended expo order across the four demos
+- one shared platform setup checklist for live mode
+- consistent per-demo guidance on live fallback and resets
 
-If parallel agents are available, a good split is:
-- Agent 1: project control + roadmap alignment
-- Agent 2: SQL injection spec/build
-- Agent 3: XSS spec/build
-- Agent 4: rate limiting polish or verification only
-- Agent 5: API key spec/build
-- Agent 6: real-platform demo specs for Trivy, deployment/gateway, Nikto, WAF dashboard
+## Recommended Demo Order
+
+Use this sequence for the four custom demos:
+
+1. SQL injection
+2. XSS feedback wall
+3. rate limiting
+4. API key protection
+
+## Platform Setup Still Required For Live Mode
+
+The expo can still run fully in local mode without these items.
+
+If live mode is desired, prepare:
+
+- dashboard at `http://localhost:30000`
+- gateway at `http://localhost:30080`
+- deployed simulation-owned target services:
+  - `expo-sqli-demo`
+  - `expo-xss-demo`
+  - `expo-rate-limit-demo`
+  - `expo-api-demo`
+- per-demo protection setup:
+  - SQLi protection toggle for SQL injection
+  - XSS protection toggle for XSS
+  - visible rate-limit threshold for rate limiting
+  - generated real API key for API key protection
+
+## Recommended Next Safe Actions
+
+1. Rehearse the exact launcher-driven route on the actual expo laptop.
+2. Open each demo once in a real browser and confirm the first screen state matches `RUN_DEMOS.md`.
+3. If live mode will be used, verify all four gateway routes before visitors arrive.
+4. If any live setup is unstable, default the presentation to local mode and use live mode only as an optional bonus proof step.
 
 ## Rules To Preserve
 
 - Do not change anything outside `simulation`
-- Prefer spec documents before coding
-- Keep wording understandable for layman expo visitors
-- Make demos visually clear and proof-oriented
-
-## Notes For Future Agents
-
-- The task list is the main execution reference.
-- The roadmap should be used to decide build order.
-- The decisions file should be checked before making structural or storytelling changes.
-- The status snapshot is the fastest way to confirm what is truly complete before starting new work.
-- The rate limiting demo is a standalone static page and does not depend on the main project.
-- The XSS demo is a standalone static page and does not depend on the main project.
-- The SQL injection demo is a standalone static page and does not depend on the main project.
-- The API key demo is a standalone static page and does not depend on the main project.
+- Do not redesign stable demos just for cosmetic consistency
+- Keep language understandable for layman expo visitors
+- Preserve local fallback even when live mode support expands
