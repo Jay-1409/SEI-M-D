@@ -1,0 +1,98 @@
+.componentScope {
+    display: contents;
+}
+
+/* Shutdown Confirmation Modal */
+.componentScope :global(.shutdown-overlay) {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+}
+
+.componentScope :global(.shutdown-overlay.active) {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.componentScope :global(.shutdown-modal) {
+    width: min(90vw, 460px);
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: var(--radius-xl);
+    box-shadow: var(--shadow-xl);
+    padding: 28px;
+    transform: translateY(10px) scale(0.98);
+    transition: transform 0.25s ease;
+    backdrop-filter: blur(10px);
+}
+
+.componentScope :global(.shutdown-overlay.active .shutdown-modal) {
+    transform: translateY(0) scale(1);
+}
+
+.componentScope :global(.modal-icon) {
+    font-size: 34px;
+    margin-bottom: 10px;
+}
+
+.componentScope :global(.shutdown-modal h3) {
+    font-size: 22px;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.componentScope :global(.shutdown-modal p) {
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-bottom: 18px;
+}
+
+.componentScope :global(.modal-actions) {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+}
+
+.componentScope :global(.btn-cancel),
+.componentScope :global(.btn-shutdown) {
+    border: none;
+    border-radius: 12px;
+    padding: 10px 16px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.componentScope :global(.btn-cancel) {
+    background: rgba(0, 0, 0, 0.06);
+    color: var(--text-secondary);
+}
+
+.componentScope :global(.btn-cancel:hover) {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.componentScope :global(.btn-shutdown) {
+    background: #d87f7f;
+    color: #fff;
+}
+
+.componentScope :global(.btn-shutdown:hover) {
+    background: #c86f6f;
+}
+
+.componentScope :global([data-theme="dark"] .btn-cancel) {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-secondary);
+}
+
+.componentScope :global([data-theme="dark"] .btn-cancel:hover) {
+    background: rgba(255, 255, 255, 0.12);
+}

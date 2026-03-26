@@ -1,0 +1,208 @@
+.componentScope {
+    display: contents;
+}
+
+/* Pastel Crayon Themes */
+.componentScope :global(.deploy-theme) {
+    background:
+        linear-gradient(var(--card-bg), var(--card-bg)),
+        linear-gradient(
+            135deg,
+            rgba(255, 243, 214, 0.5),
+            rgba(255, 224, 204, 0.5)
+        );
+}
+
+/* Dark Mode Theme Overrides */
+.componentScope :global([data-theme="dark"] .deploy-theme) {
+    background:
+        linear-gradient(var(--card-bg), var(--card-bg)),
+        linear-gradient(135deg, rgba(255, 243, 214, 0.1), rgba(255, 224, 204, 0.1));
+}
+
+/* FORM STYLES */
+.componentScope :global(#deployForm) {
+    padding: 24px;
+}
+
+.componentScope :global(.form-grid) {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 28px;
+    margin-bottom: 20px;
+}
+
+.componentScope :global(.form-group) {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.componentScope :global(label) {
+    font-size: 13px;
+    color: var(--text-secondary);
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+}
+
+.componentScope :global(.form-input),
+.componentScope :global(select) {
+    width: 100%;
+    padding: 11px 14px;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--input-border);
+    background: var(--input-bg);
+    color: var(--input-text);
+    font-family: "Inter", sans-serif;
+    font-size: 14px;
+    transition: all 0.2s;
+}
+
+.componentScope :global(.form-input::placeholder) {
+    color: var(--input-placeholder);
+}
+
+.componentScope :global(.form-input:focus),
+.componentScope :global(select:focus) {
+    outline: none;
+    border-color: var(--border-focus);
+    box-shadow: 0 0 0 3px var(--accent-glow);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.componentScope :global([data-theme="dark"] .form-input:focus),
+.componentScope :global([data-theme="dark"] select:focus) {
+    background: #2f2938;
+}
+
+/* DROP ZONE */
+.componentScope :global(.drop-zone) {
+    border: 2px dashed var(--dropzone-border);
+    border-radius: var(--radius-lg);
+    padding: 24px 16px;
+    text-align: center;
+    background: var(--dropzone-bg);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.componentScope :global(.drop-zone::before) {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.25));
+    opacity: 0;
+    transition: opacity 0.25s;
+}
+
+.componentScope :global(.drop-zone:hover),
+.componentScope :global(.drop-zone.hover) {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    background: var(--dropzone-hover-bg);
+}
+
+.componentScope :global(.drop-zone:hover::before),
+.componentScope :global(.drop-zone.hover::before) {
+    opacity: 1;
+}
+
+.componentScope :global(.drop-zone.has-file) {
+    border-style: solid;
+    border-color: #8cc8a8;
+    background: rgba(140, 200, 168, 0.12);
+}
+
+.componentScope :global(.drop-zone-content) {
+    position: relative;
+    z-index: 1;
+}
+
+.componentScope :global(.drop-zone-icon) {
+    font-size: 26px;
+    margin-bottom: 6px;
+}
+
+.componentScope :global(.drop-zone-text) {
+    color: var(--dropzone-text);
+    font-size: 13px;
+    font-weight: 500;
+}
+
+.componentScope :global(.drop-zone-file-name) {
+    margin-top: 8px;
+    font-size: 12px;
+    font-family: "JetBrains Mono", monospace;
+    word-break: break-all;
+    color: var(--text-primary);
+}
+
+.componentScope :global(.file-input-hidden) {
+    display: none;
+}
+
+/* BUTTONS */
+.componentScope :global(.btn) {
+    border: none;
+    border-radius: 13px;
+    padding: 11px 18px;
+    font-weight: 600;
+    font-family: "Inter", sans-serif;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+    font-size: 14px;
+}
+
+.componentScope :global(.btn-primary) {
+    background: linear-gradient(135deg, #b48ec2, #c9a0d0);
+    color: #fff;
+    box-shadow: 0 6px 20px rgba(201, 160, 208, 0.35);
+}
+
+.componentScope :global(.btn-primary:hover) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(201, 160, 208, 0.45);
+    background: linear-gradient(135deg, #aa84b8, #b88bc2);
+}
+
+.componentScope :global(.btn:active) {
+    transform: translateY(0);
+}
+
+/* STATUS BOX */
+.componentScope :global(.status-box) {
+    display: none;
+    margin: 12px 0 18px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    font-size: 13px;
+    animation: slideUp 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.componentScope :global(.status-box.success) {
+    display: block;
+    background: rgba(140, 200, 168, 0.18);
+    color: #4a8b64;
+    border-color: rgba(140, 200, 168, 0.35);
+}
+
+.componentScope :global(.status-box.error) {
+    display: block;
+    background: rgba(224, 144, 143, 0.18);
+    color: #a55a59;
+    border-color: rgba(224, 144, 143, 0.35);
+}
+
+@media (max-width: 800px) {
+    .componentScope :global(.form-grid) {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}

@@ -33,7 +33,7 @@ echo ""
 
 # Build frontend
 echo "→ Building deployer-frontend:latest"
-docker build -t deployer-frontend:latest ./frontend -q
+docker build -t deployer-frontend:latest ./frontendv2 -q
 echo "✓ Frontend built"
 echo ""
 

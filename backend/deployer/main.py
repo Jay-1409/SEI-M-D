@@ -20,10 +20,14 @@ import tempfile
 import subprocess
 import json
 import redis
+import re
+import threading
+import time
+import shutil
 from datetime import datetime
 from kubernetes import client, config
 
-from models import DeployRequest, DeployResponse, ServiceInfo, ScanResult, Vulnerability, RateLimitConfig
+from models import DeployRequest, DeployResponse, ServiceInfo, ScanResult, Vulnerability, RateLimitConfig, ServiceProxyConfig
 from k8s_client import create_deployment, create_service, delete_deployment, delete_service
 
 logging.basicConfig(level=logging.INFO)
@@ -49,6 +53,99 @@ TRIVY_SERVICE_URL = os.getenv("TRIVY_SERVICE_URL", "http://trivy-service.deploye
 GATEWAY_HOST = os.getenv("GATEWAY_HOST", "localhost")
 GATEWAY_PORT = os.getenv("GATEWAY_PORT", "30080")
 GATEWAY_REGISTER_URL = os.getenv("GATEWAY_REGISTER_URL", "http://gateway-service:8080")
+DEFAULT_PROXY_BASE_URL = os.getenv("DEFAULT_PROXY_BASE_URL", "").strip().rstrip("/")
+CLOUDFLARED_BIN = os.getenv("CLOUDFLARED_BIN", "cloudflared")
+CLOUDFLARED_TARGET_URL = os.getenv("CLOUDFLARED_TARGET_URL", GATEWAY_REGISTER_URL)
+
+
+def _normalize_proxy_base_url(base_url: str) -> str:
+    normalized = (base_url or "").strip().rstrip("/")
+    if not normalized:
+        return ""
+    if not (normalized.startswith("http://") or normalized.startswith("https://")):
+        raise HTTPException(status_code=400, detail="base_url must start with http:// or https://")
+    return normalized
+
+
+def build_proxy_url(base_url: str, service_name: str) -> str:
+    normalized = _normalize_proxy_base_url(base_url)
+    return f"{normalized}/{service_name}"
+
+
+_cloudflared_lock = threading.Lock()
+_cloudflared_process = None
+_cloudflared_public_url = None
+_TRYCLOUDFLARE_PATTERN = re.compile(r"https://[a-zA-Z0-9-]+\.trycloudflare\.com")
+
+
+def _extract_trycloudflare_url(text: str) -> str | None:
+    if not text:
+        return None
+    m = _TRYCLOUDFLARE_PATTERN.search(text)
+    if m:
+        return m.group(0)
+    return None
+
+
+def _ensure_cloudflared_tunnel() -> str:
+    global _cloudflared_process, _cloudflared_public_url
+
+    with _cloudflared_lock:
+        if _cloudflared_process and _cloudflared_process.poll() is None and _cloudflared_public_url:
+            return _cloudflared_public_url
+
+        if shutil.which(CLOUDFLARED_BIN) is None:
+            raise HTTPException(status_code=500, detail=f"'{CLOUDFLARED_BIN}' not found on backend host")
+
+        cmd = [CLOUDFLARED_BIN, "tunnel", "--url", CLOUDFLARED_TARGET_URL, "--no-autoupdate"]
+        logger.info(f"Starting cloudflared tunnel: {' '.join(cmd)}")
+        proc = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+        )
+
+        _cloudflared_process = proc
+        _cloudflared_public_url = None
+
+        deadline = time.time() + 20
+        recent_logs: list[str] = []
+        while time.time() < deadline:
+            if proc.poll() is not None:
+                break
+
+            line = proc.stdout.readline() if proc.stdout else ""
+            if not line:
+                time.sleep(0.2)
+                continue
+
+            recent_logs.append(line.strip())
+            if len(recent_logs) > 8:
+                recent_logs.pop(0)
+
+            found = _extract_trycloudflare_url(line)
+            if found:
+                _cloudflared_public_url = found
+                logger.info(f"cloudflared tunnel ready: {found}")
+                return found
+
+        if proc.poll() is None:
+            try:
+                proc.terminate()
+                proc.wait(timeout=3)
+            except Exception:
+                try:
+                    proc.kill()
+                except Exception:
+                    pass
+
+        _cloudflared_process = None
+        detail = "Failed to get Cloudflare tunnel URL"
+        if recent_logs:
+            detail = f"{detail}. Last logs: {' | '.join(recent_logs)}"
+        raise HTTPException(status_code=500, detail=detail)
 
 # Initialize Docker client
 try:
@@ -172,7 +269,7 @@ def gracefully_stop_all_services():
                 logger.info(f"gracefully_stop_all_services: removed {name} from registry")
 
     logger.info("gracefully_stop_all_services: all services stopped.")
-    
+
 @app.on_event("startup")
 async def startup_event():
     """Sync in-memory state with actual Kubernetes state on startup."""
@@ -187,7 +284,7 @@ async def startup_event():
             return
 
     apps_v1 = client.AppsV1Api()
-    
+
     try:
         # List items in user-services namespace
         namespace = "user-services"
@@ -195,7 +292,7 @@ async def startup_event():
         async with httpx.AsyncClient() as http_client:
             for dep in deployments.items:
                 name = dep.metadata.name
-                
+
                 # Try to extract info
                 try:
                     container = dep.spec.template.spec.containers[0]
@@ -204,13 +301,13 @@ async def startup_event():
                     port = 80
                     if container.ports:
                         port = container.ports[0].container_port
-                    
+
                     status = "deployed"
                     if not dep.status.ready_replicas:
                         status = "stopped"
-                        
+
                     public_url = f"http://{GATEWAY_HOST}:{GATEWAY_PORT}/{name}"
-                    
+
                     # Add to memory
                     deployed_services[name] = ServiceInfo(
                         service_name=name,
@@ -247,13 +344,13 @@ async def upload_image(file: UploadFile = File(...)):
     """Upload a Docker image tar file - proxied to image-service."""
     if not file.filename.endswith('.tar'):
         raise HTTPException(status_code=400, detail="File must be a .tar Docker image")
-    
+
     logger.info(f"Proxying image upload to image-service: {file.filename}")
-    
+
     # Forward to image-service
     try:
         files = {'file': (file.filename, await file.read(), file.content_type)}
-        
+
         async with httpx.AsyncClient(timeout=120.0) as http_client:
             response = await http_client.post(
                 f"{IMAGE_SERVICE_URL}/upload",
@@ -261,9 +358,9 @@ async def upload_image(file: UploadFile = File(...)):
             )
             response.raise_for_status()
             result = response.json()
-        
+
         logger.info(f"Image uploaded successfully: {result.get('image_name')}")
-        
+
         # Transform response to match frontend expectations
         return {
             "status": "success",
@@ -273,7 +370,7 @@ async def upload_image(file: UploadFile = File(...)):
             "suggested_port": result['ports'][0] if result.get('ports') else None,
             "message": f"Image loaded: {result.get('image_name')}"
         }
-    
+
     except httpx.HTTPStatusError as e:
         logger.error(f"Image service error: {e}")
         raise HTTPException(status_code=e.response.status_code, detail=str(e))
@@ -288,7 +385,7 @@ async def scan_image(req: dict):
     image_name = req.get("image_name")
     if not image_name:
         raise HTTPException(status_code=400, detail="Missing image_name")
-        
+
     try:
         async with httpx.AsyncClient(timeout=10.0) as http_client:
             resp = await http_client.post(
@@ -326,7 +423,7 @@ async def trigger_service_trivy_scan(service_name: str):
     service = deployed_services.get(service_name)
     if not service:
         raise HTTPException(status_code=404, detail=f"Service {service_name} not found in registry")
-        
+
     image_name = service.docker_image
     try:
         async with httpx.AsyncClient(timeout=10.0) as http_client:
@@ -346,7 +443,7 @@ async def get_service_trivy_scan(service_name: str):
     service = deployed_services.get(service_name)
     if not service:
         raise HTTPException(status_code=404, detail=f"Service {service_name} not found in registry")
-        
+
     image_name = service.docker_image
     try:
         async with httpx.AsyncClient(timeout=10.0) as http_client:
@@ -436,13 +533,13 @@ async def deploy_service(req: DeployRequest):
 @app.post("/services/{service_name}/redeploy")
 async def redeploy_service_endpoint(service_name: str, req: DeployRequest):
     """Restart a service deployment and re-sync gateway route."""
-    
+
     # Load K8s config
     try:
         config.load_incluster_config()
     except config.ConfigException:
         config.load_kube_config()
-    
+
     # 1. Update Deployment (or just restart if no changes)
     # We'll use the provided image and port to ensure it matches intent
     try:
@@ -450,7 +547,7 @@ async def redeploy_service_endpoint(service_name: str, req: DeployRequest):
         apps_v1 = client.AppsV1Api()
         try:
             deployment = apps_v1.read_namespaced_deployment(name=service_name, namespace="user-services")
-            
+
             # Update image if changed
             if deployment.spec.template.spec.containers[0].image != req.docker_image:
                 deployment.spec.template.spec.containers[0].image = req.docker_image
@@ -524,7 +621,7 @@ async def redeploy_service_endpoint(service_name: str, req: DeployRequest):
 
     # 3. Update Registry
     public_url = f"http://{GATEWAY_HOST}:{GATEWAY_PORT}/{service_name}"
-    
+
     info = ServiceInfo(
         service_name=service_name,
         docker_image=req.docker_image,
@@ -783,7 +880,7 @@ async def list_services():
         port = container.ports[0].container_port if container.ports else 0
 
         public_url = f"http://{GATEWAY_HOST}:{GATEWAY_PORT}/{name}"
-        
+
         # Determine real status from K8s state
         desired_replicas = dep.spec.replicas if dep.spec.replicas is not None else 1
         ready_replicas = dep.status.ready_replicas or 0
@@ -860,7 +957,7 @@ async def delete_service_endpoint(service_name: str):
             logger.info(f"Deregistered route from gateway for {service_name}")
     except Exception as e:
         logger.warning(f"Gateway deregistration failed: {e}")
-    
+
     # 2. Delete Kubernetes deployment
     try:
         delete_deployment(service_name)
@@ -878,7 +975,7 @@ async def delete_service_endpoint(service_name: str):
     # 4. Remove from in-memory registry
     if service_name in deployed_services:
         del deployed_services[service_name]
-    
+
     logger.info(f"Service '{service_name}' deleted successfully")
     return {"message": f"Service '{service_name}' deleted successfully"}
 
@@ -891,9 +988,9 @@ async def scan_service(service_name: str):
         config.load_incluster_config()
     except config.ConfigException:
         config.load_kube_config()
-    
+
     apps_v1 = client.AppsV1Api()
-    
+
     # Check if deployment exists in user-services namespace
     try:
         deployment = apps_v1.read_namespaced_deployment(name=service_name, namespace="user-services")
@@ -903,12 +1000,12 @@ async def scan_service(service_name: str):
         if e.status == 404:
             raise HTTPException(status_code=404, detail=f"Service '{service_name}' not found")
         raise HTTPException(status_code=500, detail=f"Error querying service: {str(e)}")
-    
+
     # Build FQDN target URL for cross-namespace scanning
     target_url = f"http://{service_name}-service.user-services.svc.cluster.local:{container_port}"
-    
+
     logger.info(f"Proxying scan request to nikto-service for {service_name} at {target_url}")
-    
+
     # Forward to nikto-service
     try:
         async with httpx.AsyncClient(timeout=180.0) as http_client:
@@ -921,17 +1018,17 @@ async def scan_service(service_name: str):
             )
             response.raise_for_status()
             result = response.json()
-        
+
         # Update deployed_services if exists
         if service_name in deployed_services:
             deployed_services[service_name].scan_status = result.get('scan_status', 'completed')
             deployed_services[service_name].last_scan = result.get('started_at')
             deployed_services[service_name].vulnerability_count = result.get('total_findings', 0)
-        
+
         logger.info(f"Scan completed for {service_name}: {result.get('total_findings', 0)} findings")
-        
+
         return result
-    
+
     except httpx.HTTPStatusError as e:
         logger.error(f"Nikto service error: {e}")
         raise HTTPException(status_code=e.response.status_code, detail=str(e))
@@ -948,12 +1045,12 @@ async def get_scan_results(service_name: str):
         config.load_incluster_config()
     except config.ConfigException:
         config.load_kube_config()
-    
+
     # Call nikto-service to get scan results
     try:
         async with httpx.AsyncClient(timeout=5.0) as http_client:
             resp = await http_client.get(f"{NIKTO_SERVICE_URL}/scan/service/{service_name}")
-            
+
             if resp.status_code == 404:
                 return ScanResult(
                     service_name=service_name,
@@ -965,10 +1062,10 @@ async def get_scan_results(service_name: str):
                     scan_duration=0.0,
                     error=None
                 )
-            
+
             resp.raise_for_status()
             return resp.json()
-            
+
     except Exception as e:
         logger.error(f"Failed to fetch scan results: {e}")
         # Return error state or not_scanned
@@ -989,7 +1086,7 @@ async def set_rate_limit(service_name: str, rl_config: RateLimitConfig):
     """Set rate limit configuration."""
     if not redis_client:
         raise HTTPException(503, "Redis unavailable")
-        
+
     key = f"config:ratelimit:{service_name}"
     try:
         redis_client.set(key, rl_config.model_dump_json())
@@ -1005,7 +1102,7 @@ async def get_rate_limit(service_name: str):
     """Get rate limit configuration."""
     if not redis_client:
         return RateLimitConfig()
-        
+
     key = f"config:ratelimit:{service_name}"
     try:
         data = redis_client.get(key)
@@ -1057,7 +1154,7 @@ async def get_service_apis(service_name: str):
         config.load_incluster_config()
     except config.ConfigException:
         config.load_kube_config()
-    
+
     # Get service port
     try:
         core_v1 = client.CoreV1Api()
@@ -1070,9 +1167,9 @@ async def get_service_apis(service_name: str):
 
     # API Discovery Logic (Decoupled from Nikto)
     paths = [
-        "/openapi.json", 
-        "/swagger.json", 
-        "/api/openapi.json", 
+        "/openapi.json",
+        "/swagger.json",
+        "/api/openapi.json",
         "/v1/openapi.json",
         "/docs/openapi.json"
     ]
@@ -1086,7 +1183,7 @@ async def get_service_apis(service_name: str):
                     url = f"{target_url.rstrip('/')}{path}"
                     logger.info(f"Probing {url} for OpenAPI spec...")
                     resp = await http_client.get(url)
-                    
+
                     if resp.status_code == 200:
                         try:
                             data = resp.json()
@@ -1094,14 +1191,14 @@ async def get_service_apis(service_name: str):
                                 version = data.get("openapi") or data.get("swagger")
                                 logger.info(f"Found OpenAPI {version} at {path}")
                                 found_data = {
-                                    "spec_path": path, 
-                                    "type": "openapi", 
+                                    "spec_path": path,
+                                    "type": "openapi",
                                     "version": version,
                                     "status": "found",
                                     "spec_content": data,
                                     "public_url": f"/{service_name}{path}"
                                 }
-                                break 
+                                break
                         except json.JSONDecodeError:
                             continue
                 except Exception as e:
@@ -1224,6 +1321,101 @@ async def clear_waf_events():
     except Exception as e:
         logger.error(f"Failed to clear WAF events: {e}")
         raise HTTPException(status_code=502, detail=f"Gateway unreachable: {e}")
+
+
+@app.get("/services/{service_name}/proxy-url")
+async def get_service_proxy_url(service_name: str):
+    """Get external proxy URL config for a service."""
+    base_url = ""
+    source = "none"
+
+    if redis_client:
+        try:
+            base_url = (redis_client.get(f"config:proxyurl:{service_name}") or "").strip().rstrip("/")
+            if base_url:
+                source = "service"
+        except Exception as e:
+            logger.warning(f"Failed to read proxy URL config for {service_name}: {e}")
+
+    if not base_url and DEFAULT_PROXY_BASE_URL:
+        base_url = DEFAULT_PROXY_BASE_URL
+        source = "default"
+
+    proxy_url = f"{base_url}/{service_name}" if base_url else None
+
+    return {
+        "service_name": service_name,
+        "base_url": base_url or None,
+        "proxy_url": proxy_url,
+        "source": source,
+    }
+
+
+@app.post("/services/{service_name}/proxy-url")
+async def set_service_proxy_url(service_name: str, payload: ServiceProxyConfig):
+    """Set external proxy base URL for a service and return generated proxy URL."""
+    base_url = _normalize_proxy_base_url(payload.base_url)
+
+    if not redis_client:
+        raise HTTPException(status_code=503, detail="Redis unavailable")
+
+    try:
+        redis_client.set(f"config:proxyurl:{service_name}", base_url)
+    except Exception as e:
+        logger.error(f"Failed to save proxy URL config for {service_name}: {e}")
+        raise HTTPException(status_code=500, detail="Failed to save proxy config")
+
+    return {
+        "service_name": service_name,
+        "base_url": base_url,
+        "proxy_url": build_proxy_url(base_url, service_name),
+        "source": "service",
+    }
+
+
+@app.delete("/services/{service_name}/proxy-url")
+async def clear_service_proxy_url(service_name: str):
+    """Clear service-specific proxy URL config and fallback to default if configured."""
+    if not redis_client:
+        raise HTTPException(status_code=503, detail="Redis unavailable")
+
+    try:
+        redis_client.delete(f"config:proxyurl:{service_name}")
+    except Exception as e:
+        logger.error(f"Failed to clear proxy URL config for {service_name}: {e}")
+        raise HTTPException(status_code=500, detail="Failed to clear proxy config")
+
+    base_url = DEFAULT_PROXY_BASE_URL or None
+    proxy_url = f"{DEFAULT_PROXY_BASE_URL}/{service_name}" if DEFAULT_PROXY_BASE_URL else None
+
+    return {
+        "service_name": service_name,
+        "base_url": base_url,
+        "proxy_url": proxy_url,
+        "source": "default" if DEFAULT_PROXY_BASE_URL else "none",
+    }
+
+
+@app.post("/cloudflare/tunnel/start")
+async def start_cloudflare_tunnel():
+    """Start cloudflared tunnel (if needed) and return its public URL."""
+    url = _ensure_cloudflared_tunnel()
+    return {
+        "status": "running",
+        "url": url,
+        "target_url": CLOUDFLARED_TARGET_URL,
+    }
+
+
+@app.get("/cloudflare/tunnel/status")
+async def cloudflare_tunnel_status():
+    """Get current cloudflared tunnel status."""
+    running = _cloudflared_process is not None and _cloudflared_process.poll() is None
+    return {
+        "running": running,
+        "url": _cloudflared_public_url if running else None,
+        "target_url": CLOUDFLARED_TARGET_URL,
+    }
 
 
 @app.get("/health")

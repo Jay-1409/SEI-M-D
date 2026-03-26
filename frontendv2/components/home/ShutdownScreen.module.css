@@ -1,0 +1,46 @@
+.componentScope {
+    display: contents;
+}
+
+/* Full-screen shutdown screen */
+.componentScope :global(.shutdown-screen) {
+    position: fixed;
+    inset: 0;
+    background: var(--bg-primary);
+    z-index: 10000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+}
+
+.componentScope :global(.shutdown-screen.active) {
+    display: flex;
+}
+
+.componentScope :global(.shutdown-icon) {
+    font-size: 64px;
+    animation: pulseIcon 1.2s ease-in-out infinite;
+}
+
+.componentScope :global(.shutdown-screen h2) {
+    font-size: 30px;
+    color: var(--text-primary);
+}
+
+.componentScope :global(.shutdown-screen p) {
+    color: var(--text-secondary);
+}
+
+@keyframes pulseIcon {
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.08);
+    }
+}

@@ -32,6 +32,10 @@ spec:
               value: "30080"
             - name: GATEWAY_REGISTER_URL
               value: "http://gateway-service:8080"
+            - name: CLOUDFLARED_BIN
+              value: "cloudflared"
+            - name: CLOUDFLARED_TARGET_URL
+              value: "http://gateway-service:8080"
           volumeMounts:
             - name: docker-socket
               mountPath: /var/run/docker.sock

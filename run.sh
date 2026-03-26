@@ -2,7 +2,7 @@
 
 # ==========================================
 # Secure Microservice Deployer — One-Command Launcher
-# 
+#
 # Usage:  ./run.sh          (build + deploy + stream logs)
 #         ./run.sh --stop    (graceful shutdown)
 #
@@ -112,7 +112,7 @@ if [[ $BUILD_IMAGES -eq 1 ]]; then
     PID3=$!
     docker build -t nikto-service:latest      ./backend/nikto     -q &
     PID4=$!
-    docker build -t deployer-frontend:latest  ./frontend           -q &
+    docker build -t deployer-frontend:latest  ./frontendv2         -q &
     PID5=$!
     docker build -t trivy-service:latest      ./backend/trivy     -q &
     PID6=$!

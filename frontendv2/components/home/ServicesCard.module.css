@@ -1,0 +1,135 @@
+.componentScope {
+    display: contents;
+}
+
+/* Pastel Crayon Themes */
+.componentScope :global(.list-theme) {
+    background:
+        linear-gradient(var(--card-bg), var(--card-bg)),
+        linear-gradient(
+            135deg,
+            rgba(255, 243, 214, 0.5),
+            rgba(255, 224, 204, 0.5)
+        );
+}
+
+/* Dark Mode Theme Overrides */
+.componentScope :global([data-theme="dark"] .list-theme) {
+    background:
+        linear-gradient(var(--card-bg), var(--card-bg)),
+        linear-gradient(135deg, rgba(255, 243, 214, 0.1), rgba(255, 224, 204, 0.1));
+}
+
+/* TABLE STYLES */
+.componentScope :global(#servicesContainer) {
+    padding: 12px 16px 16px;
+}
+
+.componentScope :global(.services-table) {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 9px;
+}
+
+.componentScope :global(.services-table thead th) {
+    text-align: left;
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    padding: 0 12px 6px;
+}
+
+.componentScope :global(.service-row) {
+    background: rgba(255, 255, 255, 0.45);
+    border-radius: 14px;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    box-shadow: var(--table-row-shadow);
+}
+
+.componentScope :global([data-theme="dark"] .service-row) {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.componentScope :global(.service-row td) {
+    padding: 14px 12px;
+    border-top: 1px solid rgba(255, 255, 255, 0.4);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.4);
+    font-size: 13px;
+    vertical-align: middle;
+}
+
+.componentScope :global(.service-row td:first-child) {
+    border-left: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 14px 0 0 14px;
+}
+
+.componentScope :global(.service-row td:last-child) {
+    border-right: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 0 14px 14px 0;
+}
+
+.componentScope :global(.service-row:hover) {
+    transform: translateY(-2px);
+    background: var(--table-row-hover);
+    box-shadow: var(--shadow);
+}
+
+.componentScope :global(.service-name) {
+    font-weight: 700;
+    color: var(--text-primary);
+    margin-bottom: 3px;
+}
+
+.componentScope :global(.service-meta) {
+    font-family: "JetBrains Mono", monospace;
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+/* BADGES & URLS */
+.componentScope :global(.badge) {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.componentScope :global(.badge.deployed),
+.componentScope :global(.badge.running) {
+    background: rgba(140, 200, 168, 0.18);
+    color: #4a8b64;
+}
+
+.componentScope :global(.external-link) {
+    color: #9b7ba8;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 12px;
+}
+
+.componentScope :global(.external-link:hover) {
+    text-decoration: underline;
+}
+
+.componentScope :global(.action-btn) {
+    background: rgba(180, 142, 194, 0.2);
+    color: #8e6a9d;
+    border: 1px solid rgba(180, 142, 194, 0.35);
+    padding: 7px 11px;
+    border-radius: 10px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.componentScope :global(.action-btn:hover) {
+    background: rgba(180, 142, 194, 0.3);
+    color: #7f5d8d;
+}

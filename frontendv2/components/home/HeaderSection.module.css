@@ -1,0 +1,140 @@
+.componentScope {
+    display: contents;
+}
+
+/* Header */
+.componentScope :global(header) {
+    text-align: center;
+    margin-bottom: 30px;
+    animation: headerSlideDown 0.8s ease;
+    position: relative;
+    padding: 0 60px;
+}
+
+.componentScope :global(header::before) {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 320px;
+    height: 130px;
+    background: radial-gradient(
+        ellipse,
+        rgba(228, 212, 244, 0.35) 0%,
+        rgba(255, 243, 214, 0.2) 40%,
+        transparent 70%
+    );
+    filter: blur(35px);
+    z-index: -1;
+    animation: pulse 4s ease-in-out infinite;
+    border-radius: 50%;
+}
+
+.componentScope :global(header::after) {
+    content: "";
+    position: absolute;
+    top: 25%;
+    right: 28%;
+    width: 16px;
+    height: 16px;
+    background: rgba(255, 224, 204, 0.7);
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(255, 224, 204, 0.6);
+    animation: float 6s ease-in-out infinite;
+}
+
+.componentScope :global(.logo-container) {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 14px;
+}
+
+.componentScope :global(.logo-icon) {
+    font-size: 60px;
+    display: block;
+    filter: drop-shadow(0 8px 20px rgba(201, 160, 208, 0.25));
+    animation:
+        float 4s ease-in-out infinite,
+        pulse 2s ease-in-out infinite;
+    position: relative;
+    z-index: 2;
+}
+
+.componentScope :global(.logo-glow) {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90px;
+    height: 90px;
+    background: radial-gradient(
+        circle,
+        rgba(201, 160, 208, 0.35) 0%,
+        rgba(228, 212, 244, 0.2) 40%,
+        transparent 70%
+    );
+    border-radius: 50%;
+    filter: blur(20px);
+    animation: pulse 3s ease-in-out infinite;
+}
+
+.componentScope :global(header h1) {
+    font-size: 39px;
+    font-weight: 700;
+    letter-spacing: -1.2px;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+    position: relative;
+}
+
+.componentScope :global(header p) {
+    color: var(--text-secondary);
+    font-size: 16px;
+    max-width: 520px;
+    margin: 0 auto;
+    line-height: 1.6;
+    font-weight: 400;
+}
+
+@keyframes headerSlideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0%,
+    100% {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 0.65;
+    }
+
+    50% {
+        transform: translate(-50%, -50%) scale(1.12);
+        opacity: 1;
+    }
+}
+
+@keyframes float {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+@media (max-width: 800px) {
+    .componentScope :global(header h1) {
+        font-size: 28px;
+    }
+}

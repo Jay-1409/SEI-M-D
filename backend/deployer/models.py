@@ -47,6 +47,11 @@ class RateLimitConfig(BaseModel):
     window: int = 60
     routes: List[RouteLimit] = []
 
+class ServiceProxyConfig(BaseModel):
+    base_url: str
+
+
+
 class ServiceInfo(BaseModel):
     service_name: str
     docker_image: str

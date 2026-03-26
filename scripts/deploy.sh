@@ -45,7 +45,7 @@ echo "  → Building deployer-gateway:latest"
 docker build -t deployer-gateway:latest ./backend/gateway -q
 
 echo "  → Building deployer-frontend:latest"
-docker build -t deployer-frontend:latest ./frontend -q
+docker build -t deployer-frontend:latest ./frontendv2 -q
 
 echo ""
 echo -e "${GREEN}✓${NC} All images built successfully"

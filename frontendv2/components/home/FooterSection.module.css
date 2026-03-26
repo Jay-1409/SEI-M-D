@@ -1,0 +1,11 @@
+.componentScope {
+    display: contents;
+}
+
+.componentScope :global(footer) {
+    margin-top: 26px;
+    text-align: center;
+    color: var(--text-muted);
+    font-size: 12px;
+    letter-spacing: 0.35px;
+}

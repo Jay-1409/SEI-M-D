@@ -69,7 +69,7 @@ docker build -t deployer-backend:latest  ./backend/deployer
 docker build -t image-service:latest     ./backend/image
 docker build -t nikto-service:latest     ./backend/nikto
 docker build -t deployer-gateway:latest  ./backend/gateway
-docker build -t deployer-frontend:latest ./frontend
+docker build -t deployer-frontend:latest ./frontendv2
 ```
 
 ### 3. Apply Kubernetes Manifests

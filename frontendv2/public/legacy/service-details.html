@@ -739,6 +739,16 @@
             }
 
             /* ── SECURITY TAB STYLES ────────────────────────── */
+            .security-panels {
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 20px;
+            }
+            @media (max-width: 1200px) {
+                .security-panels {
+                    grid-template-columns: 1fr;
+                }
+            }
             .scan-header {
                 display: flex;
                 justify-content: space-between;
@@ -1654,141 +1664,293 @@
 
                 <!-- TAB 3: SECURITY (Red Theme) -->
                 <div id="tab-security" class="tab-content">
-                    <div class="card security-theme">
-                        <!-- Header -->
-                        <div class="scan-header">
-                            <div class="scan-header-title">
-                                <h2>🛡️ Vulnerability Scanner</h2>
-                                <p>
-                                    Nikto-powered security analysis of your
-                                    running service
-                                </p>
+                    <div class="security-panels">
+                        <div class="card security-theme">
+                            <!-- Header -->
+                            <div class="scan-header">
+                                <div class="scan-header-title">
+                                    <h2>🛡️ Vulnerability Scanner</h2>
+                                    <p>
+                                        Nikto-powered security analysis of your
+                                        running service
+                                    </p>
+                                </div>
+                                <button
+                                    class="scan-btn"
+                                    id="scanTriggerBtn"
+                                    onclick="triggerScan()"
+                                >
+                                    <svg
+                                        width="16"
+                                        height="16"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    >
+                                        <circle cx="12" cy="12" r="10" />
+                                        <polygon
+                                            points="10 8 16 12 10 16 10 8"
+                                        />
+                                    </svg>
+                                    Run Scan
+                                </button>
                             </div>
-                            <button
-                                class="scan-btn"
-                                id="scanTriggerBtn"
-                                onclick="triggerScan()"
+
+                            <!-- Progress (shown during scan) -->
+                            <div class="scan-progress" id="scanProgress">
+                                <div class="scan-progress-header">
+                                    <div class="scan-progress-label">
+                                        <span
+                                            class="spinner"
+                                            style="
+                                                width: 16px;
+                                                height: 16px;
+                                                border-width: 2px;
+                                                color: #e8707e;
+                                            "
+                                        ></span>
+                                        Scanning in progress…
+                                    </div>
+                                    <div
+                                        class="scan-progress-time"
+                                        id="scanElapsed"
+                                    >
+                                        0:00
+                                    </div>
+                                </div>
+                                <div class="scan-progress-bar">
+                                    <div class="scan-progress-fill"></div>
+                                </div>
+                            </div>
+
+                            <!-- Summary stats -->
+                            <div
+                                class="scan-summary"
+                                id="scanSummary"
+                                style="display: none"
                             >
-                                <svg
-                                    width="16"
-                                    height="16"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="currentColor"
-                                    stroke-width="2.5"
-                                    stroke-linecap="round"
-                                    stroke-linejoin="round"
-                                >
-                                    <circle cx="12" cy="12" r="10" />
-                                    <polygon points="10 8 16 12 10 16 10 8" />
-                                </svg>
-                                Run Scan
-                            </button>
-                        </div>
+                                <div class="scan-stat">
+                                    <div class="scan-stat-value" id="statTotal">
+                                        0
+                                    </div>
+                                    <div class="scan-stat-label">Findings</div>
+                                </div>
+                                <div class="scan-stat">
+                                    <div
+                                        class="scan-stat-value"
+                                        id="statCritical"
+                                        style="color: #c53030"
+                                    >
+                                        0
+                                    </div>
+                                    <div class="scan-stat-label">
+                                        Critical / High
+                                    </div>
+                                </div>
+                                <div class="scan-stat">
+                                    <div
+                                        class="scan-stat-value"
+                                        id="statMedium"
+                                        style="color: #b7791f"
+                                    >
+                                        0
+                                    </div>
+                                    <div class="scan-stat-label">Medium</div>
+                                </div>
+                                <div class="scan-stat">
+                                    <div
+                                        class="scan-stat-value"
+                                        id="statLow"
+                                        style="color: #276749"
+                                    >
+                                        0
+                                    </div>
+                                    <div class="scan-stat-label">
+                                        Low / Info
+                                    </div>
+                                </div>
+                            </div>
 
-                        <!-- Progress (shown during scan) -->
-                        <div class="scan-progress" id="scanProgress">
-                            <div class="scan-progress-header">
-                                <div class="scan-progress-label">
-                                    <span
-                                        class="spinner"
-                                        style="
-                                            width: 16px;
-                                            height: 16px;
-                                            border-width: 2px;
-                                            color: #e8707e;
-                                        "
-                                    ></span>
-                                    Scanning in progress…
-                                </div>
-                                <div
-                                    class="scan-progress-time"
-                                    id="scanElapsed"
-                                >
-                                    0:00
+                            <!-- Vulnerability list -->
+                            <div id="vulnList">
+                                <div class="scan-empty">
+                                    <div class="scan-empty-icon">🔍</div>
+                                    <div class="scan-empty-title">
+                                        No scan results yet
+                                    </div>
+                                    <div class="scan-empty-sub">
+                                        Click "Run Scan" to start a
+                                        vulnerability assessment
+                                    </div>
                                 </div>
                             </div>
-                            <div class="scan-progress-bar">
-                                <div class="scan-progress-fill"></div>
-                            </div>
-                        </div>
 
-                        <!-- Summary stats -->
-                        <div
-                            class="scan-summary"
-                            id="scanSummary"
-                            style="display: none"
-                        >
-                            <div class="scan-stat">
-                                <div class="scan-stat-value" id="statTotal">
-                                    0
+                            <!-- Scan metadata footer -->
+                            <div
+                                class="scan-meta"
+                                id="scanMeta"
+                                style="display: none"
+                            >
+                                <div class="scan-meta-item">
+                                    🕐 Duration:
+                                    <strong id="metaDuration">—</strong>
                                 </div>
-                                <div class="scan-stat-label">Findings</div>
-                            </div>
-                            <div class="scan-stat">
-                                <div
-                                    class="scan-stat-value"
-                                    id="statCritical"
-                                    style="color: #c53030"
-                                >
-                                    0
+                                <div class="scan-meta-item">
+                                    📅 Completed:
+                                    <strong id="metaCompleted">—</strong>
                                 </div>
-                                <div class="scan-stat-label">
-                                    Critical / High
-                                </div>
-                            </div>
-                            <div class="scan-stat">
-                                <div
-                                    class="scan-stat-value"
-                                    id="statMedium"
-                                    style="color: #b7791f"
-                                >
-                                    0
-                                </div>
-                                <div class="scan-stat-label">Medium</div>
-                            </div>
-                            <div class="scan-stat">
-                                <div
-                                    class="scan-stat-value"
-                                    id="statLow"
-                                    style="color: #276749"
-                                >
-                                    0
-                                </div>
-                                <div class="scan-stat-label">Low / Info</div>
-                            </div>
-                        </div>
-
-                        <!-- Vulnerability list -->
-                        <div id="vulnList">
-                            <div class="scan-empty">
-                                <div class="scan-empty-icon">🔍</div>
-                                <div class="scan-empty-title">
-                                    No scan results yet
-                                </div>
-                                <div class="scan-empty-sub">
-                                    Click "Run Scan" to start a vulnerability
-                                    assessment
+                                <div class="scan-meta-item">
+                                    🎯 Target:
+                                    <strong id="metaTarget">—</strong>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Scan metadata footer -->
-                        <div
-                            class="scan-meta"
-                            id="scanMeta"
-                            style="display: none"
-                        >
-                            <div class="scan-meta-item">
-                                🕐 Duration:
-                                <strong id="metaDuration">—</strong>
+                        <div class="card security-theme">
+                            <!-- Header -->
+                            <div class="scan-header">
+                                <div class="scan-header-title">
+                                    <h2>🛡️ Trivy Image Scanner</h2>
+                                    <p>
+                                        Trivy-powered security analysis of this
+                                        service image
+                                    </p>
+                                </div>
+                                <button
+                                    class="scan-btn"
+                                    id="trivyScanTriggerBtn"
+                                    onclick="triggerTrivyScan()"
+                                >
+                                    <svg
+                                        width="16"
+                                        height="16"
+                                        viewBox="0 0 24 24"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        stroke-width="2.5"
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                    >
+                                        <circle cx="12" cy="12" r="10" />
+                                        <polygon
+                                            points="10 8 16 12 10 16 10 8"
+                                        />
+                                    </svg>
+                                    Run Trivy
+                                </button>
                             </div>
-                            <div class="scan-meta-item">
-                                📅 Completed:
-                                <strong id="metaCompleted">—</strong>
+
+                            <!-- Progress -->
+                            <div class="scan-progress" id="trivyScanProgress">
+                                <div class="scan-progress-header">
+                                    <div class="scan-progress-label">
+                                        <span
+                                            class="spinner"
+                                            style="
+                                                width: 16px;
+                                                height: 16px;
+                                                border-width: 2px;
+                                                color: #e8707e;
+                                            "
+                                        ></span>
+                                        Scanning image in progress…
+                                    </div>
+                                    <div
+                                        class="scan-progress-time"
+                                        id="trivyScanElapsed"
+                                    >
+                                        0:00
+                                    </div>
+                                </div>
+                                <div class="scan-progress-bar">
+                                    <div class="scan-progress-fill"></div>
+                                </div>
                             </div>
-                            <div class="scan-meta-item">
-                                🎯 Target: <strong id="metaTarget">—</strong>
+
+                            <!-- Summary stats -->
+                            <div
+                                class="scan-summary"
+                                id="trivyScanSummary"
+                                style="display: none"
+                            >
+                                <div class="scan-stat">
+                                    <div
+                                        class="scan-stat-value"
+                                        id="trivyStatTotal"
+                                    >
+                                        0
+                                    </div>
+                                    <div class="scan-stat-label">Findings</div>
+                                </div>
+                                <div class="scan-stat">
+                                    <div
+                                        class="scan-stat-value"
+                                        id="trivyStatCritical"
+                                        style="color: #c53030"
+                                    >
+                                        0
+                                    </div>
+                                    <div class="scan-stat-label">Critical</div>
+                                </div>
+                                <div class="scan-stat">
+                                    <div
+                                        class="scan-stat-value"
+                                        id="trivyStatHigh"
+                                        style="color: #b7791f"
+                                    >
+                                        0
+                                    </div>
+                                    <div class="scan-stat-label">High</div>
+                                </div>
+                                <div class="scan-stat">
+                                    <div
+                                        class="scan-stat-value"
+                                        id="trivyStatOther"
+                                        style="color: #276749"
+                                    >
+                                        0
+                                    </div>
+                                    <div class="scan-stat-label">
+                                        Medium / Low / Other
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Vulnerability list -->
+                            <div id="trivyVulnList">
+                                <div class="scan-empty">
+                                    <div class="scan-empty-icon">🧪</div>
+                                    <div class="scan-empty-title">
+                                        No Trivy scan results yet
+                                    </div>
+                                    <div class="scan-empty-sub">
+                                        Click "Run Trivy" to scan this service
+                                        image
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Metadata -->
+                            <div
+                                class="scan-meta"
+                                id="trivyScanMeta"
+                                style="display: none"
+                            >
+                                <div class="scan-meta-item">
+                                    🕐 Duration:
+                                    <strong id="trivyMetaDuration">—</strong>
+                                </div>
+                                <div class="scan-meta-item">
+                                    📅 Completed:
+                                    <strong id="trivyMetaCompleted">—</strong>
+                                </div>
+                                <div class="scan-meta-item">
+                                    🧱 Image:
+                                    <strong id="trivyMetaImage">—</strong>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -2995,7 +3157,10 @@
                         SERVICE_NAME;
                     loadServiceProxyUrl();
                 }
-                if (tabId === "security") fetchScanResults();
+                if (tabId === "security") {
+                    fetchScanResults();
+                    fetchTrivyScanResults();
+                }
                 if (tabId === "firewall") {
                     loadWafConfig();
                     loadWafStats();
@@ -3046,6 +3211,7 @@
                     loadSwagger();
                     loadRateLimit(); // Ensure config is loaded for Grid
                     fetchScanResults();
+                    fetchTrivyScanResults();
                     loadServiceProxyUrl();
                 } catch (e) {
                     console.error(e);
@@ -3809,6 +3975,9 @@
             // ── SCAN UTILS ──────────────────────────────────────
             let _scanTimer = null;
             let _scanStart = null;
+            let _trivyScanTimer = null;
+            let _trivyScanStart = null;
+            let _trivyPollInterval = null;
 
             async function triggerScan() {
                 const btn = document.getElementById("scanTriggerBtn");
@@ -3903,6 +4072,15 @@
                     /(https?:\/\/[^\s,)]+)/g,
                     '<a href="$1" target="_blank" rel="noopener">$1</a>',
                 );
+            }
+
+            function _escapeHtml(text) {
+                return String(text || "")
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#39;");
             }
 
             function renderScanResults(result) {
@@ -4014,6 +4192,314 @@
                         document.getElementById("metaTarget").textContent =
                             u.length > 50 ? u.substring(0, 47) + "…" : u;
                     }
+                }
+            }
+
+            async function triggerTrivyScan() {
+                const btn = document.getElementById("trivyScanTriggerBtn");
+                if (!btn) return;
+
+                btn.disabled = true;
+                btn.innerHTML = `<span class="spinner" style="width:14px;height:14px;border-width:2px;color:white;"></span> Scanning…`;
+
+                const progressEl = document.getElementById("trivyScanProgress");
+                if (progressEl) progressEl.classList.add("active");
+
+                clearInterval(_trivyScanTimer);
+                _trivyScanStart = Date.now();
+                _trivyScanTimer = setInterval(() => {
+                    const elapsed = Math.floor(
+                        (Date.now() - _trivyScanStart) / 1000,
+                    );
+                    const m = Math.floor(elapsed / 60);
+                    const s = String(elapsed % 60).padStart(2, "0");
+                    const elapsedEl =
+                        document.getElementById("trivyScanElapsed");
+                    if (elapsedEl) elapsedEl.textContent = `${m}:${s}`;
+                }, 1000);
+
+                try {
+                    const resp = await fetch(
+                        `${API_BASE}/services/${SERVICE_NAME}/trivy-scan`,
+                        { method: "POST" },
+                    );
+                    if (!resp.ok) {
+                        let message = "Failed to start Trivy scan";
+                        try {
+                            const err = await resp.json();
+                            if (err.detail) message = err.detail;
+                        } catch (e) {}
+                        throw new Error(message);
+                    }
+
+                    const result = await resp.json();
+                    renderTrivyScanResults(result);
+                    pollTrivyScan();
+                } catch (e) {
+                    _stopTrivyScanUI();
+                    alert(e.message || "Failed to start Trivy scan");
+                }
+            }
+
+            function _stopTrivyScanUI() {
+                clearInterval(_trivyScanTimer);
+                _trivyScanTimer = null;
+
+                if (_trivyPollInterval) {
+                    clearInterval(_trivyPollInterval);
+                    _trivyPollInterval = null;
+                }
+
+                const btn = document.getElementById("trivyScanTriggerBtn");
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polygon points="10 8 16 12 10 16 10 8"/></svg> Run Trivy`;
+                }
+
+                const progressEl = document.getElementById("trivyScanProgress");
+                if (progressEl) progressEl.classList.remove("active");
+            }
+
+            async function fetchTrivyScanResults() {
+                try {
+                    const resp = await fetch(
+                        `${API_BASE}/services/${SERVICE_NAME}/trivy-scan`,
+                    );
+                    if (!resp.ok) return;
+                    const result = await resp.json();
+                    renderTrivyScanResults(result);
+                    if (
+                        (result.scan_status || "").toLowerCase() === "running"
+                    ) {
+                        pollTrivyScan();
+                    }
+                } catch (e) {
+                    console.error("Failed to fetch Trivy scan results", e);
+                }
+            }
+
+            function pollTrivyScan() {
+                if (_trivyPollInterval) clearInterval(_trivyPollInterval);
+
+                _trivyPollInterval = setInterval(async () => {
+                    try {
+                        const resp = await fetch(
+                            `${API_BASE}/services/${SERVICE_NAME}/trivy-scan`,
+                        );
+                        if (!resp.ok)
+                            throw new Error("Failed to poll Trivy scan");
+                        const result = await resp.json();
+                        renderTrivyScanResults(result);
+                        if (
+                            (result.scan_status || "").toLowerCase() !==
+                            "running"
+                        ) {
+                            _stopTrivyScanUI();
+                        }
+                    } catch (e) {
+                        _stopTrivyScanUI();
+                    }
+                }, 3000);
+            }
+
+            function _trivySevOrder(s) {
+                return (
+                    {
+                        critical: 0,
+                        high: 1,
+                        medium: 2,
+                        low: 3,
+                        unknown: 4,
+                    }[s] ?? 5
+                );
+            }
+
+            function _trivySevIcon(s) {
+                return (
+                    {
+                        critical: "🔴",
+                        high: "🟠",
+                        medium: "🟡",
+                        low: "🔵",
+                        unknown: "⚪",
+                    }[s] ?? "⚪"
+                );
+            }
+
+            function renderTrivyScanResults(result) {
+                const list = document.getElementById("trivyVulnList");
+                const summary = document.getElementById("trivyScanSummary");
+                const meta = document.getElementById("trivyScanMeta");
+                const progressEl = document.getElementById("trivyScanProgress");
+                if (!list || !summary || !meta) return;
+
+                const scanStatus = (result.scan_status || "unscanned")
+                    .toString()
+                    .toLowerCase();
+
+                if (scanStatus === "running") {
+                    if (progressEl) progressEl.classList.add("active");
+                    return;
+                }
+
+                if (progressEl) progressEl.classList.remove("active");
+
+                const vulns = Array.isArray(result.vulnerabilities)
+                    ? result.vulnerabilities
+                    : [];
+
+                if (scanStatus === "failed") {
+                    summary.style.display = "none";
+                    const errMsg = _escapeHtml(
+                        result.error || "Trivy scan failed",
+                    );
+                    list.innerHTML = `
+                    <div class="scan-empty">
+                        <div class="scan-empty-icon">❌</div>
+                        <div class="scan-empty-title">Trivy Scan Failed</div>
+                        <div class="scan-empty-sub">${errMsg}</div>
+                    </div>`;
+                } else if (vulns.length === 0) {
+                    summary.style.display = "none";
+                    if (scanStatus === "completed") {
+                        list.innerHTML = `
+                        <div class="scan-clean">
+                            <div class="scan-clean-icon">✅</div>
+                            <div class="scan-clean-title">All Clear — No Vulnerabilities Found</div>
+                            <div class="scan-clean-sub">Trivy found no image vulnerabilities in this scan run.</div>
+                        </div>`;
+                    } else {
+                        list.innerHTML = `
+                        <div class="scan-empty">
+                            <div class="scan-empty-icon">🧪</div>
+                            <div class="scan-empty-title">No Trivy scan results yet</div>
+                            <div class="scan-empty-sub">Click "Run Trivy" to scan this service image</div>
+                        </div>`;
+                    }
+                } else {
+                    const counts = {
+                        critical: 0,
+                        high: 0,
+                        medium: 0,
+                        low: 0,
+                        unknown: 0,
+                    };
+
+                    vulns.forEach((v) => {
+                        const sev = (v.severity || "unknown")
+                            .toString()
+                            .toLowerCase();
+                        counts[sev] = (counts[sev] || 0) + 1;
+                    });
+
+                    const total = Number(result.total_findings || vulns.length);
+                    const critical = Number(
+                        result.critical_findings || counts.critical || 0,
+                    );
+                    const high = Number(
+                        result.high_findings || counts.high || 0,
+                    );
+                    const other = Math.max(total - critical - high, 0);
+
+                    summary.style.display = "grid";
+                    document.getElementById("trivyStatTotal").textContent =
+                        total;
+                    document.getElementById("trivyStatCritical").textContent =
+                        critical;
+                    document.getElementById("trivyStatHigh").textContent = high;
+                    document.getElementById("trivyStatOther").textContent =
+                        other;
+
+                    const grouped = {};
+                    vulns.forEach((v) => {
+                        const sev = (v.severity || "unknown")
+                            .toString()
+                            .toLowerCase();
+                        if (!grouped[sev]) grouped[sev] = [];
+                        grouped[sev].push(v);
+                    });
+
+                    const orderedKeys = Object.keys(grouped).sort(
+                        (a, b) => _trivySevOrder(a) - _trivySevOrder(b),
+                    );
+
+                    let html = "";
+                    orderedKeys.forEach((sev) => {
+                        const items = grouped[sev];
+                        html += `<div class="sev-group">`;
+                        html += `<div class="sev-group-header">
+                            <span class="sev-badge ${sev}">${_trivySevIcon(sev)} ${sev}</span>
+                            <span class="sev-group-count">${items.length} finding${items.length > 1 ? "s" : ""}</span>
+                        </div>`;
+
+                        items.forEach((v, i) => {
+                            const safeId = _escapeHtml(v.id || "UNKNOWN");
+                            const safePkg = _escapeHtml(
+                                v.pkg_name || "UNKNOWN",
+                            );
+                            const safeInstalled = _escapeHtml(
+                                v.installed_version || "UNKNOWN",
+                            );
+                            const safeFixed = _escapeHtml(
+                                v.fixed_version || "Not fixed",
+                            );
+                            const safeTitle = _escapeHtml(
+                                v.title || "No title provided",
+                            );
+                            const safeDesc = _extractLinks(
+                                _escapeHtml(v.description || ""),
+                            );
+
+                            html += `<div class="vuln-card" id="trivy-vuln-${sev}-${i}" onclick="this.classList.toggle('open')">
+                                <div class="vuln-card-top">
+                                    <div><span class="vuln-card-id">${safeId}</span></div>
+                                    <svg class="vuln-card-chevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                                </div>
+                                <div class="vuln-card-desc"><strong>${safeTitle}</strong>${safeDesc ? `<br><span style="opacity:.85;">${safeDesc}</span>` : ""}</div>
+                                <div class="vuln-card-details">
+                                    <div class="vuln-detail-row"><span class="vuln-detail-label">Package</span><span class="vuln-detail-value">${safePkg}</span></div>
+                                    <div class="vuln-detail-row"><span class="vuln-detail-label">Installed</span><span class="vuln-detail-value">${safeInstalled}</span></div>
+                                    <div class="vuln-detail-row"><span class="vuln-detail-label">Fixed</span><span class="vuln-detail-value">${safeFixed}</span></div>
+                                </div>
+                            </div>`;
+                        });
+
+                        html += `</div>`;
+                    });
+
+                    list.innerHTML = html;
+                }
+
+                if (scanStatus === "completed" || scanStatus === "failed") {
+                    meta.style.display = "flex";
+                    const dur = Number(result.scan_duration || 0);
+                    document.getElementById("trivyMetaDuration").textContent =
+                        dur >= 60
+                            ? `${Math.floor(dur / 60)}m ${Math.round(dur % 60)}s`
+                            : `${Math.round(dur)}s`;
+
+                    if (result.completed_at) {
+                        const d = new Date(result.completed_at + "Z");
+                        document.getElementById(
+                            "trivyMetaCompleted",
+                        ).textContent = d.toLocaleString();
+                    } else {
+                        document.getElementById(
+                            "trivyMetaCompleted",
+                        ).textContent = "—";
+                    }
+
+                    const imageName =
+                        result.image_name ||
+                        (currentServiceInfo &&
+                            currentServiceInfo.docker_image) ||
+                        "—";
+                    document.getElementById("trivyMetaImage").textContent =
+                        imageName.length > 60
+                            ? imageName.substring(0, 57) + "…"
+                            : imageName;
+                } else {
+                    meta.style.display = "none";
                 }
             }
 
