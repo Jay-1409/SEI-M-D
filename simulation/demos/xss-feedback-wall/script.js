@@ -79,6 +79,79 @@ const elements = {
   timelineList: document.getElementById("timeline-list"),
 };
 
+function normalizeBaseUrl(value) {
+  return value.trim().replace(/\/+$/, "");
+}
+
+function normalizeRoutePath(value) {
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return "";
+  }
+  return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+}
+
+function inferServiceName(commentsRoute) {
+  const normalized = normalizeRoutePath(commentsRoute);
+  if (!normalized) {
+    return "";
+  }
+  const parts = normalized.split("/").filter(Boolean);
+  return parts[0] || "";
+}
+
+function buildCommentsUrl() {
+  const baseUrl = normalizeBaseUrl(state.liveConfig.gatewayBaseUrl);
+  const routePath = normalizeRoutePath(state.liveConfig.commentsRoute);
+  if (!baseUrl || !routePath) {
+    return "";
+  }
+  return `${baseUrl}${routePath}`;
+}
+
+function buildResetUrl() {
+  const baseUrl = normalizeBaseUrl(state.liveConfig.gatewayBaseUrl);
+  const commentsPath = normalizeRoutePath(state.liveConfig.commentsRoute);
+  if (!baseUrl || !commentsPath) {
+    return "";
+  }
+  // If commentsRoute is "/foo/comments", reset is usually "/foo/demo/reset"
+  const parts = commentsPath.split("/").filter(Boolean);
+  if (parts.length > 0) {
+    const baseRoute = "/" + parts.slice(0, -1).join("/");
+    return `${baseUrl}${baseRoute}/demo/reset`;
+  }
+  return "";
+}
+
+async function parseResponseBody(response) {
+  const text = await response.text();
+  if (!text) {
+    return null;
+  }
+  try {
+    return JSON.parse(text);
+  } catch (error) {
+    return text;
+  }
+}
+
+function summarizePayload(payload) {
+  if (payload == null) {
+    return "";
+  }
+  if (typeof payload === "string") {
+    return payload.trim();
+  }
+  if (typeof payload === "object") {
+    return Object.entries(payload)
+      .slice(0, 4)
+      .map(([key, value]) => `${key}: ${typeof value === "string" ? value : JSON.stringify(value)}`)
+      .join(" | ");
+  }
+  return String(payload);
+}
+
 wireEvents();
 state.requestPreview = buildRequestPreview("Visitor 1", "");
 render();

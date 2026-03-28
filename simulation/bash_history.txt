@@ -1,0 +1,832 @@
+ARTH PATEL@LAPTOP-E7RTJ788 MINGW64 ~/OneDrive/Desktop/ARTH/Sem-6/Cyber/Project/SEI-M-D (arth-vis-branch)
+$ ./run.sh -b
+
+╔══════════════════════════════════════════╗
+║  Secure Microservice Deployer            ║
+╚══════════════════════════════════════════╝
+
+✓ Kubernetes cluster ready
+
+✓ All images built
+
+[1/3] Building Docker images...
+unknown shorthand flag: 't' in -t
+
+                                 Usage:  docker [OPTIONS] COMMAND [ARG...]
+
+                                                                          Run 'docker --help' for more information
+
+
+⏻  Shutting down gracefully...
+
+  Scaling down platform services...
+ERROR: failed to build: failed to solve: Cance                                 eled: context canceled
+                     ERROR: failed to build: failed to solve: Canceled: context canceled
+        ERROR: failed to build: failed to solve: Canceled: context canceled
+                                                                           ERROR: failed to build: failed to solve: Canceled: context canceled
+                                                              ERROR: failed to build: failed to solve: Canceled: context canceled
+                                                 ERROR: failed to build: failed to solve: Canceled: context canceled
+                                      Scaling down user services...
+  Waiting for pods to terminate...
+
+✓ All services stopped. Goodbye!
+
+
+ARTH PATEL@LAPTOP-E7RTJ788 MINGW64 ~/OneDrive/Desktop/ARTH/Sem-6/Cyber/Project/SEI-M-D (arth-vis-branch)
+$ ./run.sh -b
+
+╔══════════════════════════════════════════╗
+║  Secure Microservice Deployer            ║
+╚══════════════════════════════════════════╝
+
+✓ Kubernetes cluster ready
+
+✓ All images built
+
+[1/3] Building Docker images...
+sha256:5839b112cdea632806786da2b9d5afc3f365a9b5fa7b231276f4bbe5016cef7e
+sha256:bbcc145dea1ed7a9aee2c5d88fd20df07f224111a5fc6c8b7bc763631ad915fd
+sha256:389524b48f02ce11fa7e3b84e2b2c2ddb11bdfee92e7258fcdecc134dafb0229
+        sha256:4e439b1b261c91bfa77a7d923ebfb71c802a10db5007eeaa9dd65414df54cdfe
+sha256:fb967d1ead0dc6faa280f5f094dd74f71529b597719b4ed3643fed3d825f3c87
+        sha256:56acb370d8738d4276bd7f064efc6eb69665dbe7cc7de4203a8a7105f2a0975f
+sha256:ffcc281918d8993ce3753c2a0e8cb0289702155ca23b2151dd73b9030f6e9def
+✓ All images built
+
+[2/3] Applying Kubernetes manifests...
+  namespace/deployer-system
+  namespace/user-services
+  serviceaccount/deployer-backend
+  clusterrole.rbac.authorization.k8s.io/deployer-backend-role
+  clusterrolebinding.rbac.authorization.k8s.io/deployer-backend-binding
+  deployment.apps/redis
+  persistentvolumeclaim/redis-pvc
+  service/redis-service
+  deployment.apps/backend
+  service/backend-service
+  deployment.apps/image-service
+  service/image-service
+  deployment.apps/nikto-service
+  service/nikto-service
+  deployment.apps/trivy-service
+  service/trivy-service
+  deployment.apps/gateway
+  service/gateway-service
+  deployment.apps/frontend
+  service/frontend-service
+
+✓ Manifests applied & rollout triggered
+
+[3/3] Waiting for pods to be ready...
+
+  ✗ redis (timed out)
+  ✓ backend
+  ✓ image-service
+  ✓ nikto-service
+  ✓ trivy-service
+  ✓ gateway
+  ✓ frontend
+
+╔══════════════════════════════════════════╗
+║  Application is running!                 ║
+╠══════════════════════════════════════════╣
+║  Frontend:  http://localhost:30000         ║
+║  Gateway:   http://localhost:30080         ║
+╚══════════════════════════════════════════╝
+
+Streaming logs... Press Ctrl+C to gracefully shut down
+─────────────────────────────────────────────────────
+
+[backend] INFO:     Started server process [1]
+[trivy  ] WARNING:trivy-service:Redis connection failed: Error 111 connecting to redis-service.deployer-system.svc.cluster.local:6379. Connection refused.. Will retry on requests.
+[backend] INFO:     Waiting for application startup.
+[gateway] 2026-03-28 07:09:02,738 | WARNING | Redis connection failed: Error 111 connecting to redis-service.deployer-system.svc.cluster.local:6379. Connection refused.. Rate limiting disabled.
+[trivy  ] INFO:     Started server process [1]
+[backend] INFO:deployer-backend:Deployer service starting... syncing with Kubernetes.
+[nikto  ] WARNING:nikto-service:Redis connection failed: Error 111 connecting to redis-service.deployer-system.svc.cluster.local:6379. Connection refused.. Will retry on requests.
+[gateway] INFO:     Started server process [1]
+[trivy  ] INFO:     Waiting for application startup.
+[backend] INFO:     Application startup complete.
+[image  ] INFO:image-service:Docker client initialized successfully
+[nikto  ] INFO:     Started server process [1]
+[gateway] INFO:     Waiting for application startup.
+[trivy  ] INFO:     Application startup complete.
+[backend] INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+[image  ] INFO:     Started server process [1]
+[nikto  ] INFO:     Waiting for application startup.
+[gateway] 2026-03-28 07:09:03,059 | INFO | Gateway service starting...
+[trivy  ] INFO:     Uvicorn running on http://0.0.0.0:8003 (Press CTRL+C to quit)
+[backend] INFO:     10.1.0.1:36892 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     Waiting for application startup.
+[nikto  ] INFO:     Application startup complete.
+[gateway] 2026-03-28 07:09:04,096 | WARNING | Redis reconnect failed: Error 111 connecting to redis-service.deployer-system.svc.cluster.local:6379. Connection refused.
+[trivy  ] INFO:     10.1.0.1:37352 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:48640 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     Application startup complete.
+[nikto  ] INFO:     Uvicorn running on http://0.0.0.0:8002 (Press CTRL+C to quit)
+[gateway] 2026-03-28 07:09:04,096 | WARNING | Redis unavailable at startup — route table is empty
+[trivy  ] INFO:     10.1.0.1:50960 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+[nikto  ] Generated 2150 unique paths.
+[gateway] INFO:     Application startup complete.
+[image  ] INFO:     10.1.0.1:52944 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:53442 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     Uvicorn running on http://0.0.0.0:8080 (Press CTRL+C to quit)
+[image  ] INFO:     10.1.0.1:59280 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:49282 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:59290 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:39280 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:39792 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:36502 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:52148 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:36512 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:38474 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:43020 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:38926 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:58240 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:35008 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:56626 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:58254 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:56638 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:35012 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:43036 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:50200 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:50666 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:56174 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:34970 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:50678 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:33584 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:49640 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:37356 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:42816 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:48614 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:35824 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:51486 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:37804 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:47962 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:49378 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:51460 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:51474 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:47974 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:51498 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:49380 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:60902 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:54046 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:43470 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:53482 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:60916 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:52222 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:42190 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:43518 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:43106 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:36510 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:48682 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:57958 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:39878 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:43220 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:36484 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:50814 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:50828 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:39884 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:57960 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:43230 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:42648 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:46716 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:34766 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:58988 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:46732 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:51942 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:39754 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:36394 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:39696 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:43152 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:45764 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:51472 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:59736 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:34486 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:41304 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:36248 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:36258 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:51486 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:59746 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:41318 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:34820 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:51350 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:45208 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:59558 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:45214 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:55572 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:49546 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:54876 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:40134 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:37772 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:52268 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:46490 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:44996 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:40018 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:36812 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:34636 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:40028 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:34638 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:45002 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:46496 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:52828 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:48170 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:42754 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:45374 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:45380 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:47092 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:55846 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:59842 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:41408 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:43000 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:43046 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:42576 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:51432 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:51616 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:36766 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:58244 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:42590 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:58260 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:36782 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:51440 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:59394 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:57604 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:40598 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:44800 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:44802 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:38088 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:59346 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:54492 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:55394 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:38608 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:54224 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:57238 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:49560 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:56224 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:46522 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:38128 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:38132 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:57246 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:46526 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:56238 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:54834 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:59902 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:47330 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:43394 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:54838 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:55674 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:56588 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:56112 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:38076 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:41390 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:47450 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:43090 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:50300 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:50412 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:47930 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:45480 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:45488 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:43106 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:50422 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:47932 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:46232 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:36318 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:42424 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:51284 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:36328 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:33420 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:35620 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:59632 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:38844 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:50990 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:59238 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:53856 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:40892 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:59016 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:49844 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:36838 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:36848 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:49852 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:59020 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:40902 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:55360 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:38068 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:49220 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:45810 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:45822 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:56770 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:59282 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:53492 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:40806 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:57964 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:60550 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:51580 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:54828 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:41380 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:50530 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:54532 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:54546 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:51582 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:50532 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:41396 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:50750 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:43582 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:35910 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:41806 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:35922 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:51232 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:50970 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:42174 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:35178 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:42362 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:46314 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:33132 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:55670 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:60694 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:33008 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:44736 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:44744 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:60704 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:33134 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:55686 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:49636 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:59826 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:52664 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:41154 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:52672 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:50048 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:34998 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:60372 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:35820 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:42714 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:56770 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:52192 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:36950 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:40918 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:47504 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:41552 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:40928 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:41564 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:36960 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:52206 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:33538 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:52880 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:47148 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:47204 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:52888 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:34962 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:49960 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:45936 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:40916 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:38478 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:49980 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:59324 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:43896 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:44720 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:56574 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:37758 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:37772 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:43910 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:56586 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:44736 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:40482 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:43166 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:56160 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:50040 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:50042 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:53586 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:36922 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:45132 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:39156 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:51774 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:58626 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:38586 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:51976 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:34062 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:58608 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:36262 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:36274 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:58624 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:38592 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:34078 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:33796 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:37728 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:52036 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:42978 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:33810 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:36988 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:42246 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:39172 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:56828 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:56132 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:59436 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:38412 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:60168 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:50290 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:57528 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:52122 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:52124 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:57530 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:50298 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:60170 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:54422 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:43008 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:35188 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:41364 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:35190 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:49550 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:39862 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:52266 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:59902 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:35350 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:40560 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:49494 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:50216 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:53530 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:60448 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:60802 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:60814 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:49498 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:53540 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:50220 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:59580 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:50232 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:51248 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:41072 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:50248 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:52214 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:53112 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:36036 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:36936 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:56090 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:55032 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:50508 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:59692 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:34764 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:48374 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:55590 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:55594 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:34780 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:59694 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:48378 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:49838 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:40548 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:59788 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:36330 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:40556 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:60042 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:57084 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:47660 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:52522 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:37426 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:38828 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:37480 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:48956 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:39582 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:49814 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:41848 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:39588 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:41860 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:49822 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:48970 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:46212 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:34012 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:38222 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:46676 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:34024 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:39432 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:45138 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:38694 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:51328 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:37008 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:36832 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:36290 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:49408 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:48522 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:36306 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:48528 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:42048 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:40880 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:45136 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:42144 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:36344 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:48464 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:48480 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:57362 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:50662 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:58192 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:39848 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:50526 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:35952 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:41552 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:55494 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:55406 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:57746 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:51000 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:51008 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:41558 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:57748 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:55420 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:43448 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:33142 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:44200 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:51780 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:43452 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:44024 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:59336 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:48024 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:39396 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:36300 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:45272 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:33798 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:53460 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:51428 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:42026 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:57204 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:57216 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:51438 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:53470 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:42030 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:34456 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:43524 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:49150 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:38258 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:38264 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:55668 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:60994 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:38938 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:57804 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:41830 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:56834 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:47902 - "GET /services HTTP/1.1" 200 OK
+[gateway] 2026-03-28 07:20:16,582 | INFO | (Re)connected to Redis at redis-service.deployer-system.svc.cluster.local
+[gateway] INFO:     10.1.0.36:36360 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.36:36368 - "GET /waf/stats HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:58640 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:60482 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:54918 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/events?limit=20 "HTTP/1.1 200 OK"
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/stats "HTTP/1.1 200 OK"
+[backend] INFO:     10.1.0.39:47910 - "GET /waf/stats HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:47914 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:41302 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:56590 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:43150 - "GET /services HTTP/1.1" 200 OK
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/stats "HTTP/1.1 200 OK"
+[gateway] INFO:     10.1.0.36:36380 - "GET /waf/stats HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:43164 - "GET /waf/stats HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.36:36386 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/events?limit=20 "HTTP/1.1 200 OK"
+[backend] INFO:     10.1.0.39:43176 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:56602 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:41318 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:60490 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:54926 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:50918 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:56300 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:47488 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:42102 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:47500 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:56652 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:45260 - "GET /services HTTP/1.1" 200 OK
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/events?limit=20 "HTTP/1.1 200 OK"
+[gateway] INFO:     10.1.0.36:47150 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.36:47162 - "GET /waf/stats HTTP/1.1" 200 OK
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/stats "HTTP/1.1 200 OK"
+[backend] INFO:     10.1.0.39:45258 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:45276 - "GET /waf/stats HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:54706 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:45852 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:48730 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:60072 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:57622 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:57730 - "GET /services HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.36:55282 - "GET /waf/stats HTTP/1.1" 200 OK
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/stats "HTTP/1.1 200 OK"
+[backend] INFO:     10.1.0.39:57744 - "GET /waf/stats HTTP/1.1" 200 OK
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/events?limit=20 "HTTP/1.1 200 OK"
+[backend] INFO:     10.1.0.39:57752 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.36:55296 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:34256 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:51644 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:50942 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:52532 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:46456 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:50556 - "GET /services HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.36:48352 - "GET /waf/stats HTTP/1.1" 200 OK
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/stats "HTTP/1.1 200 OK"
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/events?limit=20 "HTTP/1.1 200 OK"
+[backend] INFO:     10.1.0.39:50566 - "GET /waf/stats HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:50570 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.36:48368 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:52536 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:46466 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:34268 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:51652 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:47900 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:48936 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:40462 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:59186 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:40474 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:39822 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:59446 - "GET /services HTTP/1.1" 200 OK
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/stats "HTTP/1.1 200 OK"
+[gateway] INFO:     10.1.0.36:59824 - "GET /waf/stats HTTP/1.1" 200 OK
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/events?limit=20 "HTTP/1.1 200 OK"
+[backend] INFO:     10.1.0.39:59460 - "GET /waf/stats HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:59458 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.36:59832 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:33578 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:51056 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.36:37122 - "GET /waf/stats HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.36:37136 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:36000 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:42958 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:36634 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:44230 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:50300 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:39578 - "GET /services HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:39572 - "GET /waf/stats HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:39580 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/stats "HTTP/1.1 200 OK"
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/events?limit=20 "HTTP/1.1 200 OK"
+[backend] INFO:     10.1.0.1:58734 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:54488 - "GET /services HTTP/1.1" 200 OK
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/stats "HTTP/1.1 200 OK"
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/events?limit=20 "HTTP/1.1 200 OK"
+[backend] INFO:     10.1.0.39:54466 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:54474 - "GET /waf/stats HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:58746 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.36:33630 - "GET /waf/stats HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.36:33644 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:42676 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:42686 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.36:58482 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.36:58488 - "GET /waf/stats HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:46900 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:50316 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:57346 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:52622 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:42966 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:35514 - "GET /health HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:58284 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:34860 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:55890 - "GET /health HTTP/1.1" 200 OK
+[trivy  ] INFO:     10.1.0.1:36450 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:42774 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/events?limit=20 "HTTP/1.1 200 OK"
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/stats "HTTP/1.1 200 OK"
+[backend] INFO:     10.1.0.39:32784 - "GET /services HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:32770 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:60990 - "GET /waf/stats HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:46438 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:49960 - "GET /services HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:49930 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:49946 - "GET /waf/stats HTTP/1.1" 200 OK
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/events?limit=20 "HTTP/1.1 200 OK"
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/stats "HTTP/1.1 200 OK"
+[gateway] INFO:     10.1.0.36:40102 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[nikto  ] INFO:     10.1.0.1:44782 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.36:40106 - "GET /waf/stats HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:40544 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:35596 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:52540 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:47510 - "GET /services HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:35608 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:52542 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:59962 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/stats "HTTP/1.1 200 OK"
+[gateway] 2026-03-28 07:21:53,093 | ERROR | Rate limit middleware error: Error 111 connecting to redis-service.deployer-system.svc.cluster.local:6379. Connection refused.
+[gateway] 2026-03-28 07:21:57,218 | WARNING | Redis reconnect failed: Error 111 connecting to redis-service.deployer-system.svc.cluster.local:6379. Connection refused.
+[gateway] INFO:     10.1.0.36:35240 - "GET /waf/stats HTTP/1.1" 200 OK
+[gateway] 2026-03-28 07:21:58,613 | WARNING | Redis reconnect failed: Error 111 connecting to redis-service.deployer-system.svc.cluster.local:6379. Connection refused.
+[image  ] INFO:     10.1.0.1:60804 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/events?limit=20 "HTTP/1.1 200 OK"
+[backend] INFO:     10.1.0.39:47508 - "GET /waf/stats HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:47514 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:47740 - "GET /services HTTP/1.1" 200 OK
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/stats "HTTP/1.1 200 OK"
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/events?limit=20 "HTTP/1.1 200 OK"
+[backend] INFO:     10.1.0.39:47724 - "GET /waf/stats HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:47722 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.36:35246 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:33938 - "GET /health HTTP/1.1" 200 OK
+[gateway] 2026-03-28 07:22:00,934 | WARNING | Redis reconnect failed: Error 111 connecting to redis-service.deployer-system.svc.cluster.local:6379. Connection refused.
+[gateway] 2026-03-28 07:22:01,958 | WARNING | Redis reconnect failed: Error 111 connecting to redis-service.deployer-system.svc.cluster.local:6379. Connection refused.
+[gateway] INFO:     10.1.0.36:55554 - "GET /waf/stats HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.36:55560 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:55980 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:60588 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:49270 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:47648 - "GET /services HTTP/1.1" 200 OK
+[gateway] 2026-03-28 07:22:11,035 | WARNING | Redis reconnect failed: Error 111 connecting to redis-service.deployer-system.svc.cluster.local:6379. Connection refused.
+[gateway] 2026-03-28 07:22:12,221 | WARNING | Redis reconnect failed: Error 111 connecting to redis-service.deployer-system.svc.cluster.local:6379. Connection refused.
+[gateway] INFO:     10.1.0.36:52362 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.36:52368 - "GET /waf/stats HTTP/1.1" 200 OK
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/events?limit=20 "HTTP/1.1 200 OK"
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/stats "HTTP/1.1 200 OK"
+[backend] INFO:     10.1.0.39:47658 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:47660 - "GET /waf/stats HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:39086 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:40478 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:60438 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:60448 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:59608 - "GET /services HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:39092 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:deployer-backend:Proxying image upload to image-service: example-api.tar
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/stats "HTTP/1.1 200 OK"
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/events?limit=20 "HTTP/1.1 200 OK"
+[backend] INFO:     10.1.0.39:59604 - "GET /waf/stats HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:59612 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[gateway] 2026-03-28 07:22:21,214 | WARNING | Redis reconnect failed: Error 111 connecting to redis-service.deployer-system.svc.cluster.local:6379. Connection refused.
+[gateway] 2026-03-28 07:22:22,242 | WARNING | Redis reconnect failed: Error 111 connecting to redis-service.deployer-system.svc.cluster.local:6379. Connection refused.
+[gateway] INFO:     10.1.0.36:51624 - "GET /waf/stats HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.36:51630 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:58854 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:47500 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:36130 - "GET /services HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:52272 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:52284 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/stats "HTTP/1.1 200 OK"
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/events?limit=20 "HTTP/1.1 200 OK"
+[backend] INFO:     10.1.0.39:36146 - "GET /waf/stats HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:36114 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[gateway] 2026-03-28 07:22:31,750 | WARNING | Redis reconnect failed: Error 111 connecting to redis-service.deployer-system.svc.cluster.local:6379. Connection refused.
+[gateway] 2026-03-28 07:22:32,786 | WARNING | Redis reconnect failed: Error 111 connecting to redis-service.deployer-system.svc.cluster.local:6379. Connection refused.
+[gateway] INFO:     10.1.0.36:33836 - "GET /waf/stats HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.36:33840 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:41608 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:59776 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:53994 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:36130 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:41988 - "GET /services HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:57826 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/events?limit=20 "HTTP/1.1 200 OK"
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/stats "HTTP/1.1 200 OK"
+[backend] INFO:     10.1.0.39:42004 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:41998 - "GET /waf/stats HTTP/1.1" 200 OK
+[gateway] 2026-03-28 07:22:45,834 | WARNING | Redis reconnect failed: Error 111 connecting to redis-service.deployer-system.svc.cluster.local:6379. Connection refused.
+[gateway] 2026-03-28 07:22:46,946 | WARNING | Redis reconnect failed: Error 111 connecting to redis-service.deployer-system.svc.cluster.local:6379. Connection refused.
+[gateway] INFO:     10.1.0.36:43948 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.36:43954 - "GET /waf/stats HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:46980 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:39864 - "GET /services HTTP/1.1" 200 OK
+[gateway] 2026-03-28 07:22:51,643 | WARNING | Redis reconnect failed: Error 111 connecting to redis-service.deployer-system.svc.cluster.local:6379. Connection refused.
+[gateway] INFO:     10.1.0.36:34894 - "GET /waf/stats HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:36138 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:57828 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/stats "HTTP/1.1 200 OK"
+[backend] INFO:     10.1.0.39:39852 - "GET /waf/stats HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:39878 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/events?limit=20 "HTTP/1.1 200 OK"
+[backend] INFO:     10.1.0.1:43110 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:52168 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.36:34902 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[gateway] 2026-03-28 07:22:54,848 | WARNING | Redis reconnect failed: Error 111 connecting to redis-service.deployer-system.svc.cluster.local:6379. Connection refused.
+[gateway] INFO:     10.1.0.1:41224 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:41240 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:52608 - "GET /services HTTP/1.1" 200 OK
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/events?limit=20 "HTTP/1.1 200 OK"
+[backend] INFO:     10.1.0.39:52602 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/stats "HTTP/1.1 200 OK"
+[backend] INFO:     10.1.0.39:52618 - "GET /waf/stats HTTP/1.1" 200 OK
+[gateway] 2026-03-28 07:23:01,289 | WARNING | Redis reconnect failed: Error 111 connecting to redis-service.deployer-system.svc.cluster.local:6379. Connection refused.
+[gateway] INFO:     10.1.0.36:58286 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[gateway] 2026-03-28 07:23:02,362 | WARNING | Redis reconnect failed: Error 111 connecting to redis-service.deployer-system.svc.cluster.local:6379. Connection refused.
+[gateway] INFO:     10.1.0.36:58292 - "GET /waf/stats HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:43094 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:42550 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:60390 - "GET /services HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:40070 - "GET /health HTTP/1.1" 200 OK
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/stats "HTTP/1.1 200 OK"
+[backend] INFO:     10.1.0.39:60396 - "GET /waf/stats HTTP/1.1" 200 OK
+[backend] INFO:httpx:HTTP Request: GET http://gateway-service:8080/waf/events?limit=20 "HTTP/1.1 200 OK"
+[backend] INFO:     10.1.0.39:60392 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.39:52790 - "GET /services HTTP/1.1" 200 OK
+[backend] INFO:     10.1.0.1:40080 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:46038 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:39658 - "GET /health HTTP/1.1" 200 OK
+[image  ] INFO:     10.1.0.1:39674 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:60696 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.36:46816 - "GET /waf/stats HTTP/1.1" 200 OK
+[gateway] 2026-03-28 07:23:17,441 | WARNING | Redis reconnect failed: Error 111 connecting to redis-service.deployer-system.svc.cluster.local:6379. Connection refused.
+[gateway] 2026-03-28 07:23:19,376 | WARNING | Redis reconnect failed: Error 111 connecting to redis-service.deployer-system.svc.cluster.local:6379. Connection refused.
+[gateway] INFO:     10.1.0.36:46832 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[gateway] 2026-03-28 07:23:22,493 | WARNING | Redis reconnect failed: Error 111 connecting to redis-service.deployer-system.svc.cluster.local:6379. Connection refused.
+[gateway] INFO:     10.1.0.36:46844 - "GET /waf/stats HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.36:46848 - "GET /waf/events?limit=20 HTTP/1.1" 200 OK
+[gateway] 2026-03-28 07:23:24,928 | WARNING | Redis reconnect failed: Error 111 connecting to redis-service.deployer-system.svc.cluster.local:6379. Connection refused.
+[gateway] INFO:     10.1.0.1:38208 - "GET /health HTTP/1.1" 200 OK
+[gateway] INFO:     10.1.0.1:38214 - "GET /health HTTP/1.1" 200 OK
+
+
+⏻  Shutting down gracefully...
+
+  Scaling down platform services...
+  Scaling down user services...
+  Waiting for pods to terminate...
+
+✓ All services stopped. Goodbye!
+
+
