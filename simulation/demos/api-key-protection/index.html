@@ -5,281 +5,80 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Simulation #4 | API Key Protection</title>
   <link rel="stylesheet" href="./styles.css">
+  <style>
+    .status-indicator {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      border-radius: 12px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 1.2rem;
+      display: none;
+    }
+    .status-indicator.success {
+      display: block;
+      background-color: rgba(34, 197, 94, 0.1);
+      color: #16a34a;
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+    .status-indicator.error {
+      display: block;
+      background-color: rgba(239, 68, 68, 0.1);
+      color: #dc2626;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    .status-indicator.idle {
+      display: block;
+      background-color: rgba(100, 116, 139, 0.1);
+      color: #64748b;
+      border: 1px solid rgba(100, 116, 139, 0.2);
+    }
+  </style>
 </head>
 <body>
   <div class="page-shell">
     <div class="expo-nav">
       <a href="../../index.html">Back to Launcher</a>
     </div>
-    <header class="hero">
-      <div class="hero-copy">
-        <p class="eyebrow">Security Simulation #4</p>
-        <h1>API Key Protection <span style="font-size: 0.5em; vertical-align: middle; opacity: 0.7; margin-left: 0.3em;">🔑</span></h1>
-        <p class="hero-text">
-          Explore why public information stays open while sensitive actions require a valid digital access key.
-          Test different routes with and without the correct credentials.
-        </p>
-      </div>
-      <div class="hero-actions">
-        <div class="route-badge-card">
-          <span class="mini-label">Current Route Type</span>
-          <span id="routeTypeBadge" class="route-type-badge public">Public Route</span>
-        </div>
-        <button id="resetButton" class="ghost-button" type="button">Reset Simulation</button>
-      </div>
-    </header>
-
-    <main class="demo-grid">
-      <section class="panel request-panel">
-        <div class="panel-header">
-          <p class="panel-kicker">Interactive Setup (Step 1)</p>
-          <h2>Service Desk Request</h2>
+    <main class="demo-grid" style="display: flex; justify-content: center; max-width: 600px; margin: 40px auto 0;">
+      <section class="panel request-panel" style="width: 100%;">
+        <div class="panel-header" style="border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 1.5rem; margin-bottom: 2rem;">
+          <h1 style="margin: 0; font-size: 2.2rem; display: flex; align-items: center; justify-content: space-between;">API Key Protection <span style="font-size: 0.7em; opacity: 0.7;">🔑</span></h1>
+          <p style="margin: 0.5rem 0 0 0; opacity: 0.7; font-weight: 500;">Service Desk Request</p>
         </div>
 
-        <div class="connection-card">
-          <div class="connection-card-header">
-            <div>
-              <p class="helper-title">Connection Mode</p>
-              <p class="connection-copy">Keep local simulation as a safe fallback, or point the demo at the real gateway.</p>
-            </div>
-            <span id="connectionModeBadge" class="mode-badge local">Local Simulation</span>
+        <form id="apiForm">
+          <div class="form-group" style="margin-bottom: 20px;">
+            <label for="urlInput">Target Gateway URL</label>
+            <input id="urlInput" class="field-input text-input" type="text" autocomplete="off" value="http://localhost:30080/expo-api-demo/staff/open-maintenance-panel">
           </div>
 
-          <label class="field-group compact-field" for="connectionModeSelect">
-            <span class="field-label">Mode</span>
-            <select id="connectionModeSelect" class="field-input">
-              <option value="local">Local simulation</option>
-              <option value="live">Live platform mode</option>
+          <div class="form-group" style="margin-bottom: 20px;">
+            <label for="methodSelect">HTTP Method</label>
+            <select id="methodSelect" class="field-input text-input">
+              <option value="POST">POST (Typical for Staff Action)</option>
+              <option value="GET">GET (Typical for Public Check)</option>
             </select>
-          </label>
-
-          <div id="liveConfigFields" class="live-config-fields" hidden>
-            <label class="field-group compact-field" for="gatewayBaseUrlInput">
-              <span class="field-label">Gateway Base URL</span>
-              <input
-                id="gatewayBaseUrlInput"
-                class="field-input"
-                type="text"
-                autocomplete="off"
-                placeholder="http://localhost:30080"
-              >
-            </label>
-
-            <label class="field-group compact-field" for="publicRouteInput">
-              <span class="field-label">Public Route</span>
-              <input
-                id="publicRouteInput"
-                class="field-input"
-                type="text"
-                autocomplete="off"
-                placeholder="/expo-api-demo/public/help-hours"
-              >
-            </label>
-
-            <label class="field-group compact-field" for="protectedRouteInput">
-              <span class="field-label">Protected Route</span>
-              <input
-                id="protectedRouteInput"
-                class="field-input"
-                type="text"
-                autocomplete="off"
-                placeholder="/expo-api-demo/staff/open-maintenance-panel"
-              >
-            </label>
-
-            <div class="button-row compact-actions">
-              <button id="liveDefaultsButton" class="quick-button" type="button">Use Expo Service Defaults</button>
-            </div>
           </div>
 
-          <div id="connectionStatusCard" class="connection-status-card">
-            Local simulation is ready. Switch to live mode after a real service is deployed behind the gateway.
+          <div class="form-group" style="margin-bottom: 20px;">
+            <label for="apiKeyInput">Password (Access Key)</label>
+            <input id="apiKeyInput" class="field-input text-input" type="password" autocomplete="off" placeholder="Enter staff key for protected action">
           </div>
-        </div>
 
-        <label class="field-group" for="routeSelect">
-          <span class="field-label">Choose Route</span>
-          <select id="routeSelect" class="field-input">
-            <option value="public-help-hours">GET /public/help-hours</option>
-            <option value="protected-maintenance-panel">POST /staff/open-maintenance-panel</option>
-          </select>
-        </label>
-
-        <label class="field-group" for="apiKeyInput">
-          <span class="field-label">Access Key</span>
-          <input
-            id="apiKeyInput"
-            class="field-input"
-            type="text"
-            autocomplete="off"
-            placeholder="Enter staff key for protected action"
-          >
-        </label>
-
-        <div id="keyHint" class="field-hint public-hint">
-          This route is open to everyone. No access key is needed.
-        </div>
-
-        <div class="button-row">
-          <button id="noKeyButton" class="quick-button" type="button">Use No Key</button>
-          <button id="validKeyButton" class="quick-button" type="button">Use Valid Staff Key</button>
-          <button id="wrongKeyButton" class="quick-button" type="button">Use Wrong Key</button>
-        </div>
-
-        <button id="sendRequestButton" class="primary-button" type="button">Send Request</button>
-
-        <div class="helper-card">
-          <p class="helper-title">Easy idea</p>
-          <p>
-            Public info should work for everyone. Staff-only actions need a valid access key, just like a digital access card.
-          </p>
-        </div>
-
-        <div id="demoKeyReference" class="key-reference">
-          <p class="key-reference-label">Demo-only key shown on purpose</p>
-          <code>STAFF-ACCESS-DEMO-2026</code>
-          <p class="key-reference-note">This is a simulated expo key, not a real secret.</p>
-        </div>
-      </section>
-
-      <section class="panel flow-panel">
-        <div class="panel-header">
-          <p class="panel-kicker">Logic Validation (Step 2)</p>
-          <h2>What the System Checks</h2>
-        </div>
-
-        <div class="flow-step">
-          <span class="flow-label">Selected Route</span>
-          <div id="selectedRouteCard" class="flow-value">
-            GET /public/help-hours
+          <div class="quick-actions" style="margin-bottom: 20px; display: flex; gap: 10px;">
+            <button id="noKeyButton" class="ghost-button quick-button" type="button">No Key</button>
+            <button id="validKeyButton" class="ghost-button quick-button" type="button">Valid Key</button>
+            <button id="wrongKeyButton" class="ghost-button quick-button" type="button">Wrong Key</button>
           </div>
-          <p id="routeStory" class="flow-copy">
-            This route is like a lobby notice board. Visitors can read it without a staff key.
-          </p>
-        </div>
 
-        <div class="flow-step">
-          <span class="flow-label">Key Check</span>
-          <div id="keyCheckCard" class="flow-value">
-            No key required for this route
-          </div>
-          <p id="keyCheckCopy" class="flow-copy">
-            Public information stays open because it does not trigger a staff-only action.
-          </p>
-        </div>
+          <button id="sendRequestButton" class="primary-button" type="submit" style="width: 100%; margin-top: 1rem;">Send Request</button>
 
-        <div class="flow-step">
-          <span class="flow-label">Decision</span>
-          <div id="decisionCard" class="flow-value">
-            Waiting for request
+          <div id="statusIndicator" class="status-indicator idle">
+            Waiting for request...
           </div>
-          <p id="decisionCopy" class="flow-copy">
-            Choose a route and send a request to see what happens.
-          </p>
-        </div>
+        </form>
 
-        <div class="explanation-card">
-          <p class="explanation-title">Mental model</p>
-          <div class="mental-model-grid">
-            <div>
-              <span class="mental-label">Public route</span>
-              <p>Like reading a notice board in the lobby.</p>
-            </div>
-            <div>
-              <span class="mental-label">Protected route</span>
-              <p>Like entering a staff-only room.</p>
-            </div>
-            <div>
-              <span class="mental-label">API key</span>
-              <p>Like showing a digital access card.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="panel proof-panel">
-        <div class="panel-header">
-          <p class="panel-kicker">Simulation Output (Step 3)</p>
-          <h2>Visible Proof</h2>
-        </div>
-
-        <div class="proof-topline">
-          <div id="outcomeBadge" class="outcome-badge idle">Waiting</div>
-          <p id="outcomeSummary" class="proof-summary">No request has been sent yet.</p>
-        </div>
-
-        <div class="proof-facts">
-          <div class="proof-fact">
-            <span class="proof-label">Mode</span>
-            <strong id="proofMode">Local simulation</strong>
-          </div>
-          <div class="proof-fact">
-            <span class="proof-label">Current Outcome</span>
-            <strong id="currentOutcome">No action yet</strong>
-          </div>
-          <div class="proof-fact">
-            <span class="proof-label">Route Type</span>
-            <strong id="proofRouteType">Public</strong>
-          </div>
-          <div class="proof-fact">
-            <span class="proof-label">Key Status</span>
-            <strong id="proofKeyStatus">Not needed</strong>
-          </div>
-          <div class="proof-fact">
-            <span class="proof-label">Action Result</span>
-            <strong id="actionResult">Waiting for request</strong>
-          </div>
-          <div class="proof-fact">
-            <span class="proof-label">HTTP Status</span>
-            <strong id="httpStatus">Not sent</strong>
-          </div>
-        </div>
-
-        <div class="security-card">
-          <span class="security-title">Security Event</span>
-          <div class="security-grid">
-            <div>
-              <span class="security-label">Action</span>
-              <strong id="securityAction">No request yet</strong>
-            </div>
-            <div>
-              <span class="security-label">Reason</span>
-              <strong id="securityReason">Choose a route and send a request.</strong>
-            </div>
-            <div>
-              <span class="security-label">Requested Route</span>
-              <strong id="securityRoute">GET /public/help-hours</strong>
-            </div>
-          </div>
-        </div>
-
-        <div id="resultCard" class="result-card neutral">
-          <p class="result-title">Response Preview</p>
-          <div id="resultContent" class="result-content">
-            Waiting for a demo request.
-          </div>
-        </div>
-
-        <div class="counters">
-          <div class="counter-card">
-            <span class="counter-label">Allowed Requests</span>
-            <strong id="allowedCount">0</strong>
-          </div>
-          <div class="counter-card">
-            <span class="counter-label">Denied Requests</span>
-            <strong id="deniedCount">0</strong>
-          </div>
-        </div>
-
-        <div class="log-card">
-          <div class="log-header">
-            <span>Session Event Log</span>
-            <span class="log-note">Newest first</span>
-          </div>
-          <ul id="eventLog" class="event-log">
-            <li class="event-empty">No activity yet.</li>
-          </ul>
-        </div>
       </section>
     </main>
   </div>
