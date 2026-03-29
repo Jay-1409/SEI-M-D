@@ -5,79 +5,58 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Simulation #1 | SQL Injection</title>
   <link rel="stylesheet" href="./styles.css">
+  <style>
+    /* Add some specific simplified overrides to keep the theme but remove clutter */
+    .status-indicator {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      border-radius: 12px;
+      text-align: center;
+      font-weight: 600;
+      font-size: 1.2rem;
+      display: none;
+    }
+    .status-indicator.success {
+      display: block;
+      background-color: rgba(34, 197, 94, 0.1);
+      color: #16a34a;
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+    .status-indicator.error {
+      display: block;
+      background-color: rgba(239, 68, 68, 0.1);
+      color: #dc2626;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+    .status-indicator.idle {
+      display: block;
+      background-color: rgba(100, 116, 139, 0.1);
+      color: #64748b;
+      border: 1px solid rgba(100, 116, 139, 0.2);
+    }
+  </style>
 </head>
 <body>
   <div class="page-shell">
     <div class="expo-nav">
       <a href="../../index.html">Back to Launcher</a>
     </div>
-    <header class="hero">
-      <div class="hero-copy">
-        <p class="eyebrow">Security Simulation #1</p>
-        <h1>SQL Injection <span style="font-size: 0.5em; vertical-align: middle; opacity: 0.7; margin-left: 0.3em;">💉</span></h1>
-        <p class="hero-text">
-          Explore how unsanitized database queries allow attackers to bypass authentication. 
-          Use the toggle to compare <strong>Protection OFF</strong> and <strong>Protection ON</strong>, then switch to live mode if you want the same story to travel through the real gateway.
-        </p>
-      </div>
-      <div class="hero-actions">
-        <div id="protectionPill" class="protection-pill vulnerable">Protection OFF</div>
-        <button id="toggleProtectionButton" class="button primary" type="button">Enable Protection</button>
-        <button id="resetButton" class="button ghost" type="button">Reset Simulation</button>
-      </div>
-    </header>
-    <main class="main-grid">
-      <section class="panel login-panel">
-        <div class="panel-header">
-          <p class="panel-kicker">Interactive Portal</p>
-          <h2>Staff Attendance Portal</h2>
+    <main class="main-grid" style="display: flex; justify-content: center; max-width: 600px; margin: 40px auto 0;">
+      <section class="panel login-panel" style="width: 100%;">
+        <div class="panel-header" style="border-bottom: 1px solid rgba(0,0,0,0.1); padding-bottom: 1.5rem; margin-bottom: 2rem;">
+          <h1 style="margin: 0; font-size: 2.2rem; display: flex; align-items: center; justify-content: space-between;">SQL Injection <span style="font-size: 0.7em; opacity: 0.7;">💉</span></h1>
+          <p style="margin: 0.5rem 0 0 0; opacity: 0.7; font-weight: 500;">Staff Attendance Portal</p>
         </div>
 
-        <section class="connection-card">
-          <div class="connection-card-header">
-            <div>
-              <p class="panel-kicker">Connection Mode</p>
-              <p class="connection-copy">Keep the local simulation for offline fallback, or point the demo at the real gateway.</p>
-            </div>
-            <span id="connectionModeBadge" class="mode-badge local">Local Simulation</span>
-          </div>
-
-          <label class="form-group compact-field" for="connectionModeSelect">
-            <span>Mode</span>
-            <select id="connectionModeSelect" class="text-input compact-input">
-              <option value="local">Local simulation mode</option>
-              <option value="live">Live gateway mode</option>
-            </select>
-          </label>
-
-          <div id="liveConfigFields" class="live-config-fields" hidden>
-            <label class="form-group compact-field" for="gatewayBaseUrlInput">
-              <span>Gateway Base URL</span>
-              <input id="gatewayBaseUrlInput" class="text-input compact-input" type="text" autocomplete="off" placeholder="http://localhost:30080">
-            </label>
-
-            <label class="form-group compact-field" for="loginRouteInput">
-              <span>Login Route</span>
-              <input id="loginRouteInput" class="text-input compact-input" type="text" autocomplete="off" placeholder="/expo-sqli-demo/login">
-            </label>
-
-            <label class="form-group compact-field" for="platformApiBaseInput">
-              <span>Platform API URL (optional)</span>
-              <input id="platformApiBaseInput" class="text-input compact-input" type="text" autocomplete="off" placeholder="http://localhost:30000/api">
-            </label>
-
-            <button id="liveDefaultsButton" class="button secondary compact-button" type="button">Use Expo Service Defaults</button>
-          </div>
-
-          <div id="connectionStatusCard" class="connection-status-card">
-            Local simulation is ready. Switch to live mode after the SQL injection target service is deployed behind the gateway.
-          </div>
-        </section>
+        <div class="form-group">
+          <label for="urlInput">Target Gateway URL</label>
+          <input id="urlInput" class="text-input" type="text" autocomplete="off" value="http://localhost:30080/expo-sqli-demo/login">
+        </div>
 
         <div class="form-row">
           <div class="form-group">
             <label for="usernameInput">Username</label>
-            <input id="usernameInput" class="text-input" type="text" autocomplete="off" placeholder="Enter username">
+            <input id="usernameInput" class="text-input" type="text" autocomplete="off" placeholder="Enter username (e.g., admin)">
           </div>
 
           <div class="form-group">
@@ -86,127 +65,17 @@
           </div>
         </div>
 
-        <p class="form-helper">Try a normal login or a malicious input.</p>
-
         <div class="quick-actions">
           <button id="fillNormalButton" class="button secondary" type="button">Fill Normal User</button>
           <button id="fillAttackButton" class="button warning" type="button">Fill Attack Input</button>
         </div>
 
-        <button id="loginButton" class="button primary login-button" type="button">Login</button>
+        <button id="loginButton" class="button primary login-button" type="button" style="width: 100%; margin-top: 1rem;">Send Login Request</button>
 
-        <section id="resultBanner" class="result-banner idle">
-          <strong>Waiting for login attempt</strong>
-          <p>No action yet. Choose a safe login or the malicious demo input.</p>
-        </section>
-
-        <section class="legend-card">
-          <h3>Color guide</h3>
-          <div class="legend-row">
-            <span class="legend-swatch green"></span>
-            <span>Normal allowed action</span>
-          </div>
-          <div class="legend-row">
-            <span class="legend-swatch amber"></span>
-            <span>Vulnerable behavior</span>
-          </div>
-          <div class="legend-row">
-            <span class="legend-swatch red"></span>
-            <span>Suspicious or blocked action</span>
-          </div>
-        </section>
-      </section>
-
-
-
-      <section class="panel proof-panel">
-        <div class="panel-header">
-          <p class="panel-kicker">Simulation Proof</p>
-          <h2>Visible Proof</h2>
+        <div id="statusIndicator" class="status-indicator idle">
+          Waiting for request...
         </div>
 
-        <div id="proofBadge" class="proof-badge neutral">No action yet</div>
-
-        <div class="proof-grid">
-          <article class="metric-card">
-            <p class="metric-label">Current Outcome</p>
-            <p id="currentOutcome" class="metric-value">Waiting for login attempt</p>
-          </article>
-          <article class="metric-card">
-            <p class="metric-label">Attack Status</p>
-            <p id="attackStatus" class="metric-value">None</p>
-          </article>
-          <article class="metric-card">
-            <p class="metric-label">Access Granted To</p>
-            <p id="accessGranted" class="metric-value">No access yet</p>
-          </article>
-          <article class="metric-card">
-            <p class="metric-label">Blocked Attacks</p>
-            <p id="blockedCount" class="metric-value">0</p>
-          </article>
-        </div>
-
-        <article id="securityEventCard" class="security-event">
-          <h3>Security Event</h3>
-          <div class="event-grid">
-            <div>
-              <span class="event-label">Threat</span>
-              <strong id="eventThreat">None</strong>
-            </div>
-            <div>
-              <span class="event-label">Input Field</span>
-              <strong id="eventField">None</strong>
-            </div>
-            <div>
-              <span class="event-label">Action</span>
-              <strong id="eventAction">Waiting</strong>
-            </div>
-            <div>
-              <span class="event-label">Reason</span>
-              <strong id="eventReason">No request yet</strong>
-            </div>
-          </div>
-        </article>
-
-        <article class="proof-note">
-          <h3>Proof explanation</h3>
-          <p id="proofExplanation">
-            The proof panel will show either unauthorized access in vulnerable mode or a blocked security event in
-            protected mode.
-          </p>
-        </article>
-
-        <article id="liveProofCard" class="live-proof-card" hidden>
-          <h3>Live Gateway Proof</h3>
-          <div class="event-grid">
-            <div>
-              <span class="event-label">Service</span>
-              <strong id="liveProofService">Not configured</strong>
-            </div>
-            <div>
-              <span class="event-label">WAF SQLi Blocks</span>
-              <strong id="liveProofBlocks">Unknown</strong>
-            </div>
-            <div>
-              <span class="event-label">Latest Event</span>
-              <strong id="liveProofEvent">No live event loaded</strong>
-            </div>
-            <div>
-              <span class="event-label">Proof Source</span>
-              <strong id="liveProofSource">Gateway response only</strong>
-            </div>
-          </div>
-        </article>
-
-        <article class="activity-card">
-          <div class="activity-header">
-            <h3>Activity Log</h3>
-            <span id="requestCount">0 requests</span>
-          </div>
-          <div id="activityLog" class="activity-log">
-            <p class="empty-log">No activity yet.</p>
-          </div>
-        </article>
       </section>
     </main>
   </div>

@@ -31,11 +31,6 @@
     logEntries: [],
     timers: new Set(),
     liveConfig: { ...LIVE_DEFAULTS },
-    connectionStatus: {
-      tone: "info",
-      message:
-        "Local simulation is ready. Switch to live gateway mode after a target route is deployed and rate limiting is configured in the platform.",
-    },
     liveProof: {
       serviceName: "",
       targetLabel: "Not configured",
@@ -79,7 +74,6 @@
     targetRouteInput: document.getElementById("targetRouteInput"),
     platformApiBaseInput: document.getElementById("platformApiBaseInput"),
     liveDefaultsButton: document.getElementById("liveDefaultsButton"),
-    connectionStatusCard: document.getElementById("connectionStatusCard"),
     liveProofCard: document.getElementById("liveProofCard"),
     liveProofService: document.getElementById("liveProofService"),
     liveProofTarget: document.getElementById("liveProofTarget"),
@@ -148,9 +142,6 @@
     return `${baseUrl}${routePath}`;
   }
 
-  function setConnectionStatus(tone, message) {
-    state.connectionStatus = { tone, message };
-  }
 
   function updateModeUI() {
     const liveMode = state.connectionMode === "live";
@@ -207,7 +198,9 @@
   }
 
   function setNarration(text) {
-    elements.narrationText.textContent = text;
+    if (elements.narrationText) {
+      elements.narrationText.textContent = text;
+    }
   }
 
   function setActionLocks(disabled) {
@@ -468,10 +461,6 @@
 
     if (!targetUrl) {
       trackResolvedRequest("waiting", actor, requestId, "Missing live gateway URL");
-      setConnectionStatus(
-        "warning",
-        "Live mode needs both a gateway base URL and a target route before it can send traffic."
-      );
       setLiveProofLastResult("Missing gateway base URL or target route");
       renderConnectionState();
       setNarration(
@@ -494,7 +483,6 @@
 
       if (response.status === 429) {
         trackResolvedRequest("blocked", actor, requestId, "Real gateway returned 429 Too Many Requests");
-        setConnectionStatus("success", `Live gateway blocked repeated traffic with HTTP 429 at ${targetUrl}.`);
         setLiveProofLastResult(`HTTP 429 on ${requestId}`);
         setNarration(
           "This is real proof now: the gateway route is returning 429 Too Many Requests once the burst crosses the configured limit."
@@ -502,7 +490,6 @@
         updateLogHint("Real 429 responses are now visible");
       } else if (response.ok) {
         trackResolvedRequest("allowed", actor, requestId, `Live route returned HTTP ${response.status}`);
-        setConnectionStatus("success", `Live route responded through the gateway with HTTP ${response.status}.`);
         setLiveProofLastResult(`HTTP ${response.status} on ${requestId}`);
         setNarration(
           actor === "customer"
@@ -512,7 +499,6 @@
         updateLogHint(actor === "customer" ? "Real normal traffic accepted" : "Real flood traffic accepted");
       } else {
         trackResolvedRequest("waiting", actor, requestId, `Unexpected HTTP ${response.status}`);
-        setConnectionStatus("warning", `Live route answered with HTTP ${response.status}.`);
         setLiveProofLastResult(`HTTP ${response.status} on ${requestId}`);
         setNarration(
           "The request reached the live route, but the response was not a normal success or a 429 block. The route may still be usable, but it is not ideal for this expo story."
@@ -521,7 +507,6 @@
       }
     } catch (error) {
       trackResolvedRequest("waiting", actor, requestId, `Browser could not reach the live gateway route: ${error.message}`);
-      setConnectionStatus("error", `Live request failed: ${error.message}`);
       setLiveProofLastResult(`Connection error on ${requestId}`);
       setNarration(
         "The live gateway request could not be completed. The demo keeps its local fallback so the expo story still works offline."
@@ -717,19 +702,10 @@
     updateLogHint("Waiting for traffic");
 
     if (state.connectionMode === "live") {
-      setConnectionStatus(
-        "warning",
-        "Live gateway mode is ready. Use a safe target route behind the gateway and configure rate limiting in the platform before starting the flood."
-      );
       setNarration(
         "Live mode keeps the same queue story, but the real gateway response now decides whether each request is accepted or blocked with 429."
       );
-      void refreshLiveProof().then(renderConnectionState);
     } else {
-      setConnectionStatus(
-        "info",
-        "Local simulation is ready. Switch to live gateway mode after a target route is deployed and rate limiting is configured in the platform."
-      );
       setNarration(
         state.mode === "on"
           ? "Rate limiting is ON. Regular visitors should not feel it, but repeated flooding will be blocked with 429 responses."
@@ -793,8 +769,6 @@
     elements.gatewayBaseUrlInput.value = state.liveConfig.gatewayBaseUrl;
     elements.targetRouteInput.value = state.liveConfig.targetRoute;
     elements.platformApiBaseInput.value = state.liveConfig.platformApiBase;
-    elements.connectionStatusCard.textContent = state.connectionStatus.message;
-    elements.connectionStatusCard.className = `connection-status-card ${state.connectionStatus.tone}`;
     elements.liveProofCard.hidden = !liveMode;
 
     if (liveMode) {
@@ -836,7 +810,6 @@
 
   elements.liveDefaultsButton.addEventListener("click", () => {
     state.liveConfig = { ...LIVE_DEFAULTS };
-    setConnectionStatus("info", "Live defaults loaded for the simulation-owned rate-limiting target service.");
     void refreshLiveProof().then(renderConnectionState);
   });
 

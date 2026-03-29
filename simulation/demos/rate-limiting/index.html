@@ -13,13 +13,7 @@
       </div>
 
       <section class="panel control-panel">
-        <p class="eyebrow">Security Simulation #3</p>
-        <h1>Ticket Rush <span class="title-icon" aria-hidden="true">Tickets</span></h1>
-        <p class="lead">
-          Demonstrate how rate limiting prevents bot floods from overwhelming a booking service.
-          Keep the local simulation for offline use, or switch to live mode to hit a real gateway
-          route and watch genuine <code>429</code> responses appear in the same story.
-        </p>
+         <h1>Ticket Rush <span class="title-icon" aria-hidden="true">Tickets</span></h1>
 
         <div class="mode-card connection-mode-card">
           <div>
@@ -67,11 +61,6 @@
           </button>
         </div>
 
-        <div id="connectionStatusCard" class="connection-status-card">
-          Local simulation is ready. Switch to live gateway mode after a target route is deployed and
-          rate limiting is configured in the platform.
-        </div>
-
         <div class="mode-card">
           <div>
             <p class="label">Protection Mode</p>
@@ -115,14 +104,6 @@
           </button>
         </div>
 
-        <div class="control-notes">
-          <p class="label">How to use</p>
-          <ol>
-            <li>Try a normal booking request first.</li>
-            <li>In local mode, compare OFF versus ON on the same page.</li>
-            <li>In live mode, point the demo to a real gateway route and let the platform decide when <code>429</code> starts.</li>
-          </ol>
-        </div>
       </section>
 
       <section class="panel simulation-panel">
@@ -154,7 +135,6 @@
               </div>
             </div>
             <div id="customerLane" class="lane-track">
-              <div class="lane-caption">Fair-use lane</div>
             </div>
           </div>
 
@@ -175,16 +155,10 @@
               </div>
             </div>
             <div id="botLane" class="lane-track">
-              <div class="lane-caption">Flood lane</div>
             </div>
           </div>
         </div>
 
-        <div class="legend">
-          <span><i class="dot allowed"></i> Allowed</span>
-          <span><i class="dot blocked"></i> Blocked 429</span>
-          <span><i class="dot waiting"></i> Waiting / stressed</span>
-        </div>
 
         <div id="summaryCard" class="summary-card hidden">
           <p class="label">Run Summary</p>
@@ -221,13 +195,6 @@
           </article>
         </div>
 
-        <div class="narration-card">
-          <p class="label">Plain-language explanation</p>
-          <p id="narrationText">
-            Rate limiting is ON. Regular visitors should not feel it, but repeated
-            flooding will be blocked with 429 responses.
-          </p>
-        </div>
 
         <div id="liveProofCard" class="narration-card live-proof-card" hidden>
           <p class="label">Live gateway proof</p>
