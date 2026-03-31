@@ -1,0 +1,572 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Secure Microservice Deployer — Expo Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#05080f;--bg2:#0c1220;--surface:rgba(255,255,255,.04);
+  --border:rgba(100,180,255,.12);--text:#e8ecf4;--muted:#7a8ba8;
+  --accent:#3b9eff;--accent2:#00d4ff;--green:#00e676;--red:#ff3d5a;
+  --amber:#ffb300;--purple:#b388ff;
+  --speed:1;
+}
+html,body{min-height:100vh;font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+body{display:flex;flex-direction:column}
+
+/* --- HEADER --- */
+.hdr{padding:18px 32px;background:var(--bg2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:20px;flex-wrap:wrap;z-index:100}
+.hdr h1{font-size:1.6rem;font-weight:900;letter-spacing:-.02em;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.hdr .sub{font-size:.85rem;color:var(--muted);max-width:400px}
+
+/* --- CONTROLS --- */
+.controls{display:flex;align-items:center;gap:8px;margin-left:auto;flex-wrap:wrap}
+.cbtn{padding:8px 16px;border-radius:8px;font-size:.78rem;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--text);transition:all .2s;letter-spacing:.02em}
+.cbtn:hover{border-color:var(--accent);background:rgba(59,158,255,.1)}
+.cbtn.active{background:rgba(59,158,255,.15);border-color:var(--accent);color:var(--accent)}
+.cbtn.primary{background:linear-gradient(135deg,rgba(59,158,255,.25),rgba(0,212,255,.15));border-color:var(--accent);color:var(--accent)}
+.cbtn.danger{border-color:var(--red);color:var(--red);background:rgba(255,61,90,.08)}
+.speed-group{display:flex;border:1.5px solid var(--border);border-radius:8px;overflow:hidden}
+.speed-group .cbtn{border:none;border-radius:0;border-right:1px solid var(--border);padding:8px 12px}
+.speed-group .cbtn:last-child{border-right:none}
+
+/* --- MAIN STAGE --- */
+.stage{flex:1;position:relative;display:flex;align-items:center;justify-content:center;padding:40px;overflow:hidden;
+  background:radial-gradient(ellipse 70% 60% at 50% 50%,rgba(59,158,255,.04),transparent)}
+
+/* Scene indicator */
+.scene-label{position:absolute;top:24px;left:50%;transform:translateX(-50%);font-size:1.1rem;font-weight:800;letter-spacing:.05em;text-transform:uppercase;color:var(--accent);opacity:.7;transition:all .4s}
+.scene-label .num{display:inline-block;width:28px;height:28px;line-height:28px;text-align:center;border-radius:50%;background:var(--accent);color:var(--bg);font-size:.75rem;margin-right:8px;vertical-align:middle}
+
+/* Pipeline layout */
+.pipeline{display:flex;align-items:center;gap:0;position:relative;width:100%;max-width:1200px}
+
+/* Nodes */
+.pnode{position:relative;flex-shrink:0;display:flex;flex-direction:column;align-items:center;text-align:center;z-index:10;cursor:pointer;transition:all .4s ease}
+.pnode .circle{width:90px;height:90px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2.2rem;
+  background:linear-gradient(135deg,var(--bg2),rgba(20,30,50,.9));border:2.5px solid var(--border);
+  box-shadow:0 4px 24px rgba(0,0,0,.4);transition:all .4s ease}
+.pnode .label{margin-top:10px;font-size:.82rem;font-weight:700;white-space:nowrap;transition:color .3s}
+.pnode .sublabel{font-size:.65rem;color:var(--muted);margin-top:2px}
+.pnode:hover .circle{border-color:var(--accent);box-shadow:0 0 30px rgba(59,158,255,.2)}
+
+/* Security sub-nodes inside gateway group */
+.sec-group{display:flex;flex-direction:column;gap:8px;align-items:center;position:relative}
+.sec-node{display:flex;align-items:center;gap:8px;padding:8px 16px;border-radius:10px;font-size:.78rem;font-weight:600;
+  background:rgba(255,255,255,.03);border:1.5px solid rgba(255,255,255,.08);transition:all .4s;cursor:pointer;min-width:160px}
+.sec-node .dot{width:10px;height:10px;border-radius:50%;background:var(--muted);transition:all .4s;flex-shrink:0}
+.sec-node .stext{transition:color .3s}
+.sec-node.checking{border-color:rgba(255,179,0,.4);background:rgba(255,179,0,.06)}
+.sec-node.checking .dot{background:var(--amber);box-shadow:0 0 10px var(--amber)}
+.sec-node.checking .stext{color:var(--amber)}
+.sec-node.passed{border-color:rgba(0,230,118,.3);background:rgba(0,230,118,.05)}
+.sec-node.passed .dot{background:var(--green);box-shadow:0 0 10px var(--green)}
+.sec-node.passed .stext{color:var(--green)}
+.sec-node.blocked{border-color:rgba(255,61,90,.4);background:rgba(255,61,90,.08)}
+.sec-node.blocked .dot{background:var(--red);box-shadow:0 0 10px var(--red)}
+.sec-node.blocked .stext{color:var(--red)}
+
+/* Arrows between nodes */
+.arrow{flex:1;height:4px;background:var(--border);position:relative;min-width:40px;border-radius:2px;transition:background .4s}
+.arrow.active{background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.arrow.blocked{background:linear-gradient(90deg,var(--red),#ff6b7a)}
+.arrow::after{content:'';position:absolute;right:-6px;top:50%;transform:translateY(-50%);border:6px solid transparent;border-left:8px solid var(--border);transition:border-color .4s}
+.arrow.active::after{border-left-color:var(--accent2)}
+.arrow.blocked::after{border-left-color:var(--red)}
+
+/* Packet dot */
+.pkt{position:absolute;width:16px;height:16px;border-radius:50%;z-index:50;pointer-events:none;
+  opacity:0;transition:opacity .15s}
+.pkt.go{opacity:1;background:radial-gradient(circle,#fff,var(--accent));box-shadow:0 0 20px var(--accent),0 0 40px rgba(59,158,255,.3)}
+.pkt.bad{opacity:1;background:radial-gradient(circle,#fff,var(--red));box-shadow:0 0 20px var(--red),0 0 40px rgba(255,61,90,.3)}
+
+/* Cluster box */
+.cluster-box{position:absolute;border:2px dashed rgba(0,230,118,.2);border-radius:20px;padding:10px;z-index:0;transition:all .6s ease;opacity:0}
+.cluster-box.show{opacity:1}
+.cluster-box .clabel{position:absolute;top:-12px;left:20px;background:var(--bg);padding:0 10px;font-size:.65rem;
+  font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--green)}
+
+/* Status chip */
+.chip{position:absolute;bottom:-40px;left:50%;transform:translateX(-50%);white-space:nowrap;padding:6px 14px;border-radius:20px;
+  font-size:.72rem;font-weight:700;opacity:0;transition:all .4s;pointer-events:none}
+.chip.show{opacity:1}
+.chip.green{background:rgba(0,230,118,.15);border:1px solid rgba(0,230,118,.3);color:var(--green)}
+.chip.red{background:rgba(255,61,90,.15);border:1px solid rgba(255,61,90,.3);color:var(--red)}
+.chip.amber{background:rgba(255,179,0,.12);border:1px solid rgba(255,179,0,.3);color:var(--amber)}
+.chip.blue{background:rgba(59,158,255,.12);border:1px solid rgba(59,158,255,.3);color:var(--accent)}
+
+/* Big status banner */
+.banner{position:absolute;bottom:30px;left:50%;transform:translateX(-50%);text-align:center;opacity:0;transition:all .5s;pointer-events:none}
+.banner.show{opacity:1}
+.banner .btitle{font-size:1.4rem;font-weight:900;margin-bottom:4px}
+.banner .bsub{font-size:.85rem;color:var(--muted)}
+
+/* Block X animation */
+@keyframes blockPulse{0%{transform:scale(0);opacity:0}50%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:1}}
+.block-x{position:absolute;font-size:3rem;color:var(--red);z-index:60;opacity:0;pointer-events:none;
+  filter:drop-shadow(0 0 12px var(--red));text-shadow:0 0 20px rgba(255,61,90,.5)}
+.block-x.show{animation:blockPulse .4s ease forwards}
+
+/* Tooltip / info panel */
+.info-panel{display:none;position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);z-index:300;
+  width:min(480px,90vw);background:var(--bg2);border:1.5px solid var(--border);border-radius:16px;
+  box-shadow:0 20px 60px rgba(0,0,0,.6);padding:24px;animation:fadeIn .2s ease}
+.info-panel.show{display:block}
+.info-panel h3{font-size:1.1rem;font-weight:800;margin-bottom:10px;color:var(--accent)}
+.info-panel p,.info-panel li{font-size:.85rem;color:var(--muted);line-height:1.6}
+.info-panel ul{padding-left:18px}
+.info-panel .xbtn{position:absolute;top:10px;right:14px;background:none;border:none;color:var(--muted);font-size:1.3rem;cursor:pointer}
+.info-panel .xbtn:hover{color:var(--text)}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:299}
+.overlay.show{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translate(-50%,-50%) scale(.95)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+
+/* Scene progress dots */
+.scene-dots{position:absolute;bottom:80px;left:50%;transform:translateX(-50%);display:flex;gap:10px}
+.scene-dots .sdot{width:10px;height:10px;border-radius:50%;background:var(--surface);border:1.5px solid var(--border);transition:all .3s;cursor:pointer}
+.scene-dots .sdot.active{background:var(--accent);border-color:var(--accent);box-shadow:0 0 10px rgba(59,158,255,.4)}
+.scene-dots .sdot.done{background:var(--green);border-color:var(--green)}
+
+/* Glow states for nodes */
+.pnode.glow-green .circle{border-color:var(--green);box-shadow:0 0 35px rgba(0,230,118,.3)}
+.pnode.glow-red .circle{border-color:var(--red);box-shadow:0 0 35px rgba(255,61,90,.3)}
+.pnode.glow-blue .circle{border-color:var(--accent);box-shadow:0 0 35px rgba(59,158,255,.3)}
+.pnode.glow-amber .circle{border-color:var(--amber);box-shadow:0 0 35px rgba(255,179,0,.3)}
+.pnode.dim{opacity:.3}
+.pnode.hidden{opacity:0;transform:scale(.5);pointer-events:none}
+
+/* Responsive */
+@media(max-width:900px){
+  .pipeline{flex-direction:column;gap:20px}
+  .arrow{width:4px;height:40px;min-width:unset;min-height:40px;flex:unset}
+  .arrow::after{right:unset;bottom:-6px;top:unset;left:50%;transform:translateX(-50%);border:6px solid transparent;border-top:8px solid var(--border)}
+  .arrow.active::after{border-top-color:var(--accent2);border-left-color:transparent}
+  .arrow.blocked::after{border-top-color:var(--red);border-left-color:transparent}
+  .sec-group{flex-direction:row;flex-wrap:wrap;justify-content:center}
+}
+
+/* Status bar */
+.sbar{padding:8px 24px;background:rgba(0,0,0,.3);border-top:1px solid var(--border);font-size:.72rem;color:var(--muted);display:flex;align-items:center;gap:12px}
+.sbar .pulse{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <h1>&#x1F6E1;&#xFE0F; Secure Microservice Deployer</h1>
+  <span class="sub">Interactive expo demo &#x2014; see how we protect your microservice</span>
+  <div class="controls">
+    <button class="cbtn primary" onclick="playAll()" id="playBtn">&#x25B6; Play Story</button>
+    <button class="cbtn" onclick="stepNext()" id="stepBtn">&#x23ED; Next Step</button>
+    <button class="cbtn" onclick="resetDemo()">&#x21BA; Reset</button>
+    <button class="cbtn danger" id="modeBtn" onclick="toggleMode()">&#x1F7E2; Normal</button>
+    <div class="speed-group">
+      <button class="cbtn" onclick="setSpeed(2)" id="sp-slow">&#x1F422;</button>
+      <button class="cbtn active" onclick="setSpeed(1)" id="sp-normal">1x</button>
+      <button class="cbtn" onclick="setSpeed(0.4)" id="sp-fast">&#x26A1;</button>
+    </div>
+    <button class="cbtn" onclick="toggleLoop()" id="loopBtn">&#x1F501; Loop</button>
+  </div>
+</header>
+
+<div class="stage" id="stage">
+  <div class="scene-label" id="sceneLabel"><span class="num">1</span> <span id="sceneName">Deploy</span></div>
+
+  <!-- The pipeline -->
+  <div class="pipeline" id="pipeline">
+    <!-- Internet / User -->
+    <div class="pnode dim" id="n-user" onclick="showInfo('user')">
+      <div class="circle">&#x1F310;</div>
+      <div class="label">Internet</div>
+      <div class="sublabel">User Request</div>
+      <div class="chip" id="chip-user"></div>
+    </div>
+    <div class="arrow" id="a-1"></div>
+
+    <!-- Gateway -->
+    <div class="pnode dim" id="n-gateway" onclick="showInfo('gateway')">
+      <div class="circle">&#x1F6E1;&#xFE0F;</div>
+      <div class="label">API Gateway</div>
+      <div class="sublabel">NodePort 30080</div>
+      <div class="chip" id="chip-gateway"></div>
+    </div>
+    <div class="arrow" id="a-2"></div>
+
+    <!-- Security Layers -->
+    <div class="sec-group" id="n-sec">
+      <div class="sec-node" id="sec-waf" onclick="showInfo('waf')"><span class="dot"></span><span class="stext">&#x1F6E1; WAF Filter</span></div>
+      <div class="sec-node" id="sec-rate" onclick="showInfo('rate')"><span class="dot"></span><span class="stext">&#x23F1; Rate Limiter</span></div>
+      <div class="sec-node" id="sec-auth" onclick="showInfo('auth')"><span class="dot"></span><span class="stext">&#x1F511; API Key Auth</span></div>
+    </div>
+    <div class="arrow" id="a-3"></div>
+
+    <!-- Microservice -->
+    <div class="pnode hidden" id="n-svc" onclick="showInfo('svc')">
+      <div class="circle">&#x1F4E6;</div>
+      <div class="label">Your Service</div>
+      <div class="sublabel">ClusterIP &#x2014; Internal Only</div>
+      <div class="chip" id="chip-svc"></div>
+    </div>
+  </div>
+
+  <!-- Deployer node (for scene 1) -->
+  <div class="pnode hidden" id="n-deployer" style="position:absolute;top:15%;left:50%;transform:translateX(-50%)" onclick="showInfo('deployer')">
+    <div class="circle">&#x2699;&#xFE0F;</div>
+    <div class="label">Deployer</div>
+    <div class="sublabel">Orchestrator</div>
+  </div>
+
+  <!-- Block X marker -->
+  <div class="block-x" id="blockX">&#x274C;</div>
+
+  <!-- Result banner -->
+  <div class="banner" id="banner">
+    <div class="btitle" id="bannerTitle"></div>
+    <div class="bsub" id="bannerSub"></div>
+  </div>
+
+  <!-- Scene dots -->
+  <div class="scene-dots" id="sceneDots">
+    <div class="sdot active" onclick="goScene(0)"></div>
+    <div class="sdot" onclick="goScene(1)"></div>
+    <div class="sdot" onclick="goScene(2)"></div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" onclick="closeInfo()"></div>
+<div class="info-panel" id="infoPanel"><button class="xbtn" onclick="closeInfo()">&#x2715;</button><h3 id="infoTitle"></h3><div id="infoBody"></div></div>
+
+<div class="sbar"><span class="pulse"></span><span>Secure Microservice Deployer &#x2014; Expo Demo</span><span style="margin-left:auto">Click any component for details</span></div>
+
+<script>
+(function(){
+"use strict";
+
+// ==========================================
+// CONFIG & STATE
+// ==========================================
+var speed = 1;
+var attackMode = false;
+var looping = false;
+var playing = false;
+var currentScene = -1;
+var currentStep = -1;
+var animTimer = null;
+
+var INFO = {};
+INFO.user = {title:"\u{1F310} Internet / External User",html:"<p>Any request from the outside world starts here.</p><ul><li>Could be a real user calling your API</li><li>Could be an attacker probing for vulnerabilities</li><li>Could be a bot flooding with requests</li></ul><p><strong>Key point:</strong> Users have NO direct access to your microservice. Everything goes through the Gateway.</p>"};
+INFO.gateway = {title:"\u{1F6E1}\uFE0F API Gateway",html:"<p>The <strong>sole entry point</strong> for all traffic. FastAPI reverse proxy on NodePort 30080.</p><p>Every request passes through 3 security layers before reaching your service:</p><ol><li>WAF Filter</li><li>Rate Limiter</li><li>API Key Auth</li></ol><p>Only clean, validated, rate-limited traffic reaches your app.</p>"};
+INFO.waf = {title:"\u{1F6E1} WAF Filter (Web Application Firewall)",html:"<p>Scans every request for malicious payloads:</p><ul><li><strong>SQL Injection</strong> \u2014 55+ regex patterns (OR 1=1, UNION SELECT, SLEEP, xp_cmdshell...)</li><li><strong>XSS</strong> \u2014 30+ patterns (script tags, event handlers, javascript: URIs, eval...)</li><li><strong>Headers</strong> \u2014 Strips dangerous headers (X-Original-URL, X-Forwarded-Host...)</li></ul><p>Blocked requests get a <strong>403 Forbidden</strong> and the event is logged to Redis.</p>"};
+INFO.rate = {title:"\u23F1 Rate Limiter",html:"<p>Prevents floods and abuse using Redis sliding-window counters.</p><ul><li>Per-IP, per-service tracking</li><li>Route-specific overrides</li><li>Returns 429 Too Many Requests + Retry-After header</li></ul><p>Each request increments a counter with a TTL. When the limit is hit, traffic is blocked.</p>"};
+INFO.auth = {title:"\u{1F511} API Key Authentication",html:"<p>Optional per-service, per-route key validation.</p><ul><li>Multi-key support per service</li><li>Path + method matching for protected routes</li><li>Returns 401 Unauthorized if key is invalid or missing</li></ul><p>Configured via the dashboard per-service.</p>"};
+INFO.svc = {title:"\u{1F4E6} Your Microservice",html:"<p>Your deployed application, fully shielded:</p><ul><li>Runs in <code>user-services</code> namespace (isolated)</li><li>Service type: <strong>ClusterIP only</strong> \u2014 no external IP</li><li>Reachable <strong>only</strong> through the Gateway</li><li>Only sees clean, validated traffic</li></ul><p><strong>Result:</strong> Your app never handles a malicious request.</p>"};
+INFO.deployer = {title:"\u2699\uFE0F Deployer Service",html:"<p>The orchestrator that deploys your microservice:</p><ol><li>Receives Docker image upload</li><li>Inspects image for exposed ports</li><li>Creates K8s Deployment + ClusterIP Service</li><li>Registers route in the Gateway</li></ol><p>After deployment, your service is internal-only, protected by the full security pipeline.</p>"};
+
+// ==========================================
+// HELPERS
+// ==========================================
+function $(id){return document.getElementById(id);}
+function sleep(ms){return new Promise(function(r){animTimer=setTimeout(r,ms*speed);});}
+function clearAnim(){if(animTimer){clearTimeout(animTimer);animTimer=null;}}
+
+function setScene(n,name){
+  currentScene=n;
+  $("sceneLabel").innerHTML='<span class="num">'+(n+1)+'</span> <span>'+name+'</span>';
+  var dots=$("sceneDots").children;
+  for(var i=0;i<dots.length;i++){
+    dots[i].className="sdot"+(i===n?" active":(i<n?" done":""));
+  }
+}
+
+function resetNodes(){
+  ["n-user","n-gateway","n-svc","n-deployer"].forEach(function(id){
+    var el=$(id);el.className=el.className.replace(/ glow-\w+/g,"").replace(/ dim/g,"").replace(/ hidden/g,"");
+    el.classList.add("dim");
+  });
+  $("n-svc").classList.add("hidden");
+  $("n-deployer").classList.add("hidden");
+  ["sec-waf","sec-rate","sec-auth"].forEach(function(id){$(id).className="sec-node";});
+  ["a-1","a-2","a-3"].forEach(function(id){$(id).className="arrow";});
+  ["chip-user","chip-gateway","chip-svc"].forEach(function(id){$(id).className="chip";$(id).textContent="";});
+  $("blockX").className="block-x";
+  $("banner").className="banner";
+  $("bannerTitle").textContent="";
+  $("bannerSub").textContent="";
+}
+
+function showChip(id,text,color){
+  var el=$(id);el.className="chip show "+color;el.textContent=text;
+}
+function showBanner(title,sub,color){
+  $("bannerTitle").textContent=title;$("bannerTitle").style.color="var(--"+color+")";
+  $("bannerSub").textContent=sub;
+  $("banner").className="banner show";
+}
+function glowNode(id,color){
+  var el=$(id);el.classList.remove("dim","hidden");
+  el.className=el.className.replace(/ glow-\w+/g,"")+" glow-"+color;
+}
+function activateArrow(id,type){$(id).className="arrow "+(type||"active");}
+function undimNode(id){$(id).classList.remove("dim","hidden");}
+
+// ==========================================
+// INFO PANEL
+// ==========================================
+window.showInfo=function(key){
+  var d=INFO[key];if(!d)return;
+  $("infoTitle").innerHTML=d.title;$("infoBody").innerHTML=d.html;
+  $("infoPanel").classList.add("show");$("overlay").classList.add("show");
+};
+window.closeInfo=function(){
+  $("infoPanel").classList.remove("show");$("overlay").classList.remove("show");
+};
+
+// ==========================================
+// SCENE 1: DEPLOY
+// ==========================================
+function sceneDeploy(){
+  return new Promise(function(resolve){
+    resetNodes();setScene(0,"Deploy");currentStep=0;
+    // Show deployer
+    sleep(300).then(function(){
+      undimNode("n-deployer");$("n-deployer").classList.remove("hidden");
+      glowNode("n-deployer","blue");
+      showChip("chip-gateway","Receiving deployment...","blue");
+      undimNode("n-gateway");
+      return sleep(800);
+    }).then(function(){
+      // Deploy animation
+      glowNode("n-deployer","green");
+      return sleep(600);
+    }).then(function(){
+      // Service appears
+      $("n-svc").classList.remove("hidden","dim");
+      glowNode("n-svc","green");
+      showChip("chip-svc","\u2705 Deployed","green");
+      return sleep(500);
+    }).then(function(){
+      undimNode("n-user");undimNode("n-gateway");
+      activateArrow("a-3");
+      showBanner("Service Deployed","Internal only \u2014 ClusterIP, never exposed to the internet","green");
+      return sleep(1200);
+    }).then(function(){
+      $("n-deployer").classList.add("hidden");
+      $("banner").className="banner";
+      resolve();
+    });
+  });
+}
+
+// ==========================================
+// SCENE 2: NORMAL REQUEST
+// ==========================================
+function sceneNormal(){
+  return new Promise(function(resolve){
+    setScene(1,"Normal Request");currentStep=1;
+    resetNodes();undimNode("n-user");undimNode("n-gateway");undimNode("n-svc");
+    ["a-1","a-2","a-3"].forEach(function(id){$(id).className="arrow";});
+    ["sec-waf","sec-rate","sec-auth"].forEach(function(id){$(id).className="sec-node";});
+
+    sleep(300).then(function(){
+      // User sends request
+      glowNode("n-user","blue");
+      showChip("chip-user","GET /my-api/users","blue");
+      return sleep(600);
+    }).then(function(){
+      activateArrow("a-1");
+      return sleep(500);
+    }).then(function(){
+      // Gateway receives
+      glowNode("n-gateway","amber");
+      showChip("chip-gateway","Inspecting...","amber");
+      return sleep(400);
+    }).then(function(){
+      activateArrow("a-2");
+      // WAF check
+      $("sec-waf").className="sec-node checking";
+      return sleep(600);
+    }).then(function(){
+      $("sec-waf").className="sec-node passed";
+      // Rate limit check
+      $("sec-rate").className="sec-node checking";
+      return sleep(500);
+    }).then(function(){
+      $("sec-rate").className="sec-node passed";
+      // Auth check
+      $("sec-auth").className="sec-node checking";
+      return sleep(500);
+    }).then(function(){
+      $("sec-auth").className="sec-node passed";
+      showChip("chip-gateway","\u2705 All clear","green");
+      glowNode("n-gateway","green");
+      return sleep(400);
+    }).then(function(){
+      // Forward to service
+      activateArrow("a-3");
+      return sleep(400);
+    }).then(function(){
+      glowNode("n-svc","green");
+      showChip("chip-svc","200 OK","green");
+      return sleep(500);
+    }).then(function(){
+      showBanner("\u2705 Request Delivered","Clean, validated traffic reached your microservice","green");
+      return sleep(1500);
+    }).then(function(){
+      $("banner").className="banner";
+      resolve();
+    });
+  });
+}
+
+// ==========================================
+// SCENE 3: ATTACK REQUEST
+// ==========================================
+function sceneAttack(){
+  return new Promise(function(resolve){
+    setScene(2,"Attack Blocked!");currentStep=2;
+    resetNodes();undimNode("n-user");undimNode("n-gateway");undimNode("n-svc");
+    ["a-1","a-2","a-3"].forEach(function(id){$(id).className="arrow";});
+    ["sec-waf","sec-rate","sec-auth"].forEach(function(id){$(id).className="sec-node";});
+
+    sleep(300).then(function(){
+      glowNode("n-user","red");
+      showChip("chip-user","SQL: ' OR 1=1 --","red");
+      return sleep(600);
+    }).then(function(){
+      activateArrow("a-1","blocked");
+      return sleep(500);
+    }).then(function(){
+      glowNode("n-gateway","amber");
+      showChip("chip-gateway","Inspecting...","amber");
+      return sleep(400);
+    }).then(function(){
+      activateArrow("a-2","blocked");
+      $("sec-waf").className="sec-node checking";
+      return sleep(700);
+    }).then(function(){
+      // BLOCKED!
+      $("sec-waf").className="sec-node blocked";
+      $("sec-rate").className="sec-node";
+      $("sec-auth").className="sec-node";
+      glowNode("n-gateway","red");
+      showChip("chip-gateway","\u{1F6A8} BLOCKED","red");
+      // Show block X between sec and svc
+      var bx=$("blockX");
+      var a3=$("a-3");
+      var r=a3.getBoundingClientRect();var sr=$("stage").getBoundingClientRect();
+      bx.style.left=(r.left-sr.left+r.width/2-20)+"px";
+      bx.style.top=(r.top-sr.top-15)+"px";
+      bx.className="block-x show";
+      return sleep(500);
+    }).then(function(){
+      showChip("chip-svc","\u{1F6E1} Never reached","green");
+      glowNode("n-svc","green");
+      return sleep(400);
+    }).then(function(){
+      showBanner("\u{1F6A8} Attack Blocked!","SQLi detected by WAF \u2014 your microservice was NEVER reached","red");
+      return sleep(2000);
+    }).then(function(){
+      $("banner").className="banner";
+      resolve();
+    });
+  });
+}
+
+// ==========================================
+// CONTROLS
+// ==========================================
+var scenes = [sceneDeploy, sceneNormal, sceneAttack];
+
+window.playAll = function(){
+  if(playing)return;playing=true;
+  $("playBtn").textContent="\u23F8 Playing...";$("playBtn").classList.add("active");
+
+  function runSeq(i){
+    if(i>=3){
+      playing=false;
+      $("playBtn").textContent="\u25B6 Play Story";$("playBtn").classList.remove("active");
+      if(looping){setTimeout(function(){playAll();},1000*speed);}
+      return;
+    }
+    // If attack mode and scene 1, swap to scene 2 (attack)
+    var sceneIdx = i;
+    if(i===2 && !attackMode) sceneIdx = 2;
+    if(i===1 && attackMode){ sceneNormal().then(function(){sceneAttack().then(function(){runSeq(3);});}); return;}
+
+    scenes[sceneIdx]().then(function(){
+      sleep(500).then(function(){runSeq(i+1);});
+    });
+  }
+  resetDemo();
+  setTimeout(function(){runSeq(0);},200);
+};
+
+window.stepNext = function(){
+  if(playing)return;
+  var next = currentStep + 1;
+  if(next > 2) next = 0;
+  resetNodes();
+  if(next===0) sceneDeploy();
+  else if(next===1) sceneNormal();
+  else sceneAttack();
+};
+
+window.resetDemo = function(){
+  clearAnim();playing=false;currentScene=-1;currentStep=-1;
+  $("playBtn").textContent="\u25B6 Play Story";$("playBtn").classList.remove("active");
+  resetNodes();
+  setScene(0,"Ready");
+  $("sceneLabel").innerHTML='<span class="num">&#x25B6;</span> <span>Press Play or Step</span>';
+};
+
+window.toggleMode = function(){
+  attackMode = !attackMode;
+  var btn=$("modeBtn");
+  if(attackMode){
+    btn.innerHTML="&#x1F534; Attack";
+    btn.className="cbtn danger";
+  } else {
+    btn.innerHTML="&#x1F7E2; Normal";
+    btn.className="cbtn danger";
+    btn.style.borderColor="var(--green)";btn.style.color="var(--green)";btn.style.background="rgba(0,230,118,.08)";
+  }
+  // Reset style properly
+  if(!attackMode){
+    btn.className="cbtn";btn.style="";
+    btn.innerHTML="&#x1F7E2; Normal";
+    btn.style.borderColor="var(--green)";btn.style.color="var(--green)";btn.style.background="rgba(0,230,118,.08)";
+  }
+};
+
+window.setSpeed = function(s){
+  speed = s;
+  document.documentElement.style.setProperty("--speed",s);
+  ["sp-slow","sp-normal","sp-fast"].forEach(function(id){$(id).classList.remove("active");});
+  if(s===2) $("sp-slow").classList.add("active");
+  else if(s===1) $("sp-normal").classList.add("active");
+  else $("sp-fast").classList.add("active");
+};
+
+window.toggleLoop = function(){
+  looping = !looping;
+  $("loopBtn").classList.toggle("active",looping);
+};
+
+window.goScene = function(i){
+  if(playing)return;
+  currentStep = i-1;
+  stepNext();
+};
+
+// Init
+resetDemo();
+// Style the mode button green initially
+var mb=$("modeBtn");mb.style.borderColor="var(--green)";mb.style.color="var(--green)";mb.style.background="rgba(0,230,118,.08)";
+})();
+</script>
+</body>
+</html>
