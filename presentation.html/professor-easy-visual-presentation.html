@@ -1,0 +1,819 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Secure Microservice Deployer · Professor Visual Deck</title>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&family=Fraunces:opsz,wght@9..144,600;9..144,700&display=swap");
+
+    :root {
+      --bg: #f7f3eb;
+      --panel: #fffdf8;
+      --panel-2: #fff9ef;
+      --ink: #1f1c17;
+      --muted: #6d665d;
+      --line: #e8ddcb;
+      --accent: #bf5b16;
+      --accent-soft: #fff0dc;
+      --teal: #0f766e;
+      --blue: #1d4ed8;
+      --rose: #be123c;
+      --gold: #a16207;
+      --green: #166534;
+      --shadow: 0 18px 34px rgba(30, 22, 10, 0.08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Manrope", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 6% 0%, #ffe8c5 0%, transparent 34%),
+        radial-gradient(circle at 94% 0%, #ffe3bc 0%, transparent 30%),
+        var(--bg);
+      overflow-x: hidden;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--line);
+      background: rgba(247, 243, 235, 0.9);
+      backdrop-filter: blur(8px);
+    }
+
+    .top-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .tag {
+      border: 1px solid #f2ca9f;
+      background: var(--accent-soft);
+      color: #96500f;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 0.7rem;
+      font-weight: 800;
+      letter-spacing: 0.7px;
+      text-transform: uppercase;
+      flex: 0 0 auto;
+    }
+
+    .title {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: #3f352b;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 1px solid #d7c8b2;
+      background: #fff;
+      border-radius: 999px;
+      padding: 7px 11px;
+      font: inherit;
+      font-size: 0.79rem;
+      font-weight: 700;
+      color: #4f4437;
+      cursor: pointer;
+    }
+
+    button:hover { filter: brightness(0.98); }
+    button:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .count {
+      min-width: 70px;
+      text-align: center;
+      font-size: 0.86rem;
+      font-weight: 800;
+      color: #4f453a;
+    }
+
+    .progress-wrap {
+      width: 170px;
+      height: 6px;
+      border-radius: 999px;
+      background: #e6d9c7;
+      overflow: hidden;
+    }
+
+    .progress {
+      width: 0;
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), #f59e0b);
+      transition: width 240ms ease;
+    }
+
+    .mapbar {
+      border-bottom: 1px solid var(--line);
+      padding: 8px 12px;
+      background: rgba(255, 253, 248, 0.85);
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+    }
+
+    .map-btn {
+      border: 1px solid #e4d7c5;
+      background: #fff;
+      color: #5a4e3f;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 0.73rem;
+      font-weight: 700;
+      white-space: nowrap;
+      cursor: pointer;
+    }
+
+    .map-btn.active {
+      background: #fff0db;
+      border-color: #f1c895;
+      color: #96520f;
+    }
+
+    .deck {
+      max-width: 1180px;
+      margin: 0 auto;
+      padding: 14px;
+    }
+
+    .slide {
+      display: none;
+      min-height: calc(100vh - 150px);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: linear-gradient(170deg, var(--panel), var(--panel-2));
+      box-shadow: var(--shadow);
+      padding: 22px;
+      animation: fadeUp 260ms ease;
+    }
+
+    .slide.active { display: block; }
+
+    .kicker {
+      display: inline-block;
+      border: 1px solid #efca9f;
+      background: #fff2df;
+      color: #8f4d0f;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 0.69rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.65px;
+      margin-bottom: 12px;
+    }
+
+    h1, h2 {
+      margin: 0;
+      font-family: "Fraunces", serif;
+      line-height: 1.15;
+      color: #221d17;
+    }
+
+    h1 { font-size: clamp(1.9rem, 3.4vw, 2.8rem); }
+    h2 { font-size: clamp(1.55rem, 2.5vw, 2.15rem); }
+
+    .subtitle {
+      margin-top: 9px;
+      color: var(--muted);
+      font-size: 1rem;
+      max-width: 820px;
+      line-height: 1.5;
+    }
+
+    .grid-4 {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      text-align: center;
+      padding: 10px;
+    }
+
+    .metric b { display: block; font-size: 1.4rem; margin-bottom: 2px; }
+    .metric span {
+      font-size: 0.78rem;
+      color: #6d6358;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.35px;
+    }
+
+    .split {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+      padding: 14px;
+    }
+
+    .panel h3 {
+      margin: 0 0 10px;
+      font-size: 1.02rem;
+      color: #30271f;
+      letter-spacing: 0.2px;
+    }
+
+    .mini-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .mini-item {
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #fffdf8;
+      padding: 9px;
+      font-size: 0.84rem;
+      color: #413a32;
+      font-weight: 600;
+    }
+
+    .flow {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .node {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fffdf8;
+      min-width: 142px;
+      text-align: center;
+      padding: 10px;
+      font-size: 0.79rem;
+      font-weight: 700;
+      color: #362f27;
+    }
+
+    .icon {
+      width: 26px;
+      height: 26px;
+      display: block;
+      margin: 0 auto 6px;
+      color: #a85712;
+    }
+
+    .arrow {
+      width: 28px;
+      height: 2px;
+      background: #d9c9b3;
+      position: relative;
+      flex: 0 0 auto;
+    }
+
+    .arrow::after {
+      content: "";
+      position: absolute;
+      right: -2px;
+      top: -4px;
+      border-top: 5px solid transparent;
+      border-bottom: 5px solid transparent;
+      border-left: 8px solid #d9c9b3;
+    }
+
+    .zone-wrap {
+      margin-top: 12px;
+      border: 1px dashed #e2d5c1;
+      border-radius: 13px;
+      padding: 10px;
+      background: #fffefb;
+    }
+
+    .zone-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #4a4138;
+    }
+
+    .zone {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      padding: 8px;
+      text-align: center;
+    }
+
+    .control-grid {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .control {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      padding: 11px;
+      text-align: center;
+    }
+
+    .control .mini-icon {
+      width: 24px;
+      height: 24px;
+      color: #a05111;
+      margin: 0 auto 6px;
+      display: block;
+    }
+
+    .control .name {
+      font-size: 0.8rem;
+      font-weight: 800;
+      color: #3d352d;
+      margin-bottom: 4px;
+    }
+
+    .control .desc {
+      font-size: 0.72rem;
+      color: #746a5f;
+      font-weight: 600;
+      line-height: 1.35;
+    }
+
+    .attack-grid {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .attack {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      text-align: center;
+      padding: 11px;
+    }
+
+    .attack .mini-icon {
+      width: 24px;
+      height: 24px;
+      margin: 0 auto 6px;
+      color: #9f510f;
+      display: block;
+    }
+
+    .attack .name {
+      font-size: 0.79rem;
+      font-weight: 700;
+      color: #3f372f;
+      margin-bottom: 7px;
+    }
+
+    .code {
+      display: inline-block;
+      border-radius: 999px;
+      border: 1px solid #f2d8b3;
+      background: #fff3e1;
+      color: #8f4a0c;
+      padding: 4px 8px;
+      font-size: 0.73rem;
+      font-weight: 800;
+      letter-spacing: 0.35px;
+    }
+
+    .proof-row {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .proof {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      text-align: center;
+      padding: 11px;
+    }
+
+    .proof b { display: block; font-size: 1.45rem; margin-bottom: 3px; }
+    .proof span {
+      font-size: 0.74rem;
+      color: #6b6155;
+      text-transform: uppercase;
+      letter-spacing: 0.35px;
+      font-weight: 700;
+    }
+
+    .timeline {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .step {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fff;
+      padding: 10px 8px;
+      text-align: center;
+      font-size: 0.76rem;
+      font-weight: 700;
+      color: #3f382f;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .step::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--accent), #f59e0b);
+    }
+
+    .big-center {
+      min-height: 56vh;
+      display: grid;
+      place-items: center;
+      text-align: center;
+    }
+
+    .big-card {
+      border: 1px solid var(--line);
+      background: #fff;
+      border-radius: 18px;
+      padding: 22px;
+      max-width: 760px;
+      box-shadow: var(--shadow);
+    }
+
+    .big-card .final {
+      font-size: clamp(1.15rem, 2.4vw, 1.65rem);
+      line-height: 1.4;
+      color: #2f291f;
+      font-weight: 700;
+      margin-bottom: 9px;
+    }
+
+    .quick {
+      color: var(--muted);
+      font-size: 0.92rem;
+      line-height: 1.45;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(8px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 1020px) {
+      .split,
+      .grid-4,
+      .control-grid,
+      .attack-grid,
+      .proof-row,
+      .timeline { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .flow { justify-content: center; }
+      .node { min-width: 130px; }
+      .zone-row { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 680px) {
+      .title { display: none; }
+      .progress-wrap { width: 110px; }
+      .deck { padding: 10px; }
+      .slide { padding: 16px; }
+      .split,
+      .grid-4,
+      .control-grid,
+      .attack-grid,
+      .proof-row,
+      .timeline { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="top-left">
+      <span class="tag">Professor Deck</span>
+      <div class="title">Secure Microservice Deployer · Better UI + Better Understanding</div>
+    </div>
+    <div class="controls">
+      <button id="prev">Prev</button>
+      <div class="count" id="count">1 / 8</div>
+      <button id="next">Next</button>
+      <button id="full">Fullscreen</button>
+      <div class="progress-wrap"><div id="progress" class="progress"></div></div>
+    </div>
+  </header>
+
+  <nav class="mapbar" id="mapbar"></nav>
+
+  <main class="deck">
+    <section class="slide active" data-title="Project">
+      <span class="kicker">Slide 1 · Project in 20 Seconds</span>
+      <h1>Secure Microservice Deployer</h1>
+      <p class="subtitle">Deploy microservices fast, expose them safely, and prove protection with visible evidence.</p>
+      <div class="grid-4">
+        <div class="metric"><b>1</b><span>Public Gateway</span></div>
+        <div class="metric"><b>4</b><span>Security Controls</span></div>
+        <div class="metric"><b>2</b><span>Scan Layers</span></div>
+        <div class="metric"><b>3</b><span>Proof Codes</span></div>
+      </div>
+      <div class="split">
+        <article class="panel">
+          <h3>Without this platform</h3>
+          <div class="mini-list">
+            <div class="mini-item">Many direct service exposures</div>
+            <div class="mini-item">Inconsistent security logic</div>
+            <div class="mini-item">Hard-to-prove protection</div>
+          </div>
+        </article>
+        <article class="panel">
+          <h3>With this platform</h3>
+          <div class="mini-list">
+            <div class="mini-item">Single controlled ingress path</div>
+            <div class="mini-item">Centralized policy enforcement</div>
+            <div class="mini-item">Deterministic evidence (401/403/429)</div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Architecture">
+      <span class="kicker">Slide 2 · Architecture</span>
+      <h2>Single Controlled Traffic Path</h2>
+      <div class="split">
+        <article class="panel">
+          <h3>Flow</h3>
+          <div class="flow">
+            <div class="node">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="12" rx="2"/><path d="M12 16v4"/><path d="M8 20h8"/></svg>
+              Frontend<br>30000
+            </div>
+            <div class="arrow"></div>
+            <div class="node">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="14" rx="2"/><path d="M8 9h8"/><path d="M8 13h6"/></svg>
+              Deployer API
+            </div>
+            <div class="arrow"></div>
+            <div class="node">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 11h16"/><path d="M6 7h12"/><path d="M6 15h12"/><rect x="3" y="5" width="18" height="14" rx="2"/></svg>
+              Gateway<br>30080
+            </div>
+            <div class="arrow"></div>
+            <div class="node">
+              <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>
+              User Service<br>ClusterIP
+            </div>
+          </div>
+        </article>
+        <article class="panel">
+          <h3>Trust Boundary</h3>
+          <div class="zone-wrap">
+            <div class="zone-row">
+              <div class="zone">External Zone<br>Gateway entry only</div>
+              <div class="zone">Internal Zone<br>User services stay private</div>
+            </div>
+          </div>
+          <div class="quick" style="margin-top:10px;">Professor takeaway: one public door, many internal services, centralized control.</div>
+        </article>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Controls">
+      <span class="kicker">Slide 3 · Security Board</span>
+      <h2>4 Runtime Controls at Gateway</h2>
+      <div class="control-grid">
+        <div class="control">
+          <svg class="mini-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 5 6v6c0 5 3.5 8.5 7 9 3.5-.5 7-4 7-9V6z"/></svg>
+          <div class="name">WAF (SQLi/XSS)</div>
+          <div class="desc">Inspects path/query/body and blocks suspicious payloads.</div>
+        </div>
+        <div class="control">
+          <svg class="mini-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16"/><path d="M4 12h10"/><path d="M4 17h7"/></svg>
+          <div class="name">Header Rules</div>
+          <div class="desc">Strips dangerous headers and enforces content-type checks.</div>
+        </div>
+        <div class="control">
+          <svg class="mini-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+          <div class="name">Rate Limiting</div>
+          <div class="desc">Protects fairness by throttling abusive request bursts.</div>
+        </div>
+        <div class="control">
+          <svg class="mini-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 1 1 8 0v3"/></svg>
+          <div class="name">API-Key Routes</div>
+          <div class="desc">Protects selected sensitive endpoints without blocking all routes.</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Proof">
+      <span class="kicker">Slide 4 · Attack to Evidence</span>
+      <h2>Simple Professor Proof Board</h2>
+      <div class="attack-grid">
+        <div class="attack">
+          <svg class="mini-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16"/><path d="M7 12h10"/><path d="M10 18h4"/></svg>
+          <div class="name">SQL Injection</div>
+          <div class="code">HTTP 403</div>
+        </div>
+        <div class="attack">
+          <svg class="mini-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg>
+          <div class="name">XSS Payload</div>
+          <div class="code">HTTP 403</div>
+        </div>
+        <div class="attack">
+          <svg class="mini-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 12h18"/><path d="M12 3v18"/></svg>
+          <div class="name">Flood Requests</div>
+          <div class="code">HTTP 429</div>
+        </div>
+        <div class="attack">
+          <svg class="mini-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 1 1 8 0v3"/></svg>
+          <div class="name">Protected Route</div>
+          <div class="code">HTTP 401</div>
+        </div>
+      </div>
+      <div class="proof-row">
+        <div class="proof"><b style="color:var(--rose);">403</b><span>WAF Block</span></div>
+        <div class="proof"><b style="color:var(--gold);">429</b><span>Rate Limit</span></div>
+        <div class="proof"><b style="color:var(--teal);">401</b><span>Auth Reject</span></div>
+        <div class="proof"><b style="color:var(--blue);">Logs</b><span>Evidence Saved</span></div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Validation">
+      <span class="kicker">Slide 5 · Security Validation</span>
+      <h2>Two-Layer Scan Story</h2>
+      <div class="split">
+        <article class="panel">
+          <h3>Layer 1 · Image Risk</h3>
+          <div class="mini-item">Trivy scans package/dependency vulnerabilities before trust.</div>
+        </article>
+        <article class="panel">
+          <h3>Layer 2 · Runtime Behavior</h3>
+          <div class="mini-item">Nikto scans running service exposure after deployment.</div>
+        </article>
+      </div>
+      <div class="big-card" style="margin-top:12px;">
+        <div class="final">Image scan + runtime scan = stronger assurance than either alone.</div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Demo Plan">
+      <span class="kicker">Slide 6 · 5-Minute Demonstration</span>
+      <h2>What to Show, In Order</h2>
+      <div class="timeline">
+        <div class="step">Deploy service</div>
+        <div class="step">Open gateway URL</div>
+        <div class="step">Send attack input</div>
+        <div class="step">Show 401/403/429</div>
+        <div class="step">Open WAF stats</div>
+        <div class="step">Show scan results</div>
+      </div>
+      <div class="big-card" style="margin-top:12px;">
+        <div class="final">Always show both response code and evidence log.</div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Conclusion">
+      <span class="kicker">Slide 7 · Final Message</span>
+      <div class="big-center">
+        <div class="big-card">
+          <div class="final">This is not only deployment automation.<br>It is secure-by-default exposure with measurable protection.</div>
+          <div class="quick">Viva line: "I built centralized enforcement and visible proof, not just deployment convenience."</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="slide" data-title="Q&A Ready">
+      <span class="kicker">Slide 8 · Q&A Ready Snapshot</span>
+      <h2>Professor Quick Evaluation Checklist</h2>
+      <div class="split">
+        <article class="panel">
+          <h3>Architecture</h3>
+          <div class="mini-list">
+            <div class="mini-item">Single public gateway</div>
+            <div class="mini-item">Internal-only user services</div>
+            <div class="mini-item">Central policy location</div>
+          </div>
+        </article>
+        <article class="panel">
+          <h3>Evidence</h3>
+          <div class="mini-list">
+            <div class="mini-item">403: WAF block proof</div>
+            <div class="mini-item">429: rate limit proof</div>
+            <div class="mini-item">401: auth proof + logs</div>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const prevBtn = document.getElementById('prev');
+    const nextBtn = document.getElementById('next');
+    const fullBtn = document.getElementById('full');
+    const count = document.getElementById('count');
+    const progress = document.getElementById('progress');
+    const mapbar = document.getElementById('mapbar');
+
+    let idx = 0;
+
+    slides.forEach((slide, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'map-btn';
+      btn.textContent = `${i + 1}. ${slide.dataset.title || 'Slide'}`;
+      btn.addEventListener('click', () => {
+        idx = i;
+        render();
+      });
+      mapbar.appendChild(btn);
+    });
+
+    const mapButtons = Array.from(document.querySelectorAll('.map-btn'));
+
+    function render() {
+      slides.forEach((slide, i) => slide.classList.toggle('active', i === idx));
+      mapButtons.forEach((btn, i) => btn.classList.toggle('active', i === idx));
+      count.textContent = `${idx + 1} / ${slides.length}`;
+      progress.style.width = `${((idx + 1) / slides.length) * 100}%`;
+      prevBtn.disabled = idx === 0;
+      nextBtn.disabled = idx === slides.length - 1;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function prev() {
+      if (idx > 0) {
+        idx -= 1;
+        render();
+      }
+    }
+
+    function next() {
+      if (idx < slides.length - 1) {
+        idx += 1;
+        render();
+      }
+    }
+
+    async function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    }
+
+    prevBtn.addEventListener('click', prev);
+    nextBtn.addEventListener('click', next);
+    fullBtn.addEventListener('click', toggleFullscreen);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') next();
+      if (e.key === 'ArrowLeft' || e.key === 'PageUp') prev();
+      if (e.key === 'Home') { idx = 0; render(); }
+      if (e.key === 'End') { idx = slides.length - 1; render(); }
+      if (e.key.toLowerCase() === 'f') toggleFullscreen();
+    });
+
+    render();
+  </script>
+</body>
+</html>

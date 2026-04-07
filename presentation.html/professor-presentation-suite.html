@@ -1,0 +1,541 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Secure Microservice Deployer - Slide Deck</title>
+  <style>
+    :root {
+      --bg: #f2f7f4;
+      --card: #ffffff;
+      --ink: #11202e;
+      --muted: #4a5a68;
+      --line: #d4dee6;
+      --teal: #0f766e;
+      --blue: #0b5cad;
+      --amber: #a5480a;
+      --ok: #14532d;
+      --warn: #9a3412;
+      --shadow: 0 18px 40px rgba(16, 35, 52, 0.1);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Avenir Next", "Segoe UI", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 10% 0%, #d1fae5 0%, transparent 34%),
+        radial-gradient(circle at 90% 0%, #dbeafe 0%, transparent 28%),
+        var(--bg);
+    }
+
+    .topbar {
+      position: sticky;
+      top: 0;
+      z-index: 40;
+      backdrop-filter: blur(6px);
+      background: rgba(242, 247, 244, 0.82);
+      border-bottom: 1px solid var(--line);
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .title {
+      font-weight: 800;
+      letter-spacing: 0.2px;
+      color: #0f2d45;
+      font-size: 0.95rem;
+    }
+
+    .controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 1px solid #bdd0dc;
+      background: #eef7ff;
+      color: #0d3d5f;
+      border-radius: 999px;
+      padding: 8px 11px;
+      font: inherit;
+      font-size: 0.83rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    button:hover { filter: brightness(0.98); }
+    button:disabled { opacity: 0.55; cursor: not-allowed; }
+
+    .counter {
+      font-weight: 700;
+      color: #314758;
+      min-width: 70px;
+      text-align: center;
+      font-size: 0.9rem;
+    }
+
+    .progress-wrap {
+      height: 5px;
+      width: 170px;
+      background: #d8e5ee;
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress {
+      height: 100%;
+      width: 0;
+      background: linear-gradient(90deg, var(--teal), var(--blue));
+      transition: width 220ms ease;
+    }
+
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    .slide {
+      display: none;
+      min-height: calc(100vh - 115px);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--card);
+      box-shadow: var(--shadow);
+      padding: 26px;
+      animation: in 220ms ease;
+    }
+
+    .slide.active { display: block; }
+
+    .eyebrow {
+      display: inline-block;
+      font-size: 0.78rem;
+      letter-spacing: 1px;
+      font-weight: 800;
+      color: var(--teal);
+      background: #e7fbf5;
+      border: 1px solid #b2eddc;
+      border-radius: 999px;
+      padding: 4px 10px;
+      margin-bottom: 12px;
+      text-transform: uppercase;
+    }
+
+    h1, h2 {
+      margin: 0 0 12px;
+      line-height: 1.2;
+      color: #0f2d45;
+    }
+
+    h1 { font-size: clamp(1.7rem, 3vw, 2.4rem); }
+    h2 { font-size: clamp(1.35rem, 2.2vw, 1.8rem); }
+
+    p { color: var(--muted); margin: 0 0 12px; }
+
+    .split {
+      display: grid;
+      grid-template-columns: 1.1fr 1fr;
+      gap: 14px;
+    }
+
+    .card {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px;
+      background: #fbfeff;
+    }
+
+    .badge-row { margin-top: 12px; }
+
+    .badge {
+      display: inline-block;
+      margin: 4px 6px 0 0;
+      border-radius: 999px;
+      border: 1px solid #b3e8d5;
+      background: #ebfff7;
+      color: #0f644e;
+      padding: 5px 9px;
+      font-size: 0.82rem;
+      font-weight: 700;
+    }
+
+    ul {
+      margin: 8px 0 0;
+      padding-left: 20px;
+      color: #2b4251;
+    }
+
+    li { margin: 8px 0; }
+
+    .flow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .node {
+      border: 1px solid var(--line);
+      background: #f8fdff;
+      border-radius: 12px;
+      padding: 10px 12px;
+      font-weight: 700;
+      min-width: 135px;
+      text-align: center;
+      color: #113249;
+    }
+
+    .arrow {
+      font-size: 1.15rem;
+      color: #3f6075;
+      font-weight: 800;
+    }
+
+    .highlight {
+      background: #fff8e8;
+      border-color: #f4dab1;
+    }
+
+    .evidence {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      background: #fbfdff;
+      padding: 11px;
+      font-size: 0.92rem;
+      color: #2f4859;
+    }
+
+    .metric b {
+      display: block;
+      font-size: 1.45rem;
+      color: #0e6b63;
+      margin-bottom: 4px;
+    }
+
+    .notes {
+      margin-top: 14px;
+      border: 1px dashed #c6d4df;
+      background: #fbfef8;
+      border-radius: 11px;
+      padding: 10px;
+      font-size: 0.9rem;
+      color: #3f5565;
+      display: none;
+    }
+
+    .show-notes .notes { display: block; }
+
+    .kbd {
+      border: 1px solid #bfd2df;
+      background: #f4fbff;
+      border-radius: 7px;
+      padding: 2px 7px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #2a4d63;
+    }
+
+    .footer-line {
+      margin-top: 18px;
+      color: #4d6373;
+      font-size: 0.9rem;
+    }
+
+    @keyframes in {
+      from { opacity: 0; transform: translateY(7px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 900px) {
+      .split { grid-template-columns: 1fr; }
+      .evidence { grid-template-columns: 1fr; }
+      .topbar { padding: 8px 10px; }
+      .title { display: none; }
+      .progress-wrap { width: 120px; }
+    }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <div class="title">Secure Microservice Deployer · Professor Deck</div>
+    <div class="controls">
+      <button id="prevBtn">Prev</button>
+      <div class="counter" id="counter">1 / 10</div>
+      <button id="nextBtn">Next</button>
+      <button id="notesBtn">Notes</button>
+      <button id="fullBtn">Fullscreen</button>
+      <div class="progress-wrap"><div id="progress" class="progress"></div></div>
+    </div>
+  </header>
+
+  <main id="deck">
+    <section class="slide active">
+      <span class="eyebrow">Slide 1 · Title</span>
+      <h1>Secure Microservice Deployer</h1>
+      <p>Deploy, protect, and verify Kubernetes microservices from one controlled platform.</p>
+      <div class="badge-row">
+        <span class="badge">Kubernetes</span>
+        <span class="badge">Gateway-Centric Security</span>
+        <span class="badge">Trivy + Nikto</span>
+      </div>
+      <div class="card" style="margin-top:14px;">
+        <b>Opening line:</b>
+        <p style="margin-top:6px;">This project combines deployment and runtime security in one workflow so services are not just running, but safely exposed and verifiably protected.</p>
+      </div>
+      <div class="notes">Start calm and confident. Keep first slide under 20 seconds.</div>
+    </section>
+
+    <section class="slide">
+      <span class="eyebrow">Slide 2 · Problem</span>
+      <h2>Problem and Threat Model</h2>
+      <div class="split">
+        <div class="card">
+          <b>Problem:</b>
+          <ul>
+            <li>Microservices often get exposed directly after deployment.</li>
+            <li>Security controls become inconsistent across teams.</li>
+            <li>Observability is weak when enforcement is scattered.</li>
+          </ul>
+        </div>
+        <div class="card highlight">
+          <b>Threats addressed:</b>
+          <ul>
+            <li>SQL injection and XSS payloads</li>
+            <li>Abusive/flood traffic</li>
+            <li>Unauthorized access to sensitive routes</li>
+          </ul>
+        </div>
+      </div>
+      <div class="notes">Phrase: "safe access, not zero access".</div>
+    </section>
+
+    <section class="slide">
+      <span class="eyebrow">Slide 3 · Architecture</span>
+      <h2>Architecture Overview</h2>
+      <div class="flow" style="margin-top:10px;">
+        <div class="node">Frontend<br>(NodePort 30000)</div>
+        <div class="arrow">→</div>
+        <div class="node">Deployer Backend<br>(ClusterIP)</div>
+        <div class="arrow">→</div>
+        <div class="node">User Services<br>(ClusterIP only)</div>
+        <div class="arrow">→</div>
+        <div class="node">Gateway<br>(NodePort 30080)</div>
+      </div>
+      <div class="card" style="margin-top:14px;">
+        <b>Security policy:</b>
+        <p style="margin-top:6px;">All user-deployed services remain internal. Public ingress is centralized at the gateway for enforceable policy checks.</p>
+      </div>
+      <div class="notes">Say: "single front door, many internal rooms".</div>
+    </section>
+
+    <section class="slide">
+      <span class="eyebrow">Slide 4 · Workflow</span>
+      <h2>Deployment Workflow</h2>
+      <div class="flow" style="margin-top:10px;">
+        <div class="node">1. Upload Image</div>
+        <div class="arrow">→</div>
+        <div class="node">2. Deploy to K8s</div>
+        <div class="arrow">→</div>
+        <div class="node">3. Register Route</div>
+        <div class="arrow">→</div>
+        <div class="node">4. Access via Gateway</div>
+      </div>
+      <ul>
+        <li>Lifecycle APIs support deploy, list, start/stop, redeploy, rename, and delete.</li>
+        <li>Operational flow stays simple while security stays centralized.</li>
+      </ul>
+      <div class="notes">Use one practical example service name while speaking.</div>
+    </section>
+
+    <section class="slide">
+      <span class="eyebrow">Slide 5 · Controls</span>
+      <h2>Gateway Security Controls</h2>
+      <div class="split">
+        <div class="card">
+          <b>Traffic protection:</b>
+          <ul>
+            <li>WAF checks for SQLi and XSS patterns</li>
+            <li>Header sanitization and content-type enforcement</li>
+            <li>Structured block event logging</li>
+          </ul>
+        </div>
+        <div class="card">
+          <b>Access and abuse control:</b>
+          <ul>
+            <li>Per-service and per-route rate limits</li>
+            <li>Route-level API key protection</li>
+            <li>Redis-backed policy state and counters</li>
+          </ul>
+        </div>
+      </div>
+      <div class="notes">Mention 403, 429, 401 here once as anchor outcomes.</div>
+    </section>
+
+    <section class="slide">
+      <span class="eyebrow">Slide 6 · Scanning</span>
+      <h2>Two-Layer Vulnerability Validation</h2>
+      <div class="split">
+        <div class="card highlight">
+          <b>Trivy (image layer):</b>
+          <ul>
+            <li>Scans container image contents</li>
+            <li>Reports severity counts</li>
+            <li>Good for pre-trust package risk</li>
+          </ul>
+        </div>
+        <div class="card">
+          <b>Nikto (runtime layer):</b>
+          <ul>
+            <li>Scans running web endpoint behavior</li>
+            <li>Finds exposed server/web weaknesses</li>
+            <li>Complements image scanning</li>
+          </ul>
+        </div>
+      </div>
+      <div class="notes">Key phrase: "different layers, different answers".</div>
+    </section>
+
+    <section class="slide">
+      <span class="eyebrow">Slide 7 · Evidence</span>
+      <h2>Demo Proof and Measurable Outcomes</h2>
+      <div class="evidence">
+        <div class="metric"><b>403</b>WAF blocks malicious SQLi/XSS payloads</div>
+        <div class="metric"><b>429</b>Rate limiter throttles abusive bursts</div>
+        <div class="metric"><b>401</b>Protected routes reject missing/invalid API keys</div>
+      </div>
+      <div class="card" style="margin-top:12px;">
+        <b>Proof source:</b>
+        <p style="margin-top:6px;">WAF events and stats are persisted, so we can show visible evidence instead of only configuration claims.</p>
+      </div>
+      <div class="notes">Always show logs/stats after showing blocked request.</div>
+    </section>
+
+    <section class="slide">
+      <span class="eyebrow">Slide 8 · Limits</span>
+      <h2>Limitations and Honest Tradeoffs</h2>
+      <ul>
+        <li>Regex-based detection can have false positives/false negatives.</li>
+        <li>Current setup depends on Redis availability for richer state.</li>
+        <li>Production hardening needs stricter policy gates.</li>
+      </ul>
+      <div class="card highlight" style="margin-top:12px;">
+        <b>Why this is still strong:</b>
+        <p style="margin-top:6px;">It is a practical, demonstrable foundation where security is built into platform flow, not added as an afterthought.</p>
+      </div>
+      <div class="notes">Professors appreciate clear limits when paired with rationale.</div>
+    </section>
+
+    <section class="slide">
+      <span class="eyebrow">Slide 9 · Future</span>
+      <h2>Future Scope</h2>
+      <ul>
+        <li>Policy gates before deployment (critical vulnerability thresholds)</li>
+        <li>Signed image verification (Cosign)</li>
+        <li>mTLS between services via mesh</li>
+        <li>SIEM integration for long-term detection and alerting</li>
+      </ul>
+      <div class="notes">Keep it concise: one sentence per bullet.</div>
+    </section>
+
+    <section class="slide">
+      <span class="eyebrow">Slide 10 · Closing</span>
+      <h2>Conclusion</h2>
+      <p><b>Final line:</b> This project delivers secure-by-default microservice deployment with centralized enforcement and measurable security evidence.</p>
+      <div class="card" style="margin-top:14px;">
+        <b>Keyboard shortcuts:</b>
+        <p style="margin-top:8px;">
+          <span class="kbd">←</span> Prev
+          <span class="kbd">→</span> Next
+          <span class="kbd">N</span> Notes
+          <span class="kbd">F</span> Fullscreen
+          <span class="kbd">Home</span> First slide
+          <span class="kbd">End</span> Last slide
+        </p>
+      </div>
+      <p class="footer-line">Thank you. I am ready for questions.</p>
+      <div class="notes">Pause and smile after the final line.</div>
+    </section>
+  </main>
+
+  <script>
+    const slides = Array.from(document.querySelectorAll('.slide'));
+    const deck = document.getElementById('deck');
+    const counter = document.getElementById('counter');
+    const progress = document.getElementById('progress');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+    const notesBtn = document.getElementById('notesBtn');
+    const fullBtn = document.getElementById('fullBtn');
+
+    let idx = 0;
+
+    function render() {
+      slides.forEach((s, i) => s.classList.toggle('active', i === idx));
+      counter.textContent = `${idx + 1} / ${slides.length}`;
+      progress.style.width = `${((idx + 1) / slides.length) * 100}%`;
+      prevBtn.disabled = idx === 0;
+      nextBtn.disabled = idx === slides.length - 1;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function prev() {
+      if (idx > 0) {
+        idx -= 1;
+        render();
+      }
+    }
+
+    function next() {
+      if (idx < slides.length - 1) {
+        idx += 1;
+        render();
+      }
+    }
+
+    function toggleNotes() {
+      document.body.classList.toggle('show-notes');
+      notesBtn.textContent = document.body.classList.contains('show-notes') ? 'Notes On' : 'Notes';
+    }
+
+    async function toggleFullscreen() {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen();
+      } else {
+        await document.exitFullscreen();
+      }
+    }
+
+    prevBtn.addEventListener('click', prev);
+    nextBtn.addEventListener('click', next);
+    notesBtn.addEventListener('click', toggleNotes);
+    fullBtn.addEventListener('click', toggleFullscreen);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown') next();
+      if (e.key === 'ArrowLeft' || e.key === 'PageUp') prev();
+      if (e.key === 'Home') { idx = 0; render(); }
+      if (e.key === 'End') { idx = slides.length - 1; render(); }
+      if (e.key.toLowerCase() === 'n') toggleNotes();
+      if (e.key.toLowerCase() === 'f') toggleFullscreen();
+    });
+
+    render();
+  </script>
+</body>
+</html>
