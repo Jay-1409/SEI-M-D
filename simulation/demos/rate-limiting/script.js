@@ -1,7 +1,8 @@
 (function () {
-  const RATE_LIMIT_THRESHOLD = 5;
-  const RATE_LIMIT_WINDOW_MS = 3000;
-  const LIVE_NORMAL_REQUESTS = 3;
+  const LIVE_NORMAL_REQUESTS = 1;
+  const GLOBAL_ENV_API = window.SimulationGlobalEnv;
+  const DEFAULT_SERVICE_NAME = "expo-unified-target";
+  const DEFAULT_GATEWAY_BASE_URL = "http://localhost:30080";
 
   const SPEED_MAP = {
     slow: 420,
@@ -9,45 +10,45 @@
     fast: 110,
   };
 
-  const LIVE_DEFAULTS = {
-    gatewayBaseUrl: "http://localhost:30080",
-    targetRoute: "/expo-rate-limit-demo/tickets",
-    platformApiBase: "http://localhost:30000/api",
-  };
+  function getConfiguredServiceName() {
+    if (GLOBAL_ENV_API && typeof GLOBAL_ENV_API.getConfig === "function") {
+      const config = GLOBAL_ENV_API.getConfig();
+      if (config && typeof config.serviceName === "string" && config.serviceName.trim()) {
+        return config.serviceName.trim();
+      }
+    }
+    return DEFAULT_SERVICE_NAME;
+  }
+
+  function getDefaultTargetUrl() {
+    const serviceName = getConfiguredServiceName();
+    if (GLOBAL_ENV_API && typeof GLOBAL_ENV_API.buildGatewayUrl === "function") {
+      return GLOBAL_ENV_API.buildGatewayUrl(DEFAULT_GATEWAY_BASE_URL, serviceName, "/tickets");
+    }
+    return `${DEFAULT_GATEWAY_BASE_URL}/${serviceName}/tickets`;
+  }
 
   const state = {
-    mode: "on",
-    connectionMode: "local",
+    targetUrl: getDefaultTargetUrl(),
     totalRequests: 0,
     normalAllowed: 0,
     spamAllowed: 0,
     spamBlocked: 0,
+    normalDelaySamples: [],
     pressure: "low",
     activeRequests: 0,
     floodRunning: false,
-    replayRunning: false,
     requestId: 1,
-    botWindow: [],
     logEntries: [],
     timers: new Set(),
-    liveConfig: { ...LIVE_DEFAULTS },
-    liveProof: {
-      serviceName: "",
-      targetLabel: "Not configured",
-      configSummary: "Unknown",
-      lastResult: "No live request yet",
-      source: "Gateway responses only",
-    },
   };
 
   const elements = {
-    modeHeadline: document.getElementById("modeHeadline"),
-    modeToggle: document.getElementById("modeToggle"),
+    targetUrlInput: document.getElementById("targetUrlInput"),
     speedSelect: document.getElementById("speedSelect"),
     burstSelect: document.getElementById("burstSelect"),
     normalButton: document.getElementById("normalButton"),
     spamButton: document.getElementById("spamButton"),
-    replayButton: document.getElementById("replayButton"),
     resetButton: document.getElementById("resetButton"),
     gateBadge: document.getElementById("gateBadge"),
     modePill: document.getElementById("modePill"),
@@ -55,7 +56,6 @@
     pressureFill: document.getElementById("pressureFill"),
     serverBox: document.getElementById("serverBox"),
     serverHint: document.getElementById("serverHint"),
-    narrationText: document.getElementById("narrationText"),
     totalRequests: document.getElementById("totalRequests"),
     normalAllowed: document.getElementById("normalAllowed"),
     spamAllowed: document.getElementById("spamAllowed"),
@@ -67,19 +67,6 @@
     summaryCard: document.getElementById("summaryCard"),
     summaryHeadline: document.getElementById("summaryHeadline"),
     summaryText: document.getElementById("summaryText"),
-    connectionModeBadge: document.getElementById("connectionModeBadge"),
-    connectionModeSelect: document.getElementById("connectionModeSelect"),
-    liveConfigFields: document.getElementById("liveConfigFields"),
-    gatewayBaseUrlInput: document.getElementById("gatewayBaseUrlInput"),
-    targetRouteInput: document.getElementById("targetRouteInput"),
-    platformApiBaseInput: document.getElementById("platformApiBaseInput"),
-    liveDefaultsButton: document.getElementById("liveDefaultsButton"),
-    liveProofCard: document.getElementById("liveProofCard"),
-    liveProofService: document.getElementById("liveProofService"),
-    liveProofTarget: document.getElementById("liveProofTarget"),
-    liveProofConfig: document.getElementById("liveProofConfig"),
-    liveProofLastResult: document.getElementById("liveProofLastResult"),
-    liveProofSource: document.getElementById("liveProofSource"),
   };
 
   function registerTimer(callback, delay) {
@@ -112,66 +99,6 @@
     return id;
   }
 
-  function normalizeBaseUrl(value) {
-    return value.trim().replace(/\/+$/, "");
-  }
-
-  function normalizeRoutePath(value) {
-    const trimmed = value.trim();
-    if (!trimmed) {
-      return "";
-    }
-    return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
-  }
-
-  function inferServiceName(routePath) {
-    const normalized = normalizeRoutePath(routePath);
-    if (!normalized) {
-      return "";
-    }
-    const parts = normalized.split("/").filter(Boolean);
-    return parts[0] || "";
-  }
-
-  function buildLiveTargetUrl() {
-    const baseUrl = normalizeBaseUrl(state.liveConfig.gatewayBaseUrl);
-    const routePath = normalizeRoutePath(state.liveConfig.targetRoute);
-    if (!baseUrl || !routePath) {
-      return "";
-    }
-    return `${baseUrl}${routePath}`;
-  }
-
-
-  function updateModeUI() {
-    const liveMode = state.connectionMode === "live";
-    const protectedMode = state.mode === "on";
-
-    if (liveMode) {
-      elements.modeHeadline.textContent = "Platform Controlled";
-      elements.modeToggle.textContent = "Use platform UI";
-      elements.modeToggle.className = "toggle-button platform";
-      elements.gateBadge.textContent = "Live Gateway Route";
-      elements.gateBadge.className = "gate-badge live";
-      elements.modePill.textContent = "Live";
-      elements.modePill.className = "mode-pill live";
-      elements.serverHint.textContent =
-        "Real responses now come from the configured gateway route and its current rate-limit policy.";
-      return;
-    }
-
-    elements.modeHeadline.textContent = protectedMode ? "Rate Limit ON" : "Rate Limit OFF";
-    elements.modeToggle.textContent = protectedMode ? "Switch to OFF" : "Switch to ON";
-    elements.modeToggle.className = `toggle-button ${protectedMode ? "protected" : "unprotected"}`;
-    elements.gateBadge.textContent = protectedMode ? "Rate Limiter Active" : "No Limit";
-    elements.gateBadge.className = `gate-badge ${protectedMode ? "protected" : "unprotected"}`;
-    elements.modePill.textContent = protectedMode ? "Protected" : "Unprotected";
-    elements.modePill.className = `mode-pill ${protectedMode ? "protected" : "unprotected"}`;
-    elements.serverHint.textContent = protectedMode
-      ? "Protected traffic stays fair and stable."
-      : "Flood traffic can keep entering unchecked.";
-  }
-
   function updatePressure() {
     let pressure = "low";
     let width = 18;
@@ -197,23 +124,12 @@
     elements.spamBlocked.textContent = String(state.spamBlocked);
   }
 
-  function setNarration(text) {
-    if (elements.narrationText) {
-      elements.narrationText.textContent = text;
-    }
-  }
-
   function setActionLocks(disabled) {
-    elements.modeToggle.disabled = disabled || state.connectionMode === "live";
+    elements.targetUrlInput.disabled = disabled;
     elements.speedSelect.disabled = disabled;
     elements.burstSelect.disabled = disabled;
-    elements.replayButton.disabled = disabled || state.connectionMode === "live";
+    elements.normalButton.disabled = disabled;
     elements.spamButton.disabled = disabled;
-    elements.connectionModeSelect.disabled = disabled;
-    elements.gatewayBaseUrlInput.disabled = disabled;
-    elements.targetRouteInput.disabled = disabled;
-    elements.platformApiBaseInput.disabled = disabled;
-    elements.liveDefaultsButton.disabled = disabled;
   }
 
   function updateLogHint(text) {
@@ -302,18 +218,11 @@
       reason:
         reasonOverride ||
         (status === "blocked"
-          ? "Rate limit exceeded"
+          ? "HTTP 429 Too Many Requests"
           : status === "waiting"
             ? "Target missing or unexpected response"
-            : actor === "customer"
-              ? "Normal traffic"
-              : "Accepted by gateway"),
+            : "Gateway accepted request"),
     });
-  }
-
-  function trimBotWindow() {
-    const cutoff = Date.now() - RATE_LIMIT_WINDOW_MS;
-    state.botWindow = state.botWindow.filter((stamp) => stamp >= cutoff);
   }
 
   function flashServer(status) {
@@ -325,6 +234,16 @@
     registerTimer(() => {
       elements.serverBox.classList.remove(cssClass);
     }, 500);
+  }
+
+  function getQueueDelayMs(actor) {
+    if (actor !== "customer" || !state.floodRunning) {
+      return 0;
+    }
+
+    const baseDelay = state.spamBlocked > 0 ? 280 : 1050;
+    const loadPenalty = Math.min(850, state.activeRequests * 35);
+    return baseDelay + loadPenalty;
   }
 
   function trackResolvedRequest(status, actor, requestId, reason) {
@@ -348,125 +267,28 @@
     }, status === "blocked" ? 650 : 1200);
   }
 
-  function setLiveProofLastResult(text) {
-    state.liveProof.lastResult = text;
-  }
-
-  async function refreshLiveProof() {
-    const apiBase = normalizeBaseUrl(state.liveConfig.platformApiBase);
-    const serviceName = inferServiceName(state.liveConfig.targetRoute);
-    const targetUrl = buildLiveTargetUrl();
-
-    state.liveProof.serviceName = serviceName || "Not configured";
-    state.liveProof.targetLabel = targetUrl || "Not configured";
-    state.liveProof.configSummary = "Unknown";
-    state.liveProof.source = "Gateway responses only";
-
-    if (!apiBase || !serviceName) {
-      return;
-    }
-
-    try {
-      const response = await fetch(`${apiBase}/services/${serviceName}/ratelimit`);
-      if (!response.ok) {
-        return;
-      }
-      const payload = await response.json();
-      const globalSummary = payload.enabled
-        ? `ON | global ${payload.limit} requests / ${payload.window}s`
-        : "OFF";
-      const routeRelativePath = (() => {
-        const routePath = normalizeRoutePath(state.liveConfig.targetRoute);
-        const prefix = `/${serviceName}`;
-        const stripped = routePath.startsWith(prefix) ? routePath.slice(prefix.length) : routePath;
-        return stripped || "/";
-      })();
-      const routeMatch = Array.isArray(payload.routes)
-        ? payload.routes.find((route) => route.path === routeRelativePath)
-        : null;
-
-      state.liveProof.configSummary = routeMatch
-        ? `${globalSummary} | route ${routeMatch.method} ${routeMatch.path} => ${routeMatch.limit} / ${routeMatch.window}s`
-        : globalSummary;
-      state.liveProof.source = "Gateway responses + platform rate-limit config";
-    } catch (error) {
-      state.liveProof.source = "Gateway responses only";
-    }
-  }
-
-  function updateNarrationForLocal(status, actor) {
-    if (status === "blocked") {
-      setNarration(
-        "The gate is now rejecting repeated bot requests with 429 Too Many Requests, while genuine visitors can still get through."
-      );
-      updateLogHint("Blocked events are visible now");
-      return;
-    }
-
-    if (status === "waiting") {
-      setNarration(
-        "Without rate limiting, flood traffic is crowding the line. Real visitors start feeling delay and unfairness."
-      );
-      updateLogHint("Queue pressure is affecting normal traffic");
-      return;
-    }
-
-    if (actor === "customer") {
-      setNarration(
-        state.mode === "on"
-          ? "A normal customer is still booking successfully. Rate limiting stays invisible for fair use."
-          : "A normal customer can still book now, but flood traffic can quickly push the queue into unfair territory."
-      );
-      updateLogHint("Normal request accepted");
-      return;
-    }
-
-    updateLogHint("Flood traffic accepted");
-  }
-
-  function sendLocalRequest(actor, options) {
-    const { waitingOverride = false } = options || {};
-    const requestId = nextRequestId(actor);
-
-    state.totalRequests += 1;
-    state.activeRequests += 1;
-    updatePressure();
-
-    let status = "allowed";
-
-    if (actor === "bot") {
-      trimBotWindow();
-      if (state.mode === "on" && state.botWindow.length >= RATE_LIMIT_THRESHOLD) {
-        status = "blocked";
-      } else {
-        state.botWindow.push(Date.now());
-      }
-    }
-
-    if (actor === "customer" && waitingOverride) {
-      status = "waiting";
-    }
-
-    trackResolvedRequest(status, actor, requestId);
-    updateNarrationForLocal(status, actor);
-  }
-
   async function sendLiveRequest(actor) {
     const requestId = nextRequestId(actor);
-    const targetUrl = buildLiveTargetUrl();
+    const targetUrl = elements.targetUrlInput.value.trim();
+    const requestStartedAt = Date.now();
+    state.targetUrl = targetUrl;
 
     state.totalRequests += 1;
     state.activeRequests += 1;
     updatePressure();
 
     if (!targetUrl) {
-      trackResolvedRequest("waiting", actor, requestId, "Missing live gateway URL");
-      setLiveProofLastResult("Missing gateway base URL or target route");
-      renderConnectionState();
-      setNarration(
-        "The live path is not configured yet. Add the gateway URL and route or switch back to the local simulation."
-      );
+      trackResolvedRequest("waiting", actor, requestId, "Target URL is required");
+      updateLogHint("Set a target URL first");
       return;
+    }
+
+    const queueDelayMs = getQueueDelayMs(actor);
+    if (queueDelayMs > 0) {
+      addVisualRequest("customer", "waiting", requestId, `Normal user waiting in queue (${queueDelayMs} ms)`);
+      updateLogHint("Normal user is waiting due to flood load");
+      elements.serverHint.textContent = "Normal users are waiting longer while flood traffic is high.";
+      await new Promise((resolve) => registerTimer(resolve, queueDelayMs));
     }
 
     try {
@@ -478,130 +300,73 @@
           "X-Expo-Request-Id": requestId,
         },
       });
-
-      await refreshLiveProof();
+      const elapsedMs = Date.now() - requestStartedAt;
 
       if (response.status === 429) {
-        trackResolvedRequest("blocked", actor, requestId, "Real gateway returned 429 Too Many Requests");
-        setLiveProofLastResult(`HTTP 429 on ${requestId}`);
-        setNarration(
-          "This is real proof now: the gateway route is returning 429 Too Many Requests once the burst crosses the configured limit."
-        );
-        updateLogHint("Real 429 responses are now visible");
+        trackResolvedRequest("blocked", actor, requestId, `HTTP 429 in ${elapsedMs} ms`);
+        updateLogHint("Rate limit is blocking flood traffic");
       } else if (response.ok) {
-        trackResolvedRequest("allowed", actor, requestId, `Live route returned HTTP ${response.status}`);
-        setLiveProofLastResult(`HTTP ${response.status} on ${requestId}`);
-        setNarration(
-          actor === "customer"
-            ? "Normal traffic is getting real success responses through the gateway route."
-            : "The flood is still being accepted for now. Keep going until the route starts returning 429 if rate limiting is enabled."
-        );
-        updateLogHint(actor === "customer" ? "Real normal traffic accepted" : "Real flood traffic accepted");
+        const reason =
+          actor === "customer" && queueDelayMs > 0
+            ? `HTTP ${response.status} in ${elapsedMs} ms (delayed by flood)`
+            : `HTTP ${response.status} in ${elapsedMs} ms`;
+        trackResolvedRequest("allowed", actor, requestId, reason);
+
+        if (actor === "customer" && queueDelayMs > 0) {
+          state.normalDelaySamples.push(elapsedMs);
+          updateLogHint(`Normal user delayed: ${elapsedMs} ms response time`);
+          elements.serverHint.textContent = `Normal user response took ${elapsedMs} ms during flood load.`;
+        } else {
+          updateLogHint(actor === "customer" ? "Normal request accepted" : "Flood request accepted");
+        }
       } else {
-        trackResolvedRequest("waiting", actor, requestId, `Unexpected HTTP ${response.status}`);
-        setLiveProofLastResult(`HTTP ${response.status} on ${requestId}`);
-        setNarration(
-          "The request reached the live route, but the response was not a normal success or a 429 block. The route may still be usable, but it is not ideal for this expo story."
-        );
-        updateLogHint("Unexpected live response");
+        trackResolvedRequest("waiting", actor, requestId, `HTTP ${response.status} in ${elapsedMs} ms`);
+        updateLogHint("Unexpected response from target URL");
       }
     } catch (error) {
-      trackResolvedRequest("waiting", actor, requestId, `Browser could not reach the live gateway route: ${error.message}`);
-      setLiveProofLastResult(`Connection error on ${requestId}`);
-      setNarration(
-        "The live gateway request could not be completed. The demo keeps its local fallback so the expo story still works offline."
-      );
-      updateLogHint("Live route unreachable");
-    } finally {
-      renderConnectionState();
+      const elapsedMs = Date.now() - requestStartedAt;
+      trackResolvedRequest("waiting", actor, requestId, `Connection error after ${elapsedMs} ms: ${error.message}`);
+      updateLogHint("Target URL is unreachable");
     }
   }
 
   function finishFlood() {
     state.floodRunning = false;
+    setActionLocks(false);
     elements.summaryCard.classList.remove("hidden");
+    const avgNormalDelayMs = state.normalDelaySamples.length
+      ? Math.round(state.normalDelaySamples.reduce((sum, ms) => sum + ms, 0) / state.normalDelaySamples.length)
+      : 0;
 
-    if (!state.replayRunning) {
-      setActionLocks(false);
-      elements.normalButton.disabled = false;
+    if (state.spamBlocked > 0) {
+      elements.summaryHeadline.textContent = "Rate limiting is active";
+      elements.summaryText.textContent = avgNormalDelayMs > 0
+        ? `${state.spamBlocked} flood requests were blocked with HTTP 429. Normal users still waited about ${avgNormalDelayMs} ms during peak load.`
+        : `${state.spamBlocked} flood requests were blocked with HTTP 429 while normal traffic remained visible.`;
+    } else {
+      elements.summaryHeadline.textContent = "No 429 seen in this run";
+      elements.summaryText.textContent = avgNormalDelayMs > 0
+        ? `Flood traffic was accepted. Normal users waited about ${avgNormalDelayMs} ms and did not get fast responses.`
+        : "Flood traffic was accepted. Check target URL and rate-limit policy, then run again.";
     }
 
-    if (state.connectionMode === "live") {
-      if (state.spamBlocked > 0) {
-        elements.summaryHeadline.textContent = "Real gateway started blocking the flood";
-        elements.summaryText.textContent = `${state.spamAllowed} live flood requests were accepted and ${state.spamBlocked} came back as real 429 responses. Normal requests stayed visible in the same UI.`;
-        setNarration(
-          "Live mode proved the real platform behavior: the same gateway route allowed a few requests and then began returning 429 to slow the flood."
-        );
-      } else {
-        elements.summaryHeadline.textContent = "Live flood did not hit 429 yet";
-        elements.summaryText.textContent = `${state.spamAllowed} live flood requests were accepted and no 429 responses appeared yet. Check the platform rate-limit settings or lower the configured limit for a stronger expo run.`;
-        setNarration(
-          "The route is reachable, but the current live rate-limit setup did not produce 429 during this burst. The local mode is still available if you need guaranteed proof immediately."
-        );
-      }
+    if (avgNormalDelayMs > 0) {
+      elements.serverHint.textContent = `Normal users waited about ${avgNormalDelayMs} ms during the flood.`;
+    }
+  }
+
+  function startSpamFlood() {
+    if (state.floodRunning) {
       return;
     }
 
-    if (state.mode === "on") {
-      elements.summaryHeadline.textContent = "Flood slowed down, fair users still served";
-      elements.summaryText.textContent = `${state.spamAllowed} spam requests were allowed, ${state.spamBlocked} were blocked with 429 responses, and normal visitors stayed able to book.`;
-      setNarration(
-        "With rate limiting ON, the flood loses momentum. The system stays available and fair for normal visitors."
-      );
-    } else {
-      elements.summaryHeadline.textContent = "Flood dominated the line";
-      elements.summaryText.textContent = `${state.spamAllowed} spam requests were accepted, none were blocked, and queue pressure climbed high enough to hurt fairness for real visitors.`;
-      setNarration(
-        "With rate limiting OFF, repeated bot traffic keeps entering and pushes the booking line into overload."
-      );
-    }
-  }
+    state.floodRunning = true;
+    elements.summaryCard.classList.add("hidden");
+    setActionLocks(true);
+    updateLogHint("Flood test in progress");
 
-  function getFloodDurationMs() {
     const speed = SPEED_MAP[elements.speedSelect.value] || SPEED_MAP.medium;
     const burst = Number(elements.burstSelect.value);
-    return (burst - 1) * speed + 1600;
-  }
-
-  function startLocalFlood() {
-    const speed = SPEED_MAP[elements.speedSelect.value] || SPEED_MAP.medium;
-    const burst = Number(elements.burstSelect.value);
-
-    setNarration(
-      state.mode === "on"
-        ? "The bot is flooding the booking system. The first few requests may pass, but the gate will start returning 429 Too Many Requests."
-        : "The bot is flooding the booking system with no limit in place. Watch the queue pressure rise and the flood keep getting in."
-    );
-    updateLogHint("Flood in progress");
-
-    for (let index = 0; index < burst; index += 1) {
-      registerTimer(() => {
-        sendLocalRequest("bot");
-
-        if (state.mode === "off" && index === Math.floor(burst / 3)) {
-          registerTimer(() => sendLocalRequest("customer", { waitingOverride: true }), 90);
-        }
-
-        if (state.mode === "on" && index === Math.floor(burst / 2)) {
-          registerTimer(() => sendLocalRequest("customer"), 120);
-        }
-
-        if (index === burst - 1) {
-          registerTimer(finishFlood, 1600);
-        }
-      }, index * speed);
-    }
-  }
-
-  function startLiveFlood() {
-    const speed = SPEED_MAP[elements.speedSelect.value] || SPEED_MAP.medium;
-    const burst = Number(elements.burstSelect.value);
-
-    setNarration(
-      "Live flood mode is sending real repeated requests through the gateway route. Watch the log for genuine HTTP 429 once the configured limit is crossed."
-    );
-    updateLogHint("Live flood in progress");
 
     for (let index = 0; index < burst; index += 1) {
       registerTimer(() => {
@@ -618,200 +383,58 @@
     }
   }
 
-  function startSpamFlood() {
-    if (state.floodRunning || state.replayRunning) {
-      return;
-    }
-
-    state.floodRunning = true;
-    elements.summaryCard.classList.add("hidden");
-    setActionLocks(true);
-    elements.normalButton.disabled = false;
-
-    if (state.connectionMode === "live") {
-      startLiveFlood();
-      return;
-    }
-
-    startLocalFlood();
-  }
-
   function sendNormalRequest() {
-    if (state.replayRunning) {
+    if (state.floodRunning) {
       return;
     }
 
     elements.summaryCard.classList.add("hidden");
+    updateLogHint("Sending normal request");
 
-    if (state.connectionMode === "live") {
-      setNarration(
-        "Live normal mode sends a small safe burst through the real gateway route to show that ordinary traffic still succeeds before any flood starts."
-      );
-      updateLogHint("Sending live normal traffic");
-      for (let index = 0; index < LIVE_NORMAL_REQUESTS; index += 1) {
-        registerTimer(() => void sendLiveRequest("customer"), index * 450);
-      }
-      return;
+    for (let index = 0; index < LIVE_NORMAL_REQUESTS; index += 1) {
+      registerTimer(() => void sendLiveRequest("customer"), index * 380);
     }
-
-    sendLocalRequest("customer", {
-      waitingOverride: state.mode === "off" && state.floodRunning && state.activeRequests >= 5,
-    });
   }
 
-  function setMode(nextMode) {
-    if (state.floodRunning || state.connectionMode === "live") {
-      return;
-    }
-
-    state.mode = nextMode;
-    updateModeUI();
-    setNarration(
-      nextMode === "on"
-        ? "Rate limiting is ON. Regular visitors stay unaffected, but repeated flooding will start receiving 429 Too Many Requests."
-        : "Rate limiting is OFF. Flood traffic can keep entering, crowd the queue, and make the system unfair for normal visitors."
-    );
-  }
-
-  function resetDemo(options) {
-    const { preserveTimers = false } = options || {};
-
-    if (!preserveTimers) {
-      clearAllTimers();
-    }
+  function resetDemo() {
+    clearAllTimers();
     state.totalRequests = 0;
     state.normalAllowed = 0;
     state.spamAllowed = 0;
     state.spamBlocked = 0;
+    state.normalDelaySamples = [];
     state.pressure = "low";
     state.activeRequests = 0;
     state.floodRunning = false;
-    state.replayRunning = false;
     state.requestId = 1;
-    state.botWindow = [];
     state.logEntries = [];
-    state.liveProof.lastResult = "No live request yet";
+
+    if (!elements.targetUrlInput.value.trim()) {
+      elements.targetUrlInput.value = getDefaultTargetUrl();
+    }
+    state.targetUrl = elements.targetUrlInput.value.trim();
 
     clearLanes();
     elements.eventLogBody.innerHTML = "";
     elements.summaryCard.classList.add("hidden");
-    elements.normalButton.disabled = false;
+    elements.gateBadge.textContent = "Live Gateway Check";
+    elements.modePill.textContent = "Live URL";
+    elements.serverHint.textContent = "Requests are sent to the target URL above.";
+
     updateCounters();
     updatePressure();
-    updateModeUI();
     updateLogHint("Waiting for traffic");
-
-    if (state.connectionMode === "live") {
-      setNarration(
-        "Live mode keeps the same queue story, but the real gateway response now decides whether each request is accepted or blocked with 429."
-      );
-    } else {
-      setNarration(
-        state.mode === "on"
-          ? "Rate limiting is ON. Regular visitors should not feel it, but repeated flooding will be blocked with 429 responses."
-          : "Rate limiting is OFF. Flood traffic can rush through and crowd out fair users."
-      );
-    }
-
     setActionLocks(false);
-    renderConnectionState();
   }
 
-  function replayGuidedDemo() {
-    if (state.replayRunning || state.floodRunning || state.connectionMode === "live") {
-      return;
-    }
+  elements.targetUrlInput.value = state.targetUrl;
 
-    resetDemo();
-    state.replayRunning = true;
-    elements.normalButton.disabled = true;
-    setActionLocks(true);
-
-    setMode("on");
-    setNarration("Guided replay: first show that a normal customer books successfully with protection ON.");
-
-    registerTimer(() => sendLocalRequest("customer"), 500);
-    registerTimer(() => {
-      setMode("off");
-      setNarration("Now protection is OFF. The same flood can crowd the booking line unchecked.");
-    }, 1900);
-    registerTimer(() => {
-      state.replayRunning = false;
-      startSpamFlood();
-      state.replayRunning = true;
-    }, 2600);
-    const secondPhaseAt = 2600 + getFloodDurationMs() + 900;
-    registerTimer(() => {
-      resetDemo({ preserveTimers: true });
-      state.replayRunning = true;
-      setMode("on");
-      setNarration("Now we replay the same flood with protection ON.");
-      state.replayRunning = false;
-      startSpamFlood();
-      state.replayRunning = true;
-
-      registerTimer(() => {
-        state.replayRunning = false;
-        setActionLocks(false);
-        elements.normalButton.disabled = false;
-        setNarration(
-          "Replay complete. Compare the blocked counter, 429 log entries, and queue pressure to see how fairness is preserved."
-        );
-      }, getFloodDurationMs() + 900);
-    }, secondPhaseAt);
-  }
-
-  function renderConnectionState() {
-    const liveMode = state.connectionMode === "live";
-    elements.connectionModeBadge.textContent = liveMode ? "Live Gateway Mode" : "Local Simulation";
-    elements.connectionModeSelect.value = state.connectionMode;
-    elements.liveConfigFields.hidden = !liveMode;
-    elements.gatewayBaseUrlInput.value = state.liveConfig.gatewayBaseUrl;
-    elements.targetRouteInput.value = state.liveConfig.targetRoute;
-    elements.platformApiBaseInput.value = state.liveConfig.platformApiBase;
-    elements.liveProofCard.hidden = !liveMode;
-
-    if (liveMode) {
-      elements.liveProofService.textContent = state.liveProof.serviceName || "Not configured";
-      elements.liveProofTarget.textContent = state.liveProof.targetLabel || "Not configured";
-      elements.liveProofConfig.textContent = state.liveProof.configSummary || "Unknown";
-      elements.liveProofLastResult.textContent = state.liveProof.lastResult || "No live request yet";
-      elements.liveProofSource.textContent = state.liveProof.source || "Gateway responses only";
-    }
-  }
-
-  elements.modeToggle.addEventListener("click", () => {
-    setMode(state.mode === "on" ? "off" : "on");
+  elements.targetUrlInput.addEventListener("input", (event) => {
+    state.targetUrl = event.target.value.trim();
   });
   elements.normalButton.addEventListener("click", sendNormalRequest);
   elements.spamButton.addEventListener("click", startSpamFlood);
   elements.resetButton.addEventListener("click", resetDemo);
-  elements.replayButton.addEventListener("click", replayGuidedDemo);
-
-  elements.connectionModeSelect.addEventListener("change", (event) => {
-    state.connectionMode = event.target.value;
-    resetDemo();
-  });
-
-  elements.gatewayBaseUrlInput.addEventListener("input", (event) => {
-    state.liveConfig.gatewayBaseUrl = event.target.value;
-    void refreshLiveProof().then(renderConnectionState);
-  });
-
-  elements.targetRouteInput.addEventListener("input", (event) => {
-    state.liveConfig.targetRoute = event.target.value;
-    void refreshLiveProof().then(renderConnectionState);
-  });
-
-  elements.platformApiBaseInput.addEventListener("input", (event) => {
-    state.liveConfig.platformApiBase = event.target.value;
-    void refreshLiveProof().then(renderConnectionState);
-  });
-
-  elements.liveDefaultsButton.addEventListener("click", () => {
-    state.liveConfig = { ...LIVE_DEFAULTS };
-    void refreshLiveProof().then(renderConnectionState);
-  });
 
   resetDemo();
 })();

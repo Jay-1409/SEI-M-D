@@ -1,3 +1,27 @@
+const GLOBAL_ENV_API = window.SimulationGlobalEnv;
+const DEFAULT_GATEWAY_BASE_URL = "http://localhost:30080";
+const DEFAULT_SERVICE_NAME = "expo-unified-target";
+
+function getConfiguredServiceName() {
+  if (GLOBAL_ENV_API && typeof GLOBAL_ENV_API.getConfig === "function") {
+    const config = GLOBAL_ENV_API.getConfig();
+    if (config && typeof config.serviceName === "string" && config.serviceName.trim()) {
+      return config.serviceName.trim();
+    }
+  }
+  return DEFAULT_SERVICE_NAME;
+}
+
+function buildDefaultGatewayUrl(routePath) {
+  const serviceName = getConfiguredServiceName();
+  if (GLOBAL_ENV_API && typeof GLOBAL_ENV_API.buildGatewayUrl === "function") {
+    return GLOBAL_ENV_API.buildGatewayUrl(DEFAULT_GATEWAY_BASE_URL, serviceName, routePath);
+  }
+
+  const normalizedRoute = routePath.startsWith("/") ? routePath : `/${routePath}`;
+  return `${DEFAULT_GATEWAY_BASE_URL}/${serviceName}${normalizedRoute}`;
+}
+
 const DEMO_KEYS = {
   valid: "STAFF-ACCESS-DEMO-2026",
   wrong: "STAFF-KEY-DEMO-WRONG",
@@ -19,6 +43,8 @@ function setStatus(status, message) {
   elements.statusIndicator.className = `status-indicator ${status}`;
   elements.statusIndicator.textContent = message;
 }
+
+elements.urlInput.value = buildDefaultGatewayUrl("/staff/open-maintenance-panel");
 
 elements.noKeyButton.addEventListener("click", () => {
   elements.apiKeyInput.value = "";

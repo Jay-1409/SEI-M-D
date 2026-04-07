@@ -1,3 +1,27 @@
+const GLOBAL_ENV_API = window.SimulationGlobalEnv;
+const DEFAULT_GATEWAY_BASE_URL = "http://localhost:30080";
+const DEFAULT_SERVICE_NAME = "expo-unified-target";
+
+function getConfiguredServiceName() {
+  if (GLOBAL_ENV_API && typeof GLOBAL_ENV_API.getConfig === "function") {
+    const config = GLOBAL_ENV_API.getConfig();
+    if (config && typeof config.serviceName === "string" && config.serviceName.trim()) {
+      return config.serviceName.trim();
+    }
+  }
+  return DEFAULT_SERVICE_NAME;
+}
+
+function buildDefaultGatewayUrl(routePath) {
+  const serviceName = getConfiguredServiceName();
+  if (GLOBAL_ENV_API && typeof GLOBAL_ENV_API.buildGatewayUrl === "function") {
+    return GLOBAL_ENV_API.buildGatewayUrl(DEFAULT_GATEWAY_BASE_URL, serviceName, routePath);
+  }
+
+  const normalizedRoute = routePath.startsWith("/") ? routePath : `/${routePath}`;
+  return `${DEFAULT_GATEWAY_BASE_URL}/${serviceName}${normalizedRoute}`;
+}
+
 const NORMAL_USER = {
   username: "admin",
   password: "admin123",
@@ -22,6 +46,8 @@ function setStatus(status, message) {
   elements.statusIndicator.className = `status-indicator ${status}`;
   elements.statusIndicator.textContent = message;
 }
+
+elements.urlInput.value = buildDefaultGatewayUrl("/login");
 
 elements.fillNormalButton.addEventListener("click", () => {
   elements.usernameInput.value = NORMAL_USER.username;
@@ -62,7 +88,7 @@ elements.loginButton.addEventListener("click", async () => {
       if (response.status === 403 && payload?.attack_type === "sqli") {
         setStatus("error", "Blocked: SQL Injection attack detected by Gateway WAF.");
       } else if (response.ok && payload?.auth_mode) {
-        setStatus("success", `Accepted: Service granted access (Auth mode: ${payload.auth_mode}).`);
+        setStatus("success", "Accepted: Service granted access.");
       } else if (response.status === 401 || payload?.result === "denied") {
         setStatus("error", "Rejected: Service denied access (Invalid Credentials).");
       } else {

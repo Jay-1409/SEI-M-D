@@ -52,6 +52,39 @@
         </div>
       </section>
     </main>
+
+    <section class="panel global-config-panel">
+      <div class="config-header">
+        <div>
+          <p class="panel-kicker">Global Env</p>
+          <h3>Service Name Dashboard</h3>
+          <p class="config-subtext">Set this once. Demo routes will use this service name prefix by default.</p>
+        </div>
+      </div>
+
+      <form id="globalEnvForm" class="config-form" novalidate>
+        <label for="serviceNameInput">Service name</label>
+        <div class="config-row">
+          <input id="serviceNameInput" type="text" autocomplete="off" spellcheck="false" placeholder="expo-unified-target">
+          <button class="config-save-button" type="submit">Save</button>
+          <button id="resetServiceNameButton" class="config-reset-button" type="button">Reset</button>
+        </div>
+        <p id="configFeedback" class="config-feedback">Changes are stored locally in this browser.</p>
+      </form>
+
+      <div class="route-preview">
+        <p class="label">Route preview used by demos</p>
+        <div class="route-list">
+          <p><strong>SQL Injection:</strong> <code id="previewSql">/expo-unified-target/login</code></p>
+          <p><strong>XSS Feedback Wall:</strong> <code id="previewXss">/expo-unified-target/comments</code></p>
+          <p><strong>Rate Limiting:</strong> <code id="previewRate">/expo-unified-target/tickets</code></p>
+          <p><strong>API Key Protection:</strong> <code id="previewApi">/expo-unified-target/staff/open-maintenance-panel</code></p>
+        </div>
+      </div>
+    </section>
   </div>
+
+  <script src="./assets/global-env.js"></script>
+  <script src="./launcher.js"></script>
 </body>
 </html>

@@ -15,60 +15,14 @@
       <section class="panel control-panel">
          <h1>Ticket Rush <span class="title-icon" aria-hidden="true">Tickets</span></h1>
 
-        <div class="mode-card connection-mode-card">
-          <div>
-            <p class="label">Connection Mode</p>
-            <p id="connectionModeBadge" class="mode-headline">Local Simulation</p>
-          </div>
-          <select id="connectionModeSelect" aria-label="Connection mode">
-            <option value="local" selected>Local simulation</option>
-            <option value="live">Live gateway mode</option>
-          </select>
-        </div>
-
-        <div id="liveConfigFields" class="live-config-card" hidden>
-          <div class="control-group compact">
-            <label for="gatewayBaseUrlInput">Gateway base URL</label>
-            <input
-              id="gatewayBaseUrlInput"
-              type="text"
-              inputmode="url"
-              placeholder="http://localhost:30080"
-            />
-          </div>
-
-          <div class="control-group compact">
-            <label for="targetRouteInput">Target route</label>
-            <input
-              id="targetRouteInput"
-              type="text"
-              placeholder="/expo-unified-target/tickets"
-            />
-          </div>
-
-          <div class="control-group compact">
-            <label for="platformApiBaseInput">Platform API URL</label>
-            <input
-              id="platformApiBaseInput"
-              type="text"
-              inputmode="url"
-              placeholder="http://localhost:30000/api"
-            />
-          </div>
-
-          <button id="liveDefaultsButton" class="action-button secondary" type="button">
-            Use Expo Service Defaults
-          </button>
-        </div>
-
-        <div class="mode-card">
-          <div>
-            <p class="label">Protection Mode</p>
-            <p id="modeHeadline" class="mode-headline">Rate Limit ON</p>
-          </div>
-          <button id="modeToggle" class="toggle-button protected" type="button">
-            Switch to OFF
-          </button>
+        <div class="control-group">
+          <label for="targetUrlInput">Target Gateway URL</label>
+          <input
+            id="targetUrlInput"
+            type="text"
+            inputmode="url"
+            placeholder="http://localhost:30080/<service-name>/tickets"
+          />
         </div>
 
         <div class="control-group">
@@ -91,13 +45,10 @@
 
         <div class="action-stack">
           <button id="normalButton" class="action-button primary" type="button">
-            Send Normal Booking Request
+            Send Normal Request
           </button>
           <button id="spamButton" class="action-button danger" type="button">
-            Start Spam Flood
-          </button>
-          <button id="replayButton" class="action-button secondary" type="button">
-            Replay Guided Demo
+            Start Flood Test
           </button>
           <button id="resetButton" class="action-button ghost" type="button">
             Reset
@@ -112,7 +63,7 @@
             <p class="label">Booking Scenario</p>
             <h2>Concert Ticket Booking Queue</h2>
           </div>
-          <div id="gateBadge" class="gate-badge protected">Rate Limiter Active</div>
+          <div id="gateBadge" class="gate-badge live">Live Gateway Check</div>
         </div>
 
         <div class="pressure-card">
@@ -142,7 +93,7 @@
             <div id="serverBox" class="server-box">
               <p class="label">Booking Server</p>
               <h3>Ticket Counter</h3>
-              <p id="serverHint">Protected traffic stays fair and stable.</p>
+              <p id="serverHint">Requests are sent to the target URL above.</p>
             </div>
           </div>
 
@@ -170,10 +121,10 @@
       <section class="panel proof-panel">
         <div class="proof-header">
           <div>
-            <p class="eyebrow">Simulation Data</p>
-            <h2>What Visitors Should Notice</h2>
+            <p class="eyebrow">Live Demo Data</p>
+            <h2>Rate Limit Results</h2>
           </div>
-          <div id="modePill" class="mode-pill protected">Protected</div>
+          <div id="modePill" class="mode-pill live">Live URL</div>
         </div>
 
         <div class="counter-grid">
@@ -193,16 +144,6 @@
             <p>Spam Blocked</p>
             <strong id="spamBlocked">0</strong>
           </article>
-        </div>
-
-
-        <div id="liveProofCard" class="narration-card live-proof-card" hidden>
-          <p class="label">Live gateway proof</p>
-          <p><strong>Service:</strong> <span id="liveProofService">Not configured</span></p>
-          <p><strong>Target:</strong> <span id="liveProofTarget">Not configured</span></p>
-          <p><strong>Rate limit config:</strong> <span id="liveProofConfig">Unknown</span></p>
-          <p><strong>Last live result:</strong> <span id="liveProofLastResult">No live request yet</span></p>
-          <p><strong>Proof source:</strong> <span id="liveProofSource">Gateway responses only</span></p>
         </div>
 
         <div class="log-card">
@@ -228,6 +169,7 @@
       </section>
     </main>
 
+    <script src="../../assets/global-env.js"></script>
     <script src="./script.js"></script>
   </body>
 </html>
